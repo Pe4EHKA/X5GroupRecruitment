@@ -14,40 +14,40 @@ Successfully upgraded frontend dependencies to latest stable versions for improv
 | **react-dom** | 18.3.1 | **18.3.1** | Matches React version |
 
 ### UI Framework (Material-UI)
-| Package | Previous Version | New Version | Notes |
-|---------|-----------------|-------------|-------|
-| **@mui/material** | 5.15.6 | **6.3.6** | Material Design 3, major upgrade |
-| **@mui/icons-material** | 5.15.6 | **6.3.6** | Matches MUI Material |
-| **@emotion/react** | 11.11.3 | **11.14.0** | Latest stable |
-| **@emotion/styled** | 11.11.0 | **11.14.0** | Latest stable |
+| Package | Previous Version | package.json | Actually Installed | Notes |
+|---------|-----------------|--------------|-------------------|-------|
+| **@mui/material** | 5.15.6 | **^6.3.6** | **6.5.0** | Material Design 3, major upgrade |
+| **@mui/icons-material** | 5.15.6 | **^6.3.6** | **6.5.0** | Matches MUI Material |
+| **@emotion/react** | 11.11.3 | **^11.14.0** | **11.14.0** | Latest stable |
+| **@emotion/styled** | 11.11.0 | **^11.14.0** | **11.14.0** | Latest stable |
 
 ### State Management & Data Fetching
-| Package | Previous Version | New Version | Notes |
-|---------|-----------------|-------------|-------|
-| **@tanstack/react-query** | 5.17.19 | **5.73.0** | Latest v5 with improvements |
-| **@tanstack/react-query-devtools** | 5.17.19 | **5.73.0** | Matches query version |
+| Package | Previous Version | package.json | Actually Installed | Notes |
+|---------|-----------------|--------------|-------------------|-------|
+| **@tanstack/react-query** | 5.17.19 | **^5.73.0** | **5.90.12** | Latest v5 with improvements |
+| **@tanstack/react-query-devtools** | 5.17.19 | **^5.73.0** | **5.91.1** | Matches query version |
 
 ### Forms & Validation
-| Package | Previous Version | New Version | Notes |
-|---------|-----------------|-------------|-------|
-| **react-hook-form** | 7.49.3 | **7.54.2** | Latest stable v7 |
-| **zod** | 3.22.4 | **3.25.76** | Latest v3 with bug fixes |
-| **@hookform/resolvers** | 3.3.4 | **3.10.0** | Latest compatible version |
+| Package | Previous Version | package.json | Actually Installed | Notes |
+|---------|-----------------|--------------|-------------------|-------|
+| **react-hook-form** | 7.49.3 | **^7.54.2** | **7.68.0** | Latest stable v7 |
+| **zod** | 3.22.4 | **^3.25.76** | **3.25.76** | Latest v3 with bug fixes |
+| **@hookform/resolvers** | 3.3.4 | **^3.10.0** | **3.10.0** | Latest compatible version |
 
 ### HTTP & Utilities
-| Package | Previous Version | New Version | Notes |
-|---------|-----------------|-------------|-------|
-| **axios** | 1.6.5 | **1.7.9** | Security updates |
-| **date-fns** | 3.2.0 | **3.6.0** | Latest v3 |
-| **notistack** | 3.0.1 | **3.0.1** | Already latest |
+| Package | Previous Version | package.json | Actually Installed | Notes |
+|---------|-----------------|--------------|-------------------|-------|
+| **axios** | 1.6.5 | **^1.7.9** | **1.13.2** | Security updates |
+| **date-fns** | 3.2.0 | **^3.6.0** | **3.6.0** | Latest v3 |
+| **notistack** | 3.0.1 | **3.0.1** | **3.0.1** | Already latest |
 
 ### TypeScript & Type Definitions
-| Package | Previous Version | New Version | Notes |
-|---------|-----------------|-------------|-------|
-| **typescript** | 5.3.3 | **5.7.2** | Latest stable TypeScript |
-| **@types/node** | 20.11.5 | **20.19.27** | LTS Node 20 types |
-| **@types/react** | 18.2.48 | **18.3.27** | React 18 types |
-| **@types/react-dom** | 18.2.18 | **18.3.7** | React DOM 18 types |
+| Package | Previous Version | package.json | Actually Installed | Notes |
+|---------|-----------------|--------------|-------------------|-------|
+| **typescript** | 5.3.3 | **^5.7.2** | **5.9.3** | Latest stable TypeScript |
+| **@types/node** | 20.11.5 | **^20.19.27** | **20.19.27** | LTS Node 20 types |
+| **@types/react** | 18.2.48 | **^18.3.27** | **18.3.27** | React 18 types |
+| **@types/react-dom** | 18.2.18 | **^18.3.7** | **18.3.7** | React DOM 18 types |
 
 ### Linting & Code Quality
 | Package | Previous Version | New Version | Notes |
@@ -248,11 +248,11 @@ Playwright tests should be added for:
 
 | Component | Version | Compatible With |
 |-----------|---------|-----------------|
-| Node.js | 20.19.6 LTS | Next.js 15, TypeScript 5.7 |
-| Next.js | 15.5.9 | React 18, TypeScript 5.7 |
-| React | 18.3.1 | Next.js 15, MUI 6 |
-| Material-UI | 6.3.6 | React 18, Emotion 11 |
-| TypeScript | 5.7.2 | Next.js 15, React 18 |
+| Node.js | 20.19.6 LTS | Next.js 15, TypeScript 5.9 |
+| Next.js | 15.5.9 | React 18, TypeScript 5.9 |
+| React | 18.3.1 | Next.js 15, MUI 6.5 |
+| Material-UI | 6.5.0 | React 18, Emotion 11 |
+| TypeScript | 5.9.3 | Next.js 15, React 18 |
 | ESLint | 8.57.1 | Next.js 15 config |
 
 ## Next Steps

@@ -22,30 +22,30 @@
 
 ### Dependency Upgrades Completed
 
-| Category | Package | Previous | Updated | Status |
-|----------|---------|----------|---------|--------|
+| Category | Package | Previous | Requested | Installed | Status |
+|----------|---------|----------|-----------|-----------|--------|
 | **Core Framework** |
-| | Next.js | 14.2.35 | 15.5.9 | ✅ SUCCESS |
-| | React | 18.3.1 | 18.3.1 | ✅ KEPT (compatibility) |
-| | TypeScript | 5.3.3 | 5.7.2 | ✅ SUCCESS |
+| | Next.js | 14.2.35 | ^15.1.6 | 15.5.9 | ✅ SUCCESS |
+| | React | 18.3.1 | ^18.3.1 | 18.3.1 | ✅ KEPT (compatibility) |
+| | TypeScript | 5.3.3 | ^5.7.2 | 5.9.3 | ✅ SUCCESS |
 | **UI Framework** |
-| | @mui/material | 5.15.6 | 6.3.6 | ✅ SUCCESS (MD3) |
-| | @mui/icons-material | 5.15.6 | 6.3.6 | ✅ SUCCESS |
-| | @emotion/react | 11.11.3 | 11.14.0 | ✅ SUCCESS |
-| | @emotion/styled | 11.11.0 | 11.14.0 | ✅ SUCCESS |
+| | @mui/material | 5.15.6 | ^6.3.6 | 6.5.0 | ✅ SUCCESS (MD3) |
+| | @mui/icons-material | 5.15.6 | ^6.3.6 | 6.5.0 | ✅ SUCCESS |
+| | @emotion/react | 11.11.3 | ^11.14.0 | 11.14.0 | ✅ SUCCESS |
+| | @emotion/styled | 11.11.0 | ^11.14.0 | 11.14.0 | ✅ SUCCESS |
 | **State & Data** |
-| | @tanstack/react-query | 5.17.19 | 5.73.0 | ✅ SUCCESS |
-| | react-hook-form | 7.49.3 | 7.54.2 | ✅ SUCCESS |
-| | zod | 3.22.4 | 3.25.76 | ✅ SUCCESS |
-| | @hookform/resolvers | 3.3.4 | 3.10.0 | ✅ SUCCESS |
+| | @tanstack/react-query | 5.17.19 | ^5.73.0 | 5.90.12 | ✅ SUCCESS |
+| | react-hook-form | 7.49.3 | ^7.54.2 | 7.68.0 | ✅ SUCCESS |
+| | zod | 3.22.4 | ^3.25.76 | 3.25.76 | ✅ SUCCESS |
+| | @hookform/resolvers | 3.3.4 | ^3.10.0 | 3.10.0 | ✅ SUCCESS |
 | **HTTP & Utils** |
-| | axios | 1.6.5 | 1.7.9 | ✅ SUCCESS |
-| | date-fns | 3.2.0 | 3.6.0 | ✅ SUCCESS |
+| | axios | 1.6.5 | ^1.7.9 | 1.13.2 | ✅ SUCCESS |
+| | date-fns | 3.2.0 | ^3.6.0 | 3.6.0 | ✅ SUCCESS |
 | **Development** |
-| | @playwright/test | 1.41.1 | 1.49.3 | ✅ SUCCESS |
-| | msw | 2.0.13 | 2.7.3 | ✅ SUCCESS |
-| | eslint | 8.56.0 | 8.57.1 | ✅ SUCCESS |
-| | eslint-config-next | 14.2.16 | 15.1.6 | ✅ SUCCESS |
+| | @playwright/test | 1.41.1 | ^1.49.3 | 1.49.3 | ✅ SUCCESS |
+| | msw | 2.0.13 | ^2.7.3 | 2.7.3 | ✅ SUCCESS |
+| | eslint | 8.56.0 | ^8.57.1 | 8.57.1 | ✅ SUCCESS |
+| | eslint-config-next | 14.2.16 | ^15.1.6 | 15.5.9 | ✅ SUCCESS |
 
 ### Security Improvements
 

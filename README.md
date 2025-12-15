@@ -13,11 +13,11 @@
 
 ## Технологический стек
 
-- **Java 17** - основной язык программирования
+- **Java 21** - основной язык программирования
 - **Spring Boot 3.2** - фреймворк приложения
 - **Spring Data JPA** - ORM и работа с БД
 - **Spring Security** - аутентификация и авторизация (RBAC)
-- **PostgreSQL 16** - основная БД
+- **PostgreSQL 17.7** - основная БД
 - **Flyway** - миграции БД
 - **Apache POI** - импорт/экспорт Excel
 - **SpringDoc OpenAPI** - документация API
@@ -28,7 +28,7 @@
 
 ### Требования
 
-- Java 17+
+- Java 21+
 - Docker и Docker Compose
 - Maven 3.8+
 

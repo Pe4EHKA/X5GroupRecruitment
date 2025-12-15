@@ -33,7 +33,7 @@ X5GroupRecruitment/
 
 ### Backend
 - **Java 21** - основной язык программирования
-- **Spring Boot 3.2** - фреймворк приложения
+- **Spring Boot 3.4** - фреймворк приложения
 - **Spring Data JPA** - ORM и работа с БД
 - **Spring Security** - аутентификация и авторизация (RBAC)
 - **PostgreSQL 17.7** - основная БД

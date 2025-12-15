@@ -36,7 +36,7 @@ export default function ExportPage() {
               Экспорт одобренных кандидатов
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Скачать список всех кандидатов со статусом "Одобрено" для дальнейшей передачи в ATS
+              Скачать список всех кандидатов со статусом &quot;Одобрено&quot; для дальнейшей передачи в ATS
             </Typography>
             <Button
               variant="contained"

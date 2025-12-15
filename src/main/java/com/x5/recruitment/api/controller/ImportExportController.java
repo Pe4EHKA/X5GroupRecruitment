@@ -1,10 +1,14 @@
 package com.x5.recruitment.api.controller;
 
-import com.x5.recruitment.api.dto.ApplicationDto;
+import com.x5.recruitment.api.dto.ImportBatchDto;
+import com.x5.recruitment.api.dto.ImportResultDto;
+import com.x5.recruitment.api.dto.ImportRowErrorDto;
 import com.x5.recruitment.application.service.ImportExportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
 
 /**
  * REST API for Import/Export operations.
@@ -27,9 +30,10 @@ public class ImportExportController {
 
     private final ImportExportService importExportService;
 
-    @Operation(summary = "Import applications", description = "Import applications from Excel/CSV file")
+    @Operation(summary = "Import applications", 
+               description = "Import applications from XLSX file with detailed validation and error reporting")
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<List<ApplicationDto>> importApplications(
+    public ResponseEntity<ImportResultDto> importApplications(
             @RequestParam("file") MultipartFile file) throws IOException {
         
         if (!file.getOriginalFilename().endsWith(".xlsx") && 
@@ -37,8 +41,26 @@ public class ImportExportController {
             return ResponseEntity.badRequest().build();
         }
         
-        List<ApplicationDto> imported = importExportService.importFromExcel(file);
-        return ResponseEntity.ok(imported);
+        ImportResultDto result = importExportService.importFromExcel(file);
+        return ResponseEntity.ok(result);
+    }
+
+    @Operation(summary = "Get import batch status",
+               description = "Get status and summary of an import batch")
+    @GetMapping("/batches/{batchId}")
+    public ResponseEntity<ImportBatchDto> getImportBatch(@PathVariable Long batchId) {
+        ImportBatchDto batch = importExportService.getImportBatch(batchId);
+        return ResponseEntity.ok(batch);
+    }
+
+    @Operation(summary = "Get import batch errors",
+               description = "Get paginated list of errors for an import batch")
+    @GetMapping("/batches/{batchId}/errors")
+    public ResponseEntity<Page<ImportRowErrorDto>> getImportBatchErrors(
+            @PathVariable Long batchId,
+            Pageable pageable) {
+        Page<ImportRowErrorDto> errors = importExportService.getImportBatchErrors(batchId, pageable);
+        return ResponseEntity.ok(errors);
     }
 
     @Operation(summary = "Export approved applications", 

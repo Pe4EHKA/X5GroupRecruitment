@@ -580,24 +580,39 @@ public class XlsxImportService {
 
     /**
      * Get cell value as string (handles all cell types).
+     * Truncates excessively long strings to prevent issues.
      */
     private String getCellValueAsString(Cell cell) {
         if (cell == null) {
             return null;
         }
 
-        return switch (cell.getCellType()) {
+        String value = switch (cell.getCellType()) {
             case STRING -> cell.getStringCellValue();
             case NUMERIC -> {
                 if (DateUtil.isCellDateFormatted(cell)) {
                     yield cell.getDateCellValue().toString();
                 }
-                yield String.valueOf((long) cell.getNumericCellValue());
+                // Check if value is actually a whole number
+                double numValue = cell.getNumericCellValue();
+                if (numValue == Math.floor(numValue)) {
+                    yield String.valueOf((long) numValue);
+                } else {
+                    yield String.valueOf(numValue);
+                }
             }
             case BOOLEAN -> String.valueOf(cell.getBooleanCellValue());
             case FORMULA -> cell.getCellFormula();
             default -> null;
         };
+
+        // Truncate excessively long strings (safety limit)
+        if (value != null && value.length() > 5000) {
+            log.warn("Cell value truncated from {} to 5000 characters", value.length());
+            value = value.substring(0, 5000);
+        }
+
+        return value;
     }
 
     /**

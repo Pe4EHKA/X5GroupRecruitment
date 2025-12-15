@@ -12,7 +12,6 @@ import java.util.regex.Pattern;
 public class PhoneNormalizer {
 
     private static final Pattern DIGITS_ONLY = Pattern.compile("[^0-9]");
-    private static final Pattern RUSSIA_MOBILE = Pattern.compile("^(\\+?7|8)(\\d{10})$");
 
     /**
      * Normalize phone number to E.164 format.
@@ -55,3 +54,4 @@ public class PhoneNormalizer {
         return phoneE164.matches("^\\+\\d{10,14}$");
     }
 }
+

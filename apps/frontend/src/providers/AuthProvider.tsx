@@ -36,7 +36,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // In dev mode, create a mock user based on role
       // In production, this would call the backend API
       
-      // Store credentials for basic auth
+      // SECURITY NOTE: Storing credentials in localStorage is for DEV ONLY
+      // For production, implement proper JWT token management with HTTP-only cookies
       localStorage.setItem('username', username);
       localStorage.setItem('password', password);
 

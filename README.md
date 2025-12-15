@@ -55,10 +55,10 @@ X5GroupRecruitment/
 
 ### Требования
 
-- Java 21+
-- Node.js 18+ и npm 9+
-- Docker и Docker Compose
-- Maven 3.8+
+- **Java 21+** (JDK, рекомендуется Temurin/OpenJDK)
+- **Node.js 20+** и **npm 10+** (обновлено для Next.js 15)
+- **Docker** и **Docker Compose V2**
+- **Maven 3.8+**
 
 ### Установка
 
@@ -71,6 +71,18 @@ cd X5GroupRecruitment
 make install
 ```
 
+### Переменные окружения
+
+Создайте файл `.env.local` в директории `apps/frontend/`:
+
+```bash
+# Из корня репозитория
+cp apps/frontend/.env.local.example apps/frontend/.env.local
+
+# Или вручную создайте apps/frontend/.env.local:
+echo "NEXT_PUBLIC_API_BASE_URL=http://localhost:8080" > apps/frontend/.env.local
+```
+
 ### Запуск для разработки
 
 ```bash
@@ -78,10 +90,22 @@ make install
 make dev
 ```
 
+**Важно для Java 21:** Если используется система с несколькими версиями Java, убедитесь что JAVA_HOME указывает на Java 21:
+
+```bash
+# Linux/macOS
+export JAVA_HOME=/usr/lib/jvm/temurin-21-jdk-amd64  # или путь к вашей Java 21
+export PATH=$JAVA_HOME/bin:$PATH
+
+# Проверить версию
+java --version  # должна быть 21.x
+```
+
 После запуска будут доступны:
 - **Frontend**: http://localhost:3000
 - **Backend API**: http://localhost:8080
 - **Swagger UI**: http://localhost:8080/swagger-ui.html
+- **OpenAPI Docs**: http://localhost:8080/api-docs
 - **PostgreSQL**: localhost:5432
 
 ### Альтернативные команды запуска
@@ -89,12 +113,18 @@ make dev
 ```bash
 # Только база данных
 make db-up
+# или
+docker compose up -d postgres
 
-# Только backend
+# Только backend (требует запущенную БД)
 make backend
+# или
+cd apps/backend && mvn spring-boot:run
 
 # Только frontend
-make frontend
+make frontend  
+# или
+cd apps/frontend && npm run dev
 
 # Docker Compose (все в контейнерах)
 make docker-up
@@ -425,11 +455,117 @@ GET /actuator/metrics  - Метрики
 
 - Email-уведомления только логируются (не отправляются)
 - Basic Auth вместо OAuth2/JWT
-- Нет UI (только API)
 - Упрощенная валидация
 - Нет полнотекстового поиска
 - Нет файлового хранилища для резюме
 - Нет интеграции с внешней ATS (только экспорт)
+- Admin панель имеет placeholders (CRUD не реализован)
+
+## Тестирование системы
+
+### Smoke Test Checklist
+
+После запуска системы выполните следующие проверки:
+
+**1. Базовая доступность**
+- [ ] Frontend доступен на http://localhost:3000
+- [ ] Backend API отвечает на http://localhost:8080/actuator/health
+- [ ] Swagger UI открывается http://localhost:8080/swagger-ui.html
+- [ ] PostgreSQL подключена (проверить логи backend)
+
+**2. Авторизация**
+- [ ] Открыть http://localhost:3000/login
+- [ ] Нажать кнопку "Recruiter" (Quick Login)
+- [ ] Проверить редирект на /recruiter/dashboard
+- [ ] Повторить для HM и Admin
+
+**3. Recruiter Workflow**
+- [ ] Dashboard отображает метрики (счетчики статусов)
+- [ ] Открыть "Заявки" → видны записи в таблице
+- [ ] Применить фильтр по статусу → список обновляется
+- [ ] Открыть детальную страницу заявки
+- [ ] Изменить статус → успешно сохраняется
+- [ ] Проверить историю статусов
+
+**4. Import Workflow**
+- [ ] Открыть "Импорт" в меню
+- [ ] Загрузить Excel файл (использовать `generate_sample_excel.py` если нужно)
+- [ ] Увидеть batch summary (успешных/ошибочных строк)
+- [ ] Просмотреть список ошибок (если есть)
+
+**5. HM Workflow**
+- [ ] Войти как HM
+- [ ] Открыть "Входящие"
+- [ ] Открыть заявку на рассмотрении
+- [ ] Заполнить форму решения (Approve/Reject)
+- [ ] Добавить структурированный фидбек
+- [ ] Отправить решение → успешно сохранено
+
+**6. Candidate Status**
+- [ ] Получить токен кандидата из БД или логов
+- [ ] Открыть http://localhost:3000/status/[TOKEN]
+- [ ] Увидеть текущий статус и прогресс
+- [ ] Проверить отображение комментариев
+
+**7. Export**
+- [ ] Открыть "Экспорт" в меню
+- [ ] Нажать кнопку экспорта
+- [ ] Файл Excel скачивается
+- [ ] Открыть файл → проверить данные
+
+### Troubleshooting
+
+**Backend не запускается:**
+```bash
+# Проверьте версию Java
+java --version  # должна быть 21.x
+
+# Если не 21, установите JAVA_HOME
+export JAVA_HOME=/usr/lib/jvm/temurin-21-jdk-amd64
+export PATH=$JAVA_HOME/bin:$PATH
+
+# Проверьте PostgreSQL
+docker ps | grep postgres
+
+# Перезапустите backend
+cd apps/backend && mvn spring-boot:run
+```
+
+**Frontend не запускается:**
+```bash
+# Проверьте версию Node
+node --version  # должна быть 20.x+
+
+# Переустановите зависимости
+cd apps/frontend
+rm -rf node_modules package-lock.json
+npm install
+
+# Проверьте .env.local
+cat .env.local  # должен быть NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
+
+# Запустите dev server
+npm run dev
+```
+
+**401 Unauthorized при API запросах:**
+- Убедитесь что вы вошли через frontend UI
+- Проверьте что браузер сохранил credentials
+- Попробуйте очистить cookies и войти заново
+- Проверьте логи backend на наличие ошибок аутентификации
+
+**База данных не подключается:**
+```bash
+# Проверьте статус контейнера
+docker compose ps
+
+# Посмотрите логи
+docker compose logs postgres
+
+# Перезапустите PostgreSQL
+docker compose down
+docker compose up -d postgres
+```
 
 ## Roadmap
 

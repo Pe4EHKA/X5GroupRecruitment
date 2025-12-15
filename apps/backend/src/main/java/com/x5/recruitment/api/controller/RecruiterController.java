@@ -18,6 +18,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * REST API for Recruiter operations.
  */
@@ -29,6 +32,23 @@ import org.springframework.web.bind.annotation.*;
 public class RecruiterController {
 
     private final ApplicationService applicationService;
+
+    @Operation(summary = "Get dashboard metrics", description = "Get metrics for recruiter dashboard")
+    @GetMapping("/dashboard/metrics")
+    public ResponseEntity<Map<String, Long>> getDashboardMetrics() {
+        Map<String, Long> metrics = new HashMap<>();
+        metrics.put("newCount", applicationService.countByStatus(ApplicationStatus.NEW));
+        metrics.put("screeningCount", applicationService.countByStatus(ApplicationStatus.SCREENING));
+        metrics.put("hmReviewCount", applicationService.countByStatus(ApplicationStatus.PENDING_HM_REVIEW));
+        metrics.put("interviewCount", applicationService.countByStatus(ApplicationStatus.INTERVIEW_SCHEDULED) 
+            + applicationService.countByStatus(ApplicationStatus.INTERVIEW_COMPLETED));
+        metrics.put("approvedCount", applicationService.countByStatus(ApplicationStatus.APPROVED));
+        metrics.put("rejectedCount", applicationService.countByStatus(ApplicationStatus.REJECTED));
+        metrics.put("slaBreachCount", 0L); // Placeholder for SLA calculation
+        metrics.put("totalCount", applicationService.countAll());
+        
+        return ResponseEntity.ok(metrics);
+    }
 
     @Operation(summary = "Get all applications", description = "Get paginated list of applications with optional status filter")
     @GetMapping("/applications")

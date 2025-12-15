@@ -133,6 +133,20 @@ public class ApplicationService {
     }
 
     /**
+     * Count applications by status.
+     */
+    public long countByStatus(ApplicationStatus status) {
+        return applicationRepository.countByStatus(status);
+    }
+
+    /**
+     * Count all applications.
+     */
+    public long countAll() {
+        return applicationRepository.count();
+    }
+
+    /**
      * Create notification for candidate.
      */
     private void createNotification(Candidate candidate, Application application, 

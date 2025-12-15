@@ -10,9 +10,28 @@
 - Автоматизацию коммуникаций с кандидатами
 - Принятие решений hiring manager'ами
 - Экспорт одобренных кандидатов во внутреннюю ATS
+- **Полнофункциональный веб-интерфейс (MVP)**
+
+## Архитектура - Monorepo (TurboRepo)
+
+Проект организован как монорепозиторий с использованием TurboRepo для удобной разработки backend и frontend вместе:
+
+```
+X5GroupRecruitment/
+├── apps/
+│   ├── backend/          # Spring Boot backend (Java 21)
+│   └── frontend/         # Next.js frontend (TypeScript)
+├── packages/             # Shared packages (future)
+├── docker-compose.yml    # Docker configuration
+├── Makefile             # Development commands
+├── package.json         # Root package.json (workspaces)
+├── turbo.json          # TurboRepo configuration
+└── README.md           # This file
+```
 
 ## Технологический стек
 
+### Backend
 - **Java 21** - основной язык программирования
 - **Spring Boot 3.2** - фреймворк приложения
 - **Spring Data JPA** - ORM и работа с БД
@@ -24,46 +43,121 @@
 - **Docker** - контейнеризация
 - **Maven** - сборка проекта
 
+### Frontend
+- **Next.js 14+** (App Router) - React фреймворк
+- **TypeScript** - типизация
+- **Material UI (MUI)** - UI компоненты
+- **React Query** (TanStack Query) - управление состоянием
+- **react-hook-form + zod** - формы и валидация
+- **Axios** - HTTP клиент
+
 ## Быстрый старт
 
 ### Требования
 
 - Java 21+
+- Node.js 18+ и npm 9+
 - Docker и Docker Compose
 - Maven 3.8+
 
-### Запуск с Docker Compose
+### Установка
 
 ```bash
 # Клонировать репозиторий
 git clone https://github.com/Pe4EHKA/X5GroupRecruitment.git
 cd X5GroupRecruitment
 
-# Запустить через Docker Compose
-docker-compose up -d
-
-# Приложение будет доступно на http://localhost:8080
-# Swagger UI: http://localhost:8080/swagger-ui.html
-# PostgreSQL: localhost:5432
+# Установить все зависимости
+make install
 ```
 
-### Локальная разработка
+### Запуск для разработки
 
 ```bash
-# Запустить только PostgreSQL
-docker-compose up -d postgres
-
-# Собрать приложение
-mvn clean package
-
-# Запустить приложение
-mvn spring-boot:run
-
-# Или запустить jar
-java -jar target/internship-recruitment-system-0.0.1-SNAPSHOT.jar
+# Запустить full stack (БД + Backend + Frontend)
+make dev
 ```
 
-## Архитектура
+После запуска будут доступны:
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:8080
+- **Swagger UI**: http://localhost:8080/swagger-ui.html
+- **PostgreSQL**: localhost:5432
+
+### Альтернативные команды запуска
+
+```bash
+# Только база данных
+make db-up
+
+# Только backend
+make backend
+
+# Только frontend
+make frontend
+
+# Docker Compose (все в контейнерах)
+make docker-up
+```
+
+### Сборка для production
+
+```bash
+make build
+```
+
+## Веб-интерфейс (MVP)
+
+Система включает полнофункциональный веб-интерфейс для всех ролей:
+
+### Роли и доступ
+
+**Candidate (Кандидат)**
+- `/status/[token]` - Просмотр статуса своей заявки
+
+**Recruiter (Рекрутер)**
+- Dashboard с метриками и статистикой
+- Список заявок с фильтрами и поиском
+- Детальный просмотр заявок
+- Изменение статусов и назначение на HM
+- Импорт заявок из Excel
+- Экспорт одобренных кандидатов
+
+**HM (Hiring Manager)**
+- Входящие заявки на рассмотрении
+- Просмотр деталей кандидата
+- Принятие решений с структурированным фидбеком
+- Добавление в кадровый резерв
+
+**Admin (Администратор)**
+- Управление программами/вакансиями
+- Настройка шаблонов уведомлений
+- Управление пользователями
+- Журнал аудита
+
+### Тестовые пользователи
+
+```
+Recruiter:
+  username: recruiter
+  password: recruiter123
+
+HM:
+  username: hm
+  password: hm123
+
+Admin:
+  username: admin
+  password: admin123
+```
+
+На странице логина есть кнопки быстрого входа для удобства.
+
+### Документация Frontend
+
+Подробная документация по frontend находится в [apps/frontend/README.md](apps/frontend/README.md)
+
+## Архитектура Backend
 
 ### Модульный монолит
 

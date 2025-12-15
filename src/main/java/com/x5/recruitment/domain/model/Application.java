@@ -65,6 +65,16 @@ public class Application {
     @Column
     private Integer screeningScore;
 
+    /**
+     * Actual submission date from Excel import (Дата заявки)
+     */
+    @Column(name = "submitted_at")
+    private LocalDateTime submittedAt;
+
+    @OneToMany(mappedBy = "application", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<ApplicationPreference> preferences = new ArrayList<>();
+
     @OneToMany(mappedBy = "application", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<StatusHistory> statusHistory = new ArrayList<>();
@@ -117,5 +127,13 @@ public class Application {
     public void addFeedback(Feedback feedback) {
         feedbacks.add(feedback);
         feedback.setApplication(this);
+    }
+
+    /**
+     * Add preference to application
+     */
+    public void addPreference(ApplicationPreference preference) {
+        preferences.add(preference);
+        preference.setApplication(this);
     }
 }

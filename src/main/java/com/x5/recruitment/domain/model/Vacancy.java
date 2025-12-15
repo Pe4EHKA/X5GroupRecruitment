@@ -57,6 +57,10 @@ public class Vacancy {
     @Builder.Default
     private Boolean active = true;
 
+    @Column(name = "allow_unmapped", nullable = false)
+    @Builder.Default
+    private Boolean allowUnmapped = true;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hiring_manager_id")
     private User hiringManager;

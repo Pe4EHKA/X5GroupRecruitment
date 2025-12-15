@@ -48,3 +48,8 @@ buildNumber.properties
 # OS
 .DS_Store
 Thumbs.db
+
+# Test data
+test-data/
+*.xlsx
+*.xls

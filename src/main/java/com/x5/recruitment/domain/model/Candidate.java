@@ -2,6 +2,8 @@ package com.x5.recruitment.domain.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -44,6 +46,55 @@ public class Candidate {
 
     @Column(length = 20)
     private String phone;
+
+    @Column(length = 100)
+    private String telegram;
+
+    @Column(name = "phone_e164", length = 20)
+    private String phoneE164;
+
+    @Column(name = "raw_phone", length = 50)
+    private String rawPhone;
+
+    @Column(name = "birth_year")
+    private Integer birthYear;
+
+    @Column(length = 100)
+    private String citizenship;
+
+    @Column(length = 200)
+    private String university;
+
+    @Column(name = "other_university", length = 200)
+    private String otherUniversity;
+
+    @Column(length = 200)
+    private String speciality;
+
+    @Column(name = "other_speciality", length = 200)
+    private String otherSpeciality;
+
+    @Column(length = 50)
+    private String course;
+
+    @Column(length = 100)
+    private String schedule;
+
+    @Column(length = 100)
+    private String city;
+
+    @Column(name = "other_city", length = 100)
+    private String otherCity;
+
+    @Column(length = 200)
+    private String source;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    private List<String> languages;
+
+    @Column(name = "raw_languages", columnDefinition = "TEXT")
+    private String rawLanguages;
 
     @Column(length = 500)
     private String resumePath;

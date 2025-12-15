@@ -37,7 +37,7 @@ install:
 dev:
 	@echo "Starting full stack development environment..."
 	@echo "1. Starting PostgreSQL..."
-	docker-compose up -d postgres
+	docker compose up -d postgres
 	@echo "2. Waiting for PostgreSQL to be ready..."
 	sleep 5
 	@echo "3. Starting backend and frontend..."
@@ -61,12 +61,12 @@ frontend:
 # Start database only
 db-up:
 	@echo "Starting PostgreSQL..."
-	docker-compose up -d postgres
+	docker compose up -d postgres
 
 # Docker commands
 docker-up:
 	@echo "Starting all services with Docker..."
-	docker-compose up -d
+	docker compose up -d
 	@echo "✓ Services started"
 	@echo "Backend: http://localhost:8080"
 	@echo "Swagger: http://localhost:8080/swagger-ui.html"
@@ -74,7 +74,7 @@ docker-up:
 
 docker-down:
 	@echo "Stopping all Docker services..."
-	docker-compose down
+	docker compose down
 
 # Build
 build:

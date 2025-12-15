@@ -18,11 +18,11 @@ services:
       timeout: 5s
       retries: 5
 
-  app:
+  backend:
     build:
-      context: .
+      context: ./apps/backend
       dockerfile: Dockerfile
-    container_name: x5-recruitment-app
+    container_name: x5-recruitment-backend
     depends_on:
       postgres:
         condition: service_healthy

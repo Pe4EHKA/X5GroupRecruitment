@@ -1,0 +1,36 @@
+{
+  "name": "x5-recruitment-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "X5 Tech Internship Recruitment System - Monorepo",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "backend:dev": "cd apps/backend && mvn spring-boot:run",
+    "backend:build": "cd apps/backend && mvn clean package",
+    "frontend:dev": "cd apps/frontend && npm run dev",
+    "frontend:build": "cd apps/frontend && npm run build",
+    "db:up": "docker-compose up -d postgres",
+    "db:down": "docker-compose down",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "openapi:generate": "cd apps/frontend && npm run openapi:generate"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "devDependencies": {
+    "prettier": "^3.1.1",
+    "turbo": "^1.11.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "packageManager": "npm@10.8.2"
+}

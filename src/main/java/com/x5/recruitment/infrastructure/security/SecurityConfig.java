@@ -29,7 +29,9 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable()) // Disable CSRF for API
+            .csrf(csrf -> csrf.disable()) // Disable CSRF for stateless REST API (no session cookies)
+            // IMPORTANT: For production with web UI, enable CSRF protection for browser-based requests
+            // This is acceptable for MVP as we use stateless authentication (HTTP Basic) without cookies
             .authorizeHttpRequests(auth -> auth
                 // Public endpoints
                 .requestMatchers("/api/candidate/**").permitAll()

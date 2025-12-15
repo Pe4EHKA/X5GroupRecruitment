@@ -783,14 +783,14 @@ com.x5.recruitment/
 ### Требования к окружению
 
 **Development:**
-- Java 17 JDK
+- Java 21 JDK
 - Maven 3.8+
 - Docker Desktop
 - IDE (IntelliJ IDEA / Eclipse)
 
 **Production:**
-- Java 17 JRE
-- PostgreSQL 16+
+- Java 21 JRE
+- PostgreSQL 17.7+
 - 2GB RAM minimum
 - 10GB disk minimum
 

@@ -1,22 +1,29 @@
 package com.x5.recruitment.application.service;
 
 import com.x5.recruitment.api.dto.ApplicationDto;
-import com.x5.recruitment.api.dto.CreateApplicationRequest;
+import com.x5.recruitment.api.dto.ImportBatchDto;
+import com.x5.recruitment.api.dto.ImportResultDto;
+import com.x5.recruitment.api.dto.ImportRowErrorDto;
 import com.x5.recruitment.domain.model.ApplicationStatus;
+import com.x5.recruitment.domain.model.ImportBatch;
+import com.x5.recruitment.domain.model.ImportRowError;
 import com.x5.recruitment.domain.repository.ApplicationRepository;
+import com.x5.recruitment.domain.repository.ImportBatchRepository;
+import com.x5.recruitment.domain.repository.ImportRowErrorRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Service for importing and exporting applications via CSV/Excel.
@@ -26,41 +33,54 @@ import java.util.List;
 @Slf4j
 public class ImportExportService {
 
-    private final ApplicationService applicationService;
+    private final XlsxImportService xlsxImportService;
     private final ApplicationRepository applicationRepository;
+    private final ImportBatchRepository batchRepository;
+    private final ImportRowErrorRepository errorRepository;
 
     /**
      * Import applications from Excel file.
      */
     @Transactional
-    public List<ApplicationDto> importFromExcel(MultipartFile file) throws IOException {
+    public ImportResultDto importFromExcel(MultipartFile file) throws IOException {
         log.info("Importing applications from Excel file: {}", file.getOriginalFilename());
         
-        List<ApplicationDto> imported = new ArrayList<>();
+        // Use new XLSX import service
+        ImportBatch batch = xlsxImportService.importFromXlsx(file);
         
-        try (InputStream is = file.getInputStream(); 
-             Workbook workbook = new XSSFWorkbook(is)) {
-            
-            Sheet sheet = workbook.getSheetAt(0);
-            
-            // Skip header row
-            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
-                Row row = sheet.getRow(i);
-                if (row == null) continue;
-                
-                try {
-                    CreateApplicationRequest request = parseRow(row);
-                    ApplicationDto dto = applicationService.createApplication(request);
-                    imported.add(dto);
-                    log.debug("Imported application for: {}", request.getEmail());
-                } catch (Exception e) {
-                    log.error("Error importing row {}: {}", i, e.getMessage());
-                }
-            }
-        }
+        // Get errors (limited to first 100 for response)
+        List<ImportRowError> errors = errorRepository.findByBatchId(batch.getId());
+        List<ImportRowErrorDto> errorDtos = errors.stream()
+            .limit(100)
+            .map(this::toErrorDto)
+            .collect(Collectors.toList());
         
-        log.info("Imported {} applications", imported.size());
-        return imported;
+        ImportBatchDto batchDto = toBatchDto(batch);
+        
+        return ImportResultDto.builder()
+            .batch(batchDto)
+            .errors(errorDtos)
+            .totalErrors(errors.size())
+            .build();
+    }
+
+    /**
+     * Get import batch by ID.
+     */
+    @Transactional(readOnly = true)
+    public ImportBatchDto getImportBatch(Long batchId) {
+        ImportBatch batch = batchRepository.findById(batchId)
+            .orElseThrow(() -> new IllegalArgumentException("Import batch not found: " + batchId));
+        return toBatchDto(batch);
+    }
+
+    /**
+     * Get import batch errors (paginated).
+     */
+    @Transactional(readOnly = true)
+    public Page<ImportRowErrorDto> getImportBatchErrors(Long batchId, Pageable pageable) {
+        return errorRepository.findByBatchId(batchId, pageable)
+            .map(this::toErrorDto);
     }
 
     /**
@@ -117,36 +137,36 @@ public class ImportExportService {
     }
 
     /**
-     * Parse Excel row to CreateApplicationRequest.
+     * Convert ImportBatch to DTO.
      */
-    private CreateApplicationRequest parseRow(Row row) {
-        return CreateApplicationRequest.builder()
-            .firstName(getCellValueAsString(row.getCell(0)))
-            .lastName(getCellValueAsString(row.getCell(1)))
-            .email(getCellValueAsString(row.getCell(2)))
-            .phone(getCellValueAsString(row.getCell(3)))
-            .vacancyId(getCellValueAsLong(row.getCell(4)))
-            .coverLetter(getCellValueAsString(row.getCell(5)))
-            .additionalInfo(getCellValueAsString(row.getCell(6)))
+    private ImportBatchDto toBatchDto(ImportBatch batch) {
+        return ImportBatchDto.builder()
+            .id(batch.getId())
+            .fileName(batch.getFileName())
+            .uploadedById(batch.getUploadedBy() != null ? batch.getUploadedBy().getId() : null)
+            .uploadedByName(batch.getUploadedBy() != null ? batch.getUploadedBy().getUsername() : null)
+            .uploadedAt(batch.getUploadedAt())
+            .totalRows(batch.getTotalRows())
+            .successRows(batch.getSuccessRows())
+            .failedRows(batch.getFailedRows())
+            .completed(batch.getCompleted())
+            .createdAt(batch.getCreatedAt())
+            .updatedAt(batch.getUpdatedAt())
             .build();
     }
 
-    private String getCellValueAsString(Cell cell) {
-        if (cell == null) return null;
-        return switch (cell.getCellType()) {
-            case STRING -> cell.getStringCellValue();
-            case NUMERIC -> String.valueOf((long) cell.getNumericCellValue());
-            case BOOLEAN -> String.valueOf(cell.getBooleanCellValue());
-            default -> null;
-        };
-    }
-
-    private Long getCellValueAsLong(Cell cell) {
-        if (cell == null) return null;
-        return switch (cell.getCellType()) {
-            case NUMERIC -> (long) cell.getNumericCellValue();
-            case STRING -> Long.parseLong(cell.getStringCellValue());
-            default -> null;
-        };
+    /**
+     * Convert ImportRowError to DTO.
+     */
+    private ImportRowErrorDto toErrorDto(ImportRowError error) {
+        return ImportRowErrorDto.builder()
+            .id(error.getId())
+            .batchId(error.getBatch().getId())
+            .rowNumber(error.getRowNumber())
+            .errorCode(error.getErrorCode())
+            .errorMessage(error.getErrorMessage())
+            .rawSnapshot(error.getRawSnapshot())
+            .createdAt(error.getCreatedAt())
+            .build();
     }
 }

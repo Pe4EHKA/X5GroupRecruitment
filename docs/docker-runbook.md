@@ -283,4 +283,4 @@ If you encounter issues not covered here:
 2. Verify Docker version: `docker --version`
 3. Check BuildKit is enabled: `docker buildx version`
 4. Review the Dockerfiles for commented explanations
-5. Consult docs/performance.md for caching behavior
+5. Consult docs/docker-performance.md for caching behavior

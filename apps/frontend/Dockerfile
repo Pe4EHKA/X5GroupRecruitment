@@ -10,7 +10,7 @@ COPY apps/frontend/package.json apps/frontend/package-lock.json ./
 
 # Install dependencies with workaround for npm ci bug in Docker BuildKit
 # npm ci sometimes hangs waiting for stdin in non-interactive environments
-# We use a shell wrapper to kill it after installation completes
+# We use a shell wrapper with 120s timeout (2x typical install time) to handle completion
 RUN sh -c 'npm ci --prefer-offline --no-audit < /dev/null & pid=$!; sleep 120; kill $pid 2>/dev/null || true; wait $pid 2>/dev/null || [ -d node_modules ]'
 
 # Rebuild the source code only when needed

@@ -1,4 +1,4 @@
-import { useQuery, UseQueryResult } from '@tantml:query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { ApplicationDetail, CandidateStatus, StatusHistory } from '@/types';
 

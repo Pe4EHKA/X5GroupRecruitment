@@ -52,14 +52,20 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Page<User> findByRole(@Param("role") UserRole role, Pageable pageable);
     
     /**
+     * Find users by role and status (combined filter)
+     */
+    @Query("SELECT u FROM User u JOIN u.roles r WHERE r = :role AND u.status = :status")
+    Page<User> findByRoleAndStatus(@Param("role") UserRole role, @Param("status") UserStatus status, Pageable pageable);
+    
+    /**
      * Count active users with ADMIN role
      */
     @Query("SELECT COUNT(u) FROM User u JOIN u.roles r WHERE r = 'ADMIN' AND u.status = 'ACTIVE'")
     long countActiveAdmins();
     
     /**
-     * Find all users with a specific role and status
+     * Find all users with a specific role and status (for non-paginated results)
      */
     @Query("SELECT u FROM User u JOIN u.roles r WHERE r = :role AND u.status = :status")
-    List<User> findByRoleAndStatus(@Param("role") UserRole role, @Param("status") UserStatus status);
+    List<User> findAllByRoleAndStatus(@Param("role") UserRole role, @Param("status") UserStatus status);
 }

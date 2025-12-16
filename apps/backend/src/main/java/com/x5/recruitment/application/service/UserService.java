@@ -43,11 +43,7 @@ public class UserService {
         if (query != null && !query.isBlank()) {
             users = userRepository.searchUsers(query.trim(), pageable);
         } else if (status != null && role != null) {
-            users = userRepository.findByRoleAndStatus(role, status).stream()
-                .collect(java.util.stream.Collectors.collectingAndThen(
-                    java.util.stream.Collectors.toList(),
-                    list -> new org.springframework.data.domain.PageImpl<>(list, pageable, list.size())
-                ));
+            users = userRepository.findByRoleAndStatus(role, status, pageable);
         } else if (status != null) {
             users = userRepository.findByStatus(status, pageable);
         } else if (role != null) {

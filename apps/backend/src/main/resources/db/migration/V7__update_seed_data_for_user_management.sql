@@ -8,13 +8,14 @@ UPDATE users SET
 WHERE email_normalized IS NULL OR status IS NULL;
 
 -- Add audit event for initial setup (optional)
+-- Using PostgreSQL string concatenation
 INSERT INTO audit_events (actor_user_id, action, entity_type, entity_id, metadata, timestamp)
 SELECT 
   NULL,
   'CREATE_USER',
   'USER',
   id,
-  CONCAT('Initial seed user: ', username),
+  'Initial seed user: ' || username,
   created_at
 FROM users
 WHERE id IN (1, 2, 3);

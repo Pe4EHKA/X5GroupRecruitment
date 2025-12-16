@@ -10,7 +10,8 @@ RUN --mount=type=cache,target=/root/.m2 \
     -Dmaven.wagon.http.ssl.insecure=true \
     -Dmaven.wagon.http.ssl.allowall=true \
     -Dmaven.wagon.http.ssl.ignore.validity.dates=true \
-    dependency:go-offline
+    -Dmaven.resolver.transport=wagon \
+    dependency:go-offline || true
 
 # Copy source code and build
 COPY apps/backend/src ./src
@@ -18,7 +19,8 @@ RUN --mount=type=cache,target=/root/.m2 \
     mvn clean package -DskipTests -B \
     -Dmaven.wagon.http.ssl.insecure=true \
     -Dmaven.wagon.http.ssl.allowall=true \
-    -Dmaven.wagon.http.ssl.ignore.validity.dates=true && \
+    -Dmaven.wagon.http.ssl.ignore.validity.dates=true \
+    -Dmaven.resolver.transport=wagon && \
     mv target/*.jar app.jar
 
 # Runtime stage with JRE 21 for smaller image

@@ -37,6 +37,12 @@ public class User {
     @Column(nullable = false, unique = true, length = 255)
     private String email;
 
+    /**
+     * Normalized email for case-insensitive lookups
+     */
+    @Column(name = "email_normalized", unique = true, length = 255)
+    private String emailNormalized;
+
     @Column(nullable = false)
     private String passwordHash;
 
@@ -46,6 +52,24 @@ public class User {
     @Column(nullable = false, length = 100)
     private String lastName;
 
+    /**
+     * Optional phone number
+     */
+    @Column(length = 20)
+    private String phone;
+
+    /**
+     * Optional department/team
+     */
+    @Column(length = 100)
+    private String department;
+
+    /**
+     * Optional admin comment
+     */
+    @Column(columnDefinition = "TEXT")
+    private String comment;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
     @Enumerated(EnumType.STRING)
@@ -53,9 +77,39 @@ public class User {
     @Builder.Default
     private Set<UserRole> roles = new HashSet<>();
 
+    /**
+     * User status (ACTIVE, DISABLED, INVITED)
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private UserStatus status = UserStatus.ACTIVE;
+
+    /**
+     * Deprecated: use status field instead
+     * Kept for backward compatibility
+     */
     @Column(nullable = false)
     @Builder.Default
     private Boolean active = true;
+
+    /**
+     * Last login timestamp (nullable)
+     */
+    @Column(name = "last_login_at")
+    private LocalDateTime lastLoginAt;
+
+    /**
+     * User who created this user (nullable for system/initial users)
+     */
+    @Column(name = "created_by")
+    private Long createdBy;
+
+    /**
+     * User who last updated this user (nullable)
+     */
+    @Column(name = "updated_by")
+    private Long updatedBy;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
@@ -67,5 +121,23 @@ public class User {
 
     public String getFullName() {
         return firstName + " " + lastName;
+    }
+
+    /**
+     * Check if user is truly active (status = ACTIVE and active flag = true)
+     */
+    public boolean isActive() {
+        return status == UserStatus.ACTIVE && Boolean.TRUE.equals(active);
+    }
+
+    /**
+     * Normalize email before persisting
+     */
+    @PrePersist
+    @PreUpdate
+    public void normalizeEmail() {
+        if (email != null) {
+            this.emailNormalized = email.toLowerCase().trim();
+        }
     }
 }

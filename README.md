@@ -130,6 +130,7 @@ make docker-down
 
 - **[docs/runbook.md](docs/runbook.md)** - Полное руководство по развертыванию и эксплуатации
 - **[docs/smoke.md](docs/smoke.md)** - Руководство по smoke-тестированию
+- **[docs/admin-user-management.md](docs/admin-user-management.md)** - Управление пользователями
 - **[docs/upgrade-frontend.md](docs/upgrade-frontend.md)** - Обновление зависимостей frontend
 - **[UPGRADE.md](UPGRADE.md)** - Обновление Java и Spring Boot
 
@@ -165,7 +166,7 @@ make build
 **Admin (Администратор)**
 - Управление программами/вакансиями
 - Настройка шаблонов уведомлений
-- Управление пользователями
+- **Управление пользователями** (создание, редактирование, назначение ролей)
 - Журнал аудита
 
 ### Тестовые пользователи
@@ -278,6 +279,19 @@ GET    /api/candidate/status?token={token}     - Статус заявок (по
 POST   /api/import-export/import               - Импорт из Excel
 GET    /api/import-export/export/approved      - Экспорт одобренных
 ```
+
+#### Admin API (`/api/admin`)
+
+```
+GET    /api/admin/users                        - Список пользователей (с фильтрами)
+GET    /api/admin/users/{id}                   - Детали пользователя
+POST   /api/admin/users                        - Создать пользователя
+PUT    /api/admin/users/{id}                   - Обновить профиль
+PUT    /api/admin/users/{id}/roles             - Обновить роли
+PUT    /api/admin/users/{id}/status            - Обновить статус (ACTIVE/DISABLED)
+```
+
+**Подробная документация**: [docs/admin-user-management.md](docs/admin-user-management.md)
 
 ### Аутентификация
 

@@ -6,6 +6,13 @@ export enum UserRole {
   CANDIDATE = 'CANDIDATE',
 }
 
+// User status enum
+export enum UserStatus {
+  ACTIVE = 'ACTIVE',
+  DISABLED = 'DISABLED',
+  INVITED = 'INVITED',
+}
+
 // Application statuses from backend
 export enum ApplicationStatus {
   NEW = 'NEW',
@@ -28,6 +35,60 @@ export interface User {
   email: string;
   fullName: string;
   roles: UserRole[];
+}
+
+// Extended user type for admin management
+export interface AdminUser {
+  id: number;
+  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  fullName: string;
+  phone?: string;
+  department?: string;
+  comment?: string;
+  roles: UserRole[];
+  status: UserStatus;
+  lastLoginAt?: string;
+  createdBy?: number;
+  updatedBy?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Create user request
+export interface CreateUserRequest {
+  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  department?: string;
+  comment?: string;
+  roles: UserRole[];
+  status?: UserStatus;
+  password?: string;
+}
+
+// Update user request
+export interface UpdateUserRequest {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  department?: string;
+  comment?: string;
+}
+
+// Update roles request
+export interface UpdateRolesRequest {
+  roles: UserRole[];
+}
+
+// Update status request
+export interface UpdateStatusRequest {
+  status: UserStatus;
 }
 
 // Candidate type

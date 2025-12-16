@@ -5,6 +5,8 @@ WORKDIR /app
 
 # Pre-download dependencies to speed up subsequent builds
 COPY apps/backend/pom.xml ./pom.xml
+# Note: dependency:go-offline can fail in CI with self-signed certs, but actual build will re-download
+# Using || true to allow build to continue - dependencies will be downloaded during the package phase
 RUN --mount=type=cache,target=/root/.m2 \
     mvn -B -DskipTests \
     -Dmaven.wagon.http.ssl.insecure=true \

@@ -9,6 +9,8 @@ WORKDIR /app
 COPY apps/frontend/package.json apps/frontend/package-lock.json ./
 
 # Install dependencies (use install instead of ci to handle workspace lockfile)
+# Note: strict-ssl is disabled for enterprise/CI environments with self-signed certificates
+# In production, configure npm to use your corporate CA bundle instead
 RUN npm config set strict-ssl false && \
     npm install --prefer-offline --no-audit --legacy-peer-deps
 

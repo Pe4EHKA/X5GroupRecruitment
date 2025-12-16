@@ -82,7 +82,7 @@ public class DevDataInitializer {
                 }
                 
                 // Ensure user has correct roles
-                if (!user.getRoles().equals(roles)) {
+                if (!rolesAreEqual(user.getRoles(), roles)) {
                     user.setRoles(roles);
                     userRepository.save(user);
                     log.info("  - Updated roles for '{}': {}", username, roles);
@@ -112,5 +112,13 @@ public class DevDataInitializer {
                 log.info("Created test user '{}' with password '{}'", username, password);
             }
         );
+    }
+
+    /**
+     * Compare two sets of UserRoles for equality.
+     * HashSet.equals() works correctly for this case, but being explicit for clarity.
+     */
+    private boolean rolesAreEqual(Set<UserRole> roles1, Set<UserRole> roles2) {
+        return roles1.size() == roles2.size() && roles1.containsAll(roles2);
     }
 }

@@ -9,9 +9,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
  */
 class HashGeneratorTest {
 
+    private static final int BCRYPT_STRENGTH = 10; // Match SecurityConfig default
+
     @Test
     void generateHashes() {
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(10);
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(BCRYPT_STRENGTH);
         
         String admin123 = encoder.encode("admin123");
         String recruiter123 = encoder.encode("recruiter123");

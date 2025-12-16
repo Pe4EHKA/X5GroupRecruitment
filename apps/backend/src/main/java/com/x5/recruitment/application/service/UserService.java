@@ -66,6 +66,16 @@ public class UserService {
     }
 
     /**
+     * Get domain User entity by username
+     * Used for resolving authenticated user from SecurityContext
+     */
+    @Transactional(readOnly = true)
+    public User getUserEntityByUsername(String username) {
+        return userRepository.findByUsername(username)
+            .orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
+    }
+
+    /**
      * Create new user
      */
     @Transactional

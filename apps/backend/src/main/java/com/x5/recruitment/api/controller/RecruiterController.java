@@ -4,6 +4,7 @@ import com.x5.recruitment.api.dto.ApplicationDto;
 import com.x5.recruitment.api.dto.ChangeStatusRequest;
 import com.x5.recruitment.api.dto.CreateApplicationRequest;
 import com.x5.recruitment.application.service.ApplicationService;
+import com.x5.recruitment.application.service.UserService;
 import com.x5.recruitment.domain.model.ApplicationStatus;
 import com.x5.recruitment.domain.model.User;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -32,6 +34,7 @@ import java.util.Map;
 public class RecruiterController {
 
     private final ApplicationService applicationService;
+    private final UserService userService;
 
     @Operation(summary = "Get dashboard metrics", description = "Get metrics for recruiter dashboard")
     @GetMapping("/dashboard/metrics")
@@ -81,8 +84,9 @@ public class RecruiterController {
     public ResponseEntity<ApplicationDto> changeStatus(
             @PathVariable Long id,
             @Valid @RequestBody ChangeStatusRequest request,
-            @AuthenticationPrincipal User user) {
+            @AuthenticationPrincipal UserDetails principal) {
         
+        User user = userService.getUserEntityByUsername(principal.getUsername());
         ApplicationDto application = applicationService.changeStatus(id, request, user);
         return ResponseEntity.ok(application);
     }
@@ -91,8 +95,9 @@ public class RecruiterController {
     @PostMapping("/applications/{id}/send-to-hm")
     public ResponseEntity<ApplicationDto> sendToHmReview(
             @PathVariable Long id,
-            @AuthenticationPrincipal User user) {
+            @AuthenticationPrincipal UserDetails principal) {
         
+        User user = userService.getUserEntityByUsername(principal.getUsername());
         ChangeStatusRequest request = ChangeStatusRequest.builder()
             .newStatus(ApplicationStatus.PENDING_HM_REVIEW)
             .comment("Sent to HM for review")

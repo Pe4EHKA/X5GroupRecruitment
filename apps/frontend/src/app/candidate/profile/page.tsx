@@ -16,6 +16,8 @@ import {
   Tab,
   Paper,
   Chip,
+} from '@mui/material';
+import {
   Timeline,
   TimelineItem,
   TimelineSeparator,
@@ -23,7 +25,7 @@ import {
   TimelineContent,
   TimelineDot,
   TimelineOppositeContent,
-} from '@mui/material';
+} from '@mui/lab';
 import {
   CheckCircle,
   HourglassEmpty,

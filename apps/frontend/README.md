@@ -142,6 +142,28 @@ npm run build
 npm run start
 ```
 
+## Docker Build
+
+### Building Docker Image
+
+```bash
+# From repository root
+docker build -t x5-frontend -f apps/frontend/Dockerfile .
+
+# Or using docker compose
+docker compose build frontend
+```
+
+**Note on package-lock.json**: The frontend directory contains a copy of the root workspace `package-lock.json` to support standalone Docker builds. This file is kept in sync with the root lockfile and should be updated whenever frontend dependencies change.
+
+### Running in Docker
+
+```bash
+docker compose up frontend
+```
+
+The frontend service will be available at `http://localhost:3000`.
+
 ## Авторизация (DEV режим)
 
 В dev режиме используется упрощенная авторизация с базовой HTTP аутентификацией:

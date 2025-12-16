@@ -6,6 +6,7 @@ FROM base AS deps
 WORKDIR /app
 
 # Copy frontend package files
+# Note: package-lock.json is copied from root workspace for dependency version consistency
 COPY apps/frontend/package.json apps/frontend/package-lock.json ./
 
 # Install dependencies with workaround for npm ci bug in Docker BuildKit

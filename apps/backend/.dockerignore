@@ -1,0 +1,15 @@
+target
+.idea
+.git
+.gitignore
+*.iml
+build
+out
+*.md
+.mvn
+mvnw
+mvnw.cmd
+*.log
+.settings
+.classpath
+.project

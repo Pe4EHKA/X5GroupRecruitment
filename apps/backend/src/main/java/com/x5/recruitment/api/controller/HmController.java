@@ -1,5 +1,6 @@
 package com.x5.recruitment.api.controller;
 
+import com.x5.recruitment.api.dto.ApplicationDetailDto;
 import com.x5.recruitment.api.dto.ApplicationDto;
 import com.x5.recruitment.api.dto.HmDecisionRequest;
 import com.x5.recruitment.application.service.ApplicationService;
@@ -46,8 +47,8 @@ public class HmController {
 
     @Operation(summary = "Get application details", description = "Get detailed information about a specific application")
     @GetMapping("/applications/{id}")
-    public ResponseEntity<ApplicationDto> getApplication(@PathVariable Long id) {
-        ApplicationDto application = applicationService.getApplication(id);
+    public ResponseEntity<ApplicationDetailDto> getApplication(@PathVariable Long id) {
+        ApplicationDetailDto application = applicationService.getApplication(id);
         return ResponseEntity.ok(application);
     }
 

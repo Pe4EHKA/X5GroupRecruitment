@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { use } from 'react';
 import {
   Box,
@@ -64,7 +64,7 @@ export default function UserDetailsPage({ params }: PageProps) {
   });
 
   // Initialize form when user loads
-  useState(() => {
+  useEffect(() => {
     if (user) {
       setFormData({
         firstName: user.firstName,
@@ -77,7 +77,7 @@ export default function UserDetailsPage({ params }: PageProps) {
       setSelectedRoles(user.roles);
       setSelectedStatus(user.status);
     }
-  });
+  }, [user]);
 
   // Update profile mutation
   const updateProfileMutation = useMutation({

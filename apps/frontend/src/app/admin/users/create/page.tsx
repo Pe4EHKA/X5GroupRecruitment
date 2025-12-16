@@ -96,7 +96,7 @@ export default function CreateUserPage() {
       ...prev,
       roles: prev.roles.includes(role)
         ? prev.roles.filter((r) => r !== role)
-        : [...prev, role],
+        : [...prev.roles, role],
     }));
   };
 

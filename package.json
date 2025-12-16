@@ -5,19 +5,22 @@
   "description": "X5 Tech Internship Recruitment System - Monorepo",
   "scripts": {
     "dev": "turbo run dev",
+    "dev:all": "concurrently --kill-others \"docker compose up -d postgres\" \"npm run wait-for-db && npm run backend:dev\" \"npm run wait-for-backend && npm run frontend:dev\"",
+    "wait-for-db": "bash -c 'for i in {1..30}; do docker exec x5-recruitment-db pg_isready -U recruitment && sleep 2 && exit 0; sleep 1; done; echo \"Timeout waiting for DB\"; exit 1'",
+    "wait-for-backend": "bash -c 'for i in {1..60}; do curl -s http://localhost:8080/actuator/health > /dev/null 2>&1 && sleep 2 && exit 0; sleep 1; done; echo \"Timeout waiting for backend\"; exit 1'",
     "build": "turbo run build",
     "test": "turbo run test",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
     "clean": "turbo run clean && rm -rf node_modules",
-    "backend:dev": "cd apps/backend && mvn spring-boot:run",
-    "backend:build": "cd apps/backend && mvn clean package",
+    "backend:dev": "cd apps/backend && export JAVA_HOME=/usr/lib/jvm/temurin-21-jdk-amd64 && export PATH=$JAVA_HOME/bin:$PATH && mvn spring-boot:run",
+    "backend:build": "cd apps/backend && export JAVA_HOME=/usr/lib/jvm/temurin-21-jdk-amd64 && export PATH=$JAVA_HOME/bin:$PATH && mvn clean package",
     "frontend:dev": "cd apps/frontend && npm run dev",
     "frontend:build": "cd apps/frontend && npm run build",
-    "db:up": "docker-compose up -d postgres",
-    "db:down": "docker-compose down",
-    "docker:up": "docker-compose up -d",
-    "docker:down": "docker-compose down",
+    "db:up": "docker compose up -d postgres",
+    "db:down": "docker compose down",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
     "openapi:generate": "cd apps/frontend && npm run openapi:generate"
   },
   "workspaces": [
@@ -25,8 +28,9 @@
     "packages/*"
   ],
   "devDependencies": {
-    "prettier": "^3.1.1",
-    "turbo": "^1.11.3"
+    "prettier": "^3.4.2",
+    "turbo": "^2.3.3",
+    "concurrently": "^9.2.0"
   },
   "engines": {
     "node": ">=18.0.0",

@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "turbo run dev",
     "dev:all": "concurrently --kill-others \"docker compose up -d postgres\" \"npm run wait-for-db && npm run backend:dev\" \"npm run wait-for-backend && npm run frontend:dev\"",
-    "wait-for-db": "bash -c 'until docker exec x5-recruitment-db pg_isready -U recruitment; do sleep 1; done; sleep 2'",
-    "wait-for-backend": "bash -c 'until curl -s http://localhost:8080/actuator/health > /dev/null 2>&1; do sleep 1; done; sleep 2'",
+    "wait-for-db": "bash -c 'for i in {1..30}; do docker exec x5-recruitment-db pg_isready -U recruitment && sleep 2 && exit 0; sleep 1; done; echo \"Timeout waiting for DB\"; exit 1'",
+    "wait-for-backend": "bash -c 'for i in {1..60}; do curl -s http://localhost:8080/actuator/health > /dev/null 2>&1 && sleep 2 && exit 0; sleep 1; done; echo \"Timeout waiting for backend\"; exit 1'",
     "build": "turbo run build",
     "test": "turbo run test",
     "lint": "turbo run lint",

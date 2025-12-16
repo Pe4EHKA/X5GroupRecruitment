@@ -31,10 +31,37 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/recruitment
       SPRING_DATASOURCE_USERNAME: recruitment
       SPRING_DATASOURCE_PASSWORD: recruitment123
+      JAVA_HOME: /opt/java/openjdk
     ports:
       - "8080:8080"
     volumes:
       - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+
+  frontend:
+    build:
+      context: ./apps/frontend
+      dockerfile: Dockerfile
+    container_name: x5-recruitment-frontend
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://backend:8080
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
 volumes:
   postgres_data:

@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17-jdk-alpine AS builder
+FROM eclipse-temurin:21-jdk-alpine AS builder
 
 WORKDIR /app
 COPY pom.xml .
@@ -8,7 +8,10 @@ RUN apk add --no-cache maven && \
     mvn clean package -DskipTests && \
     mv target/*.jar app.jar
 
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:21-jre-alpine
+
+# Install curl for healthcheck
+RUN apk add --no-cache curl
 
 WORKDIR /app
 COPY --from=builder /app/app.jar .

@@ -18,8 +18,8 @@ services:
 
   backend:
     build:
-      context: ./apps/backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./apps/backend/Dockerfile
     container_name: x5-recruitment-backend
     depends_on:
       postgres:
@@ -43,8 +43,8 @@ services:
 
   frontend:
     build:
-      context: ./apps/frontend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./apps/frontend/Dockerfile
     container_name: x5-recruitment-frontend
     depends_on:
       backend:

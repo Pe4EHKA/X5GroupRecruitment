@@ -98,9 +98,9 @@ export interface Candidate {
   fullName: string;
   phone: string;
   university?: string;
-  course?: number;
+  course?: string;  // Changed from number to string to match backend
   statusToken: string;
-  createdAt: string;
+  createdAt?: string;  // Made optional as it's not in CandidateDto
 }
 
 // Application type

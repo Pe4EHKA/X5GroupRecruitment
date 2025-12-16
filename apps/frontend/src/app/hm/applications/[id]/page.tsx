@@ -25,6 +25,7 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import StatusBadge from '@/components/StatusBadge';
 import { UserRole } from '@/types';
 import { useHmApplication, useSubmitDecision } from '@/hooks/useHm';
+import { getCandidateFullName, getCandidateEmail, getCandidatePhone, getCandidateUniversity, getCandidateCourse } from '@/lib/utils';
 import { format } from 'date-fns';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -120,31 +121,31 @@ export default function HmApplicationPage() {
                       <Typography variant="body2" color="text.secondary">
                         ФИО
                       </Typography>
-                      <Typography variant="body1">{application.candidate.fullName}</Typography>
+                      <Typography variant="body1">{getCandidateFullName(application.candidate)}</Typography>
                     </Grid>
                     <Grid item xs={6}>
                       <Typography variant="body2" color="text.secondary">
                         Email
                       </Typography>
-                      <Typography variant="body1">{application.candidate.email}</Typography>
+                      <Typography variant="body1">{getCandidateEmail(application.candidate)}</Typography>
                     </Grid>
                     <Grid item xs={6}>
                       <Typography variant="body2" color="text.secondary">
                         Телефон
                       </Typography>
-                      <Typography variant="body1">{application.candidate.phone}</Typography>
+                      <Typography variant="body1">{getCandidatePhone(application.candidate)}</Typography>
                     </Grid>
                     <Grid item xs={6}>
                       <Typography variant="body2" color="text.secondary">
                         Университет
                       </Typography>
-                      <Typography variant="body1">{application.candidate.university || '-'}</Typography>
+                      <Typography variant="body1">{getCandidateUniversity(application.candidate)}</Typography>
                     </Grid>
                     <Grid item xs={6}>
                       <Typography variant="body2" color="text.secondary">
                         Курс
                       </Typography>
-                      <Typography variant="body1">{application.candidate.course || '-'}</Typography>
+                      <Typography variant="body1">{getCandidateCourse(application.candidate)}</Typography>
                     </Grid>
                   </Grid>
                 </CardContent>

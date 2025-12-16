@@ -21,6 +21,7 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import StatusBadge from '@/components/StatusBadge';
 import { UserRole } from '@/types';
 import { usePendingApplications } from '@/hooks/useHm';
+import { getCandidateFullName, getCandidateEmail } from '@/lib/utils';
 import { format } from 'date-fns';
 
 export default function HmInboxPage() {
@@ -72,8 +73,8 @@ export default function HmInboxPage() {
                 {data?.content?.map((application) => (
                   <TableRow key={application.id} hover>
                     <TableCell>{application.id}</TableCell>
-                    <TableCell>{application.candidate.fullName}</TableCell>
-                    <TableCell>{application.candidate.email}</TableCell>
+                    <TableCell>{getCandidateFullName(application.candidate)}</TableCell>
+                    <TableCell>{getCandidateEmail(application.candidate)}</TableCell>
                     <TableCell>{application.vacancyTitle}</TableCell>
                     <TableCell>
                       <StatusBadge status={application.status} />

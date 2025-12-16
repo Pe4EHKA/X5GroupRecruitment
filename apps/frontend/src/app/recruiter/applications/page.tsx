@@ -30,6 +30,7 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import StatusBadge from '@/components/StatusBadge';
 import { UserRole, ApplicationStatus, ApplicationFilters } from '@/types';
 import { useApplications } from '@/hooks/useRecruiter';
+import { getCandidateFullName, getCandidateEmail } from '@/lib/utils';
 import { format } from 'date-fns';
 
 export default function ApplicationsPage() {
@@ -178,8 +179,8 @@ export default function ApplicationsPage() {
                 {data?.content?.map((application) => (
                   <TableRow key={application.id} hover>
                     <TableCell>{application.id}</TableCell>
-                    <TableCell>{application.candidate.fullName}</TableCell>
-                    <TableCell>{application.candidate.email}</TableCell>
+                    <TableCell>{getCandidateFullName(application.candidate)}</TableCell>
+                    <TableCell>{getCandidateEmail(application.candidate)}</TableCell>
                     <TableCell>{application.vacancyTitle}</TableCell>
                     <TableCell>
                       <StatusBadge status={application.status} />

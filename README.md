@@ -74,7 +74,7 @@ make install
 ### Запуск для разработки
 
 ```bash
-# Запустить full stack (БД + Backend + Frontend)
+# Запустить full stack (БД + Backend + Frontend) одной командой
 make dev
 ```
 
@@ -83,6 +83,18 @@ make dev
 - **Backend API**: http://localhost:8080
 - **Swagger UI**: http://localhost:8080/swagger-ui.html
 - **PostgreSQL**: localhost:5432
+
+Для остановки всех сервисов:
+```bash
+# Нажмите Ctrl+C в терминале, затем выполните:
+make down
+```
+
+### Просмотр логов
+
+```bash
+make logs
+```
 
 ### Альтернативные команды запуска
 
@@ -98,7 +110,28 @@ make frontend
 
 # Docker Compose (все в контейнерах)
 make docker-up
+
+# Остановить Docker Compose
+make docker-down
 ```
+
+### Проверка работоспособности
+
+После запуска проверьте работоспособность системы:
+
+```bash
+# Запустить smoke tests
+./docs/smoke.sh
+```
+
+Подробнее см. [docs/smoke.md](docs/smoke.md)
+
+### Документация
+
+- **[docs/runbook.md](docs/runbook.md)** - Полное руководство по развертыванию и эксплуатации
+- **[docs/smoke.md](docs/smoke.md)** - Руководство по smoke-тестированию
+- **[docs/upgrade-frontend.md](docs/upgrade-frontend.md)** - Обновление зависимостей frontend
+- **[UPGRADE.md](UPGRADE.md)** - Обновление Java и Spring Boot
 
 ### Сборка для production
 

@@ -82,9 +82,9 @@ class PasswordEncoderIntegrationTest {
         // Verify that the hashes from V8 migration match the expected passwords
         // These hashes were generated with BCryptPasswordEncoder(10)
         
-        String adminHash = "$2a$10$8K1p/h0dJOuXBJNRFcKF.OQVwEKvhCqPGfFGuTNEjdNdEOqJQDKrK";
-        String recruiterHash = "$2a$10$9L2q/i1eKPvYCKOSGdLG.PZYxFLwiDrQHgGHvUOFkedOePrKRELsS";
-        String hmHash = "$2a$10$0M3r/j2fLQwZDLPTHeEH/QaZyGMxjEsRIhHIwVPGlfeOfQsLSFMtT";
+        String adminHash = "$2a$10$ly3U/9WO2TzWJsGYr8WREe.IoTbksltexVVZPYZcWNRpa5e2mT7jG";
+        String recruiterHash = "$2a$10$OX70brqYIzKQLphVNBeFCuFNE0mgX8CJGqiKQjpmfV.fFoKaoAzhS";
+        String hmHash = "$2a$10$ZGAdXZAA/PLI4QTKbMMPq.10.EEFzQmLaS1S5m4eIOtMQOTlinE5G";
 
         assertThat(passwordEncoder.matches("admin123", adminHash))
             .as("admin123 should match admin hash")
@@ -101,7 +101,7 @@ class PasswordEncoderIntegrationTest {
 
     @Test
     void testPasswordEncoder_wrongPasswordDoesNotMatch() {
-        String hash = "$2a$10$8K1p/h0dJOuXBJNRFcKF.OQVwEKvhCqPGfFGuTNEjdNdEOqJQDKrK";
+        String hash = "$2a$10$ly3U/9WO2TzWJsGYr8WREe.IoTbksltexVVZPYZcWNRpa5e2mT7jG";
         
         // Wrong passwords should not match
         assertThat(passwordEncoder.matches("wrongpassword", hash)).isFalse();

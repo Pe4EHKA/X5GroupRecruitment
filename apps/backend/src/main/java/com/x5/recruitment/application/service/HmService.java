@@ -1,7 +1,6 @@
 package com.x5.recruitment.application.service;
 
-import com.x5.recruitment.api.dto.ApplicationDto;
-import com.x5.recruitment.api.dto.HmDecisionRequest;
+import com.x5.recruitment.api.dto.*;
 import com.x5.recruitment.domain.model.*;
 import com.x5.recruitment.domain.repository.ApplicationRepository;
 import com.x5.recruitment.domain.repository.NotificationRepository;
@@ -86,23 +85,41 @@ public class HmService {
     }
 
     private ApplicationDto mapToDto(Application application) {
+        Candidate candidate = application.getCandidate();
+        User assignedRecruiter = application.getAssignedRecruiter();
+        
+        // Create nested CandidateDto
+        CandidateDto candidateDto = CandidateDto.builder()
+            .id(candidate.getId())
+            .fullName(candidate.getFullName())
+            .email(candidate.getEmail())
+            .phone(candidate.getPhone())
+            .university(candidate.getUniversity())
+            .course(candidate.getCourse())
+            .statusToken(candidate.getAccessToken())
+            .build();
+        
         return ApplicationDto.builder()
             .id(application.getId())
-            .candidateId(application.getCandidate().getId())
-            .candidateName(application.getCandidate().getFullName())
-            .candidateEmail(application.getCandidate().getEmail())
+            // New nested structure
+            .candidate(candidateDto)
+            // Backward compatibility
+            .candidateId(candidate.getId())
+            .candidateName(candidate.getFullName())
+            .candidateEmail(candidate.getEmail())
             .vacancyId(application.getVacancy().getId())
             .vacancyTitle(application.getVacancy().getTitle())
             .status(application.getStatus())
             .coverLetter(application.getCoverLetter())
             .notes(application.getNotes())
-            .assignedRecruiterId(application.getAssignedRecruiter() != null ? 
-                application.getAssignedRecruiter().getId() : null)
-            .assignedRecruiterName(application.getAssignedRecruiter() != null ? 
-                application.getAssignedRecruiter().getFullName() : null)
+            .recruiterId(assignedRecruiter != null ? assignedRecruiter.getId() : null)
+            .recruiterName(assignedRecruiter != null ? assignedRecruiter.getFullName() : null)
+            .assignedRecruiterId(assignedRecruiter != null ? assignedRecruiter.getId() : null)
+            .assignedRecruiterName(assignedRecruiter != null ? assignedRecruiter.getFullName() : null)
             .screeningScore(application.getScreeningScore())
             .createdAt(application.getCreatedAt())
             .updatedAt(application.getUpdatedAt())
+            .statusChangedAt(application.getUpdatedAt())
             .build();
     }
 }

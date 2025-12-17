@@ -57,9 +57,18 @@ RUN mkdir .next && chown nextjs:nodejs .next
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 # Next.js outputs the standalone bundle under a nested folder that matches the
-# workspace name ("frontend"), so copy that directory's contents to the image
-# root to ensure server.js is available at /app/server.js at runtime.
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone/frontend ./
+# workspace name ("frontend"), so copy the standalone output and flatten the
+# workspace folder if it exists to ensure server.js is available at /app/server.js
+# at runtime. This makes the image resilient whether Next.js emits the
+# standalone build inside a workspace folder (e.g., /standalone/frontend) or at
+# the root of /standalone.
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./standalone
+RUN if [ -d "./standalone/frontend" ]; then \
+      mv ./standalone/frontend/* ./; \
+    else \
+      mv ./standalone/* ./; \
+    fi && \
+    rm -rf standalone
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 USER nextjs

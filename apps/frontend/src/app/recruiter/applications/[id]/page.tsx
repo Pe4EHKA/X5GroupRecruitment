@@ -31,7 +31,7 @@ import DashboardLayout from '@/components/DashboardLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import StatusBadge from '@/components/StatusBadge';
 import { UserRole, ApplicationStatus } from '@/types';
-import { useApplication, useChangeStatus, useSendToHm } from '@/hooks/useRecruiter';
+import { useApplication, useChangeStatus } from '@/hooks/useRecruiter';
 import { getCandidateFullName, getCandidateEmail, getCandidatePhone, getCandidateUniversity, getCandidateCourse } from '@/lib/utils';
 import { format } from 'date-fns';
 import { useForm } from 'react-hook-form';
@@ -43,13 +43,7 @@ const changeStatusSchema = z.object({
   comment: z.string().optional(),
 });
 
-const sendToHmSchema = z.object({
-  hmId: z.number().min(1, 'Выберите HM'),
-  comment: z.string().optional(),
-});
-
 type ChangeStatusForm = z.infer<typeof changeStatusSchema>;
-type SendToHmForm = z.infer<typeof sendToHmSchema>;
 
 export default function ApplicationDetailPage() {
   const params = useParams();
@@ -58,23 +52,13 @@ export default function ApplicationDetailPage() {
 
   const { data: application, isLoading } = useApplication(applicationId);
   const changeStatusMutation = useChangeStatus();
-  const sendToHmMutation = useSendToHm();
 
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
-  const [hmDialogOpen, setHmDialogOpen] = useState(false);
 
   const statusForm = useForm<ChangeStatusForm>({
     resolver: zodResolver(changeStatusSchema),
     defaultValues: {
       status: ApplicationStatus.SCREENING,
-      comment: '',
-    },
-  });
-
-  const hmForm = useForm<SendToHmForm>({
-    resolver: zodResolver(sendToHmSchema),
-    defaultValues: {
-      hmId: 0,
       comment: '',
     },
   });
@@ -86,18 +70,6 @@ export default function ApplicationDetailPage() {
         onSuccess: () => {
           setStatusDialogOpen(false);
           statusForm.reset();
-        },
-      }
-    );
-  };
-
-  const handleSendToHm = (data: SendToHmForm) => {
-    sendToHmMutation.mutate(
-      { id: applicationId, data },
-      {
-        onSuccess: () => {
-          setHmDialogOpen(false);
-          hmForm.reset();
         },
       }
     );
@@ -141,9 +113,6 @@ export default function ApplicationDetailPage() {
           <Box sx={{ mb: 3, display: 'flex', gap: 2 }}>
             <Button variant="contained" onClick={() => setStatusDialogOpen(true)}>
               Изменить статус
-            </Button>
-            <Button variant="outlined" onClick={() => setHmDialogOpen(true)}>
-              Отправить на HM
             </Button>
           </Box>
 
@@ -327,7 +296,6 @@ export default function ApplicationDetailPage() {
                     label="Статус"
                   >
                     <MenuItem value={ApplicationStatus.SCREENING}>Скрининг</MenuItem>
-                    <MenuItem value={ApplicationStatus.PENDING_HM_REVIEW}>Отправить на HM</MenuItem>
                     <MenuItem value={ApplicationStatus.INTERVIEW_SCHEDULED}>Интервью назначено</MenuItem>
                     <MenuItem value={ApplicationStatus.APPROVED}>Одобрено</MenuItem>
                     <MenuItem value={ApplicationStatus.REJECTED}>Отклонено</MenuItem>
@@ -346,36 +314,6 @@ export default function ApplicationDetailPage() {
                 <Button onClick={() => setStatusDialogOpen(false)}>Отмена</Button>
                 <Button type="submit" variant="contained" disabled={changeStatusMutation.isPending}>
                   Сохранить
-                </Button>
-              </DialogActions>
-            </form>
-          </Dialog>
-
-          {/* Send to HM Dialog */}
-          <Dialog open={hmDialogOpen} onClose={() => setHmDialogOpen(false)} maxWidth="sm" fullWidth>
-            <form onSubmit={hmForm.handleSubmit(handleSendToHm)}>
-              <DialogTitle>Отправить на HM</DialogTitle>
-              <DialogContent>
-                <FormControl fullWidth sx={{ mt: 2 }}>
-                  <InputLabel>HM</InputLabel>
-                  <Select {...hmForm.register('hmId', { valueAsNumber: true })} defaultValue={0} label="HM">
-                    <MenuItem value={0}>Выберите HM</MenuItem>
-                    <MenuItem value={2}>HM User</MenuItem>
-                  </Select>
-                </FormControl>
-                <TextField
-                  {...hmForm.register('comment')}
-                  fullWidth
-                  label="Комментарий"
-                  multiline
-                  rows={3}
-                  sx={{ mt: 2 }}
-                />
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={() => setHmDialogOpen(false)}>Отмена</Button>
-                <Button type="submit" variant="contained" disabled={sendToHmMutation.isPending}>
-                  Отправить
                 </Button>
               </DialogActions>
             </form>

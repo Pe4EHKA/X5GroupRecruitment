@@ -169,7 +169,6 @@ public class CandidateService {
         return switch (status) {
             case NEW -> "Your application has been received and is awaiting review.";
             case SCREENING -> "Your application is currently being reviewed by our recruitment team.";
-            case PENDING_HM_REVIEW -> "Your application has passed initial screening and is awaiting hiring manager review.";
             case INTERVIEW_SCHEDULED -> "An interview has been scheduled. Check your email for details.";
             case INTERVIEW_COMPLETED -> "Your interview has been completed. We will contact you soon with next steps.";
             case APPROVED -> "Congratulations! Your application has been approved.";

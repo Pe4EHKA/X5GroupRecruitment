@@ -33,7 +33,11 @@ public class CandidateController {
     @Operation(summary = "Get application status", description = "Get status of all applications using access token (no authentication required)")
     @GetMapping("/status")
     public ResponseEntity<List<CandidateStatusDto>> getStatus(
-            @RequestParam String token) {
+            @RequestParam(required = true) String token) {
+        
+        if (token == null || token.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
         
         List<CandidateStatusDto> statuses = candidateService.getCandidateStatus(token);
         return ResponseEntity.ok(statuses);

@@ -7,7 +7,6 @@ import {
   ApplicationFilters,
   PageResponse,
   ChangeStatusRequest,
-  SendToHmRequest,
   DashboardMetrics,
   ImportResult,
 } from '@/types';
@@ -84,28 +83,6 @@ export function useChangeStatus() {
     },
     onError: (error: any) => {
       enqueueSnackbar(error.response?.data?.message || 'Ошибка изменения статуса', { variant: 'error' });
-    },
-  });
-}
-
-// Send to HM
-export function useSendToHm() {
-  const queryClient = useQueryClient();
-  const { enqueueSnackbar } = useSnackbar();
-
-  return useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: SendToHmRequest }) => {
-      const response = await api.post<Application>(`/api/recruiter/applications/${id}/send-to-hm`, data);
-      return response.data;
-    },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: recruiterKeys.application(variables.id) });
-      queryClient.invalidateQueries({ queryKey: recruiterKeys.applications() });
-      queryClient.invalidateQueries({ queryKey: recruiterKeys.dashboard() });
-      enqueueSnackbar('Заявка отправлена на HM', { variant: 'success' });
-    },
-    onError: (error: any) => {
-      enqueueSnackbar(error.response?.data?.message || 'Ошибка отправки на HM', { variant: 'error' });
     },
   });
 }

@@ -122,16 +122,6 @@ public class ApplicationService {
     }
 
     /**
-     * Get applications pending HM review.
-     */
-    @Transactional(readOnly = true)
-    public Page<ApplicationDto> getApplicationsPendingHmReview(Long hmId, Pageable pageable) {
-        return applicationRepository.findByStatusAndHiringManagerId(
-            ApplicationStatus.PENDING_HM_REVIEW, hmId, pageable)
-            .map(this::mapToDto);
-    }
-
-    /**
      * Get application by ID with full details.
      */
     @Transactional(readOnly = true)

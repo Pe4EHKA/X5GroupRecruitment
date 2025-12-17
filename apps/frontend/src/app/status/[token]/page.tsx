@@ -23,7 +23,6 @@ import { ApplicationStatus } from '@/types';
 const statusSteps: ApplicationStatus[] = [
   ApplicationStatus.NEW,
   ApplicationStatus.SCREENING,
-  ApplicationStatus.PENDING_HM_REVIEW,
   ApplicationStatus.INTERVIEW_SCHEDULED,
   ApplicationStatus.APPROVED,
 ];
@@ -37,7 +36,7 @@ export default function CandidateStatusPage() {
   const params = useParams();
   const token = params.token as string;
 
-  const { data, isLoading } = useCandidateStatus(token);
+  const { data, isLoading, error } = useCandidateStatus(token);
 
   if (isLoading) {
     return (
@@ -49,7 +48,7 @@ export default function CandidateStatusPage() {
     );
   }
 
-  if (!data || !data.applications || data.applications.length === 0) {
+  if (error || !data || !data.applications || data.applications.length === 0) {
     return (
       <Container maxWidth="md">
         <Box sx={{ minHeight: '100vh', py: 8 }}>
@@ -95,9 +94,6 @@ export default function CandidateStatusPage() {
                 </Step>
                 <Step>
                   <StepLabel>Скрининг</StepLabel>
-                </Step>
-                <Step>
-                  <StepLabel>Рассмотрение</StepLabel>
                 </Step>
                 <Step>
                   <StepLabel>Интервью</StepLabel>

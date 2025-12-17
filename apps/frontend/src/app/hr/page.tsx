@@ -48,6 +48,8 @@ const STATUS_COLORS: Record<ApplicationStatus, string> = {
   [ApplicationStatus.OFFER_SENT]: '#8bc34a',
   [ApplicationStatus.OFFER_ACCEPTED]: '#4caf50',
   [ApplicationStatus.OFFER_DECLINED]: '#f44336',
+  [ApplicationStatus.WITHDRAWN]: '#9e9e9e',
+  [ApplicationStatus.ON_HOLD]: '#607d8b',
 };
 
 const STATUS_LABELS: Record<ApplicationStatus, string> = {
@@ -62,6 +64,8 @@ const STATUS_LABELS: Record<ApplicationStatus, string> = {
   [ApplicationStatus.OFFER_SENT]: 'Оффер отправлен',
   [ApplicationStatus.OFFER_ACCEPTED]: 'Оффер принят',
   [ApplicationStatus.OFFER_DECLINED]: 'Оффер отклонён',
+  [ApplicationStatus.WITHDRAWN]: 'Отозвано',
+  [ApplicationStatus.ON_HOLD]: 'На удержании',
 };
 
 export default function HRDashboard() {

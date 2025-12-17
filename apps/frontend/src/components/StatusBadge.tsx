@@ -16,6 +16,8 @@ const statusConfig: Record<
   [ApplicationStatus.OFFER_SENT]: { label: 'Оффер отправлен', color: 'success' },
   [ApplicationStatus.OFFER_ACCEPTED]: { label: 'Оффер принят', color: 'success' },
   [ApplicationStatus.OFFER_DECLINED]: { label: 'Оффер отклонен', color: 'error' },
+  [ApplicationStatus.WITHDRAWN]: { label: 'Отозвано', color: 'default' },
+  [ApplicationStatus.ON_HOLD]: { label: 'На удержании', color: 'secondary' },
 };
 
 interface StatusBadgeProps {

@@ -27,6 +27,8 @@ export enum ApplicationStatus {
   OFFER_SENT = 'OFFER_SENT',
   OFFER_ACCEPTED = 'OFFER_ACCEPTED',
   OFFER_DECLINED = 'OFFER_DECLINED',
+  WITHDRAWN = 'WITHDRAWN',
+  ON_HOLD = 'ON_HOLD',
 }
 
 // User type
@@ -104,7 +106,51 @@ export interface Candidate {
   createdAt?: string;  // Made optional as it's not in CandidateDto
 }
 
-// Application type
+// CandidateDto from backend API
+export interface CandidateDto {
+  id: number;
+  fullName: string;
+  email: string;
+  phone?: string;
+  university?: string;
+  course?: string;
+  statusToken?: string;
+}
+
+// ApplicationDto from backend API (list view)
+// Use this interface when consuming data from backend API endpoints
+export interface ApplicationDto {
+  id: number;
+  candidate?: CandidateDto;
+  // @deprecated Use candidate.id instead. Backend maintains for compatibility.
+  candidateId?: number;
+  // @deprecated Use candidate.fullName instead. Backend maintains for compatibility.
+  candidateName?: string;
+  // @deprecated Use candidate.email instead. Backend maintains for compatibility.
+  candidateEmail?: string;
+  vacancyId: number;
+  vacancyTitle: string;
+  status: ApplicationStatus;
+  coverLetter?: string;
+  notes?: string;
+  recruiterId?: number;
+  recruiterName?: string;
+  hmId?: number;
+  hmName?: string;
+  // @deprecated Use recruiterId/recruiterName instead. Backend maintains for compatibility.
+  assignedRecruiterId?: number;
+  // @deprecated Use recruiterId/recruiterName instead. Backend maintains for compatibility.
+  assignedRecruiterName?: string;
+  screeningScore?: number;
+  createdAt: string;
+  updatedAt: string;
+  statusChangedAt: string;
+  currentComment?: string;
+}
+
+// Application type (legacy interface)
+// @deprecated Use ApplicationDto instead for new code. This interface exists for backward compatibility
+// with existing frontend code that expects non-optional candidate field.
 export interface Application {
   id: number;
   candidate: Candidate;
@@ -119,6 +165,14 @@ export interface Application {
   updatedAt: string;
   statusChangedAt: string;
   currentComment?: string;
+}
+
+// ApplicationDetailDto from backend API (detail view)
+export interface ApplicationDetailDto extends ApplicationDto {
+  preferences?: ApplicationPreference[];
+  statusHistory?: StatusHistory[];
+  interviews?: Interview[];
+  feedbacks?: Feedback[];
 }
 
 // Application details with full info

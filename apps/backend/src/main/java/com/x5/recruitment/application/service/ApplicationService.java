@@ -98,12 +98,9 @@ public class ApplicationService {
      * Get applications for recruiter dashboard.
      */
     @Transactional(readOnly = true)
-    public Page<ApplicationDto> getApplicationsForRecruiter(ApplicationStatus status, Pageable pageable) {
-        Page<Application> applications = status != null 
-            ? applicationRepository.findByStatus(status, pageable)
-            : applicationRepository.findAll(pageable);
-        
-        return applications.map(this::mapToDto);
+    public Page<ApplicationDto> getApplicationsForRecruiter(ApplicationStatus status, Long vacancyId, String search, Pageable pageable) {
+        List<ApplicationStatus> statuses = status != null ? List.of(status) : null;
+        return getApplicationsWithFilters(statuses, vacancyId, null, null, search, pageable);
     }
 
     /**
@@ -184,8 +181,21 @@ public class ApplicationService {
             .fullName(candidate.getFullName())
             .email(candidate.getEmail())
             .phone(candidate.getPhone())
+            .telegram(candidate.getTelegram())
+            .city(candidate.getCity())
             .university(candidate.getUniversity())
+            .otherUniversity(candidate.getOtherUniversity())
+            .speciality(candidate.getSpeciality())
+            .otherSpeciality(candidate.getOtherSpeciality())
             .course(candidate.getCourse())
+            .schedule(candidate.getSchedule())
+            .source(candidate.getSource())
+            .citizenship(candidate.getCitizenship())
+            .birthYear(candidate.getBirthYear())
+            .otherCity(candidate.getOtherCity())
+            .languages(candidate.getLanguages())
+            .additionalInfo(candidate.getAdditionalInfo())
+            .resumePath(candidate.getResumePath())
             .statusToken(candidate.getAccessToken())
             .build();
         
@@ -226,8 +236,21 @@ public class ApplicationService {
             .fullName(candidate.getFullName())
             .email(candidate.getEmail())
             .phone(candidate.getPhone())
+            .telegram(candidate.getTelegram())
+            .city(candidate.getCity())
             .university(candidate.getUniversity())
+            .otherUniversity(candidate.getOtherUniversity())
+            .speciality(candidate.getSpeciality())
+            .otherSpeciality(candidate.getOtherSpeciality())
             .course(candidate.getCourse())
+            .schedule(candidate.getSchedule())
+            .source(candidate.getSource())
+            .citizenship(candidate.getCitizenship())
+            .birthYear(candidate.getBirthYear())
+            .otherCity(candidate.getOtherCity())
+            .languages(candidate.getLanguages())
+            .additionalInfo(candidate.getAdditionalInfo())
+            .resumePath(candidate.getResumePath())
             .statusToken(candidate.getAccessToken())
             .build();
         

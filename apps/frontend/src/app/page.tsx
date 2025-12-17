@@ -15,13 +15,15 @@ export default function HomePage() {
       if (!isAuthenticated) {
         router.push('/login');
       } else if (user) {
-        // Redirect based on role
-        if (user.roles.includes(UserRole.ADMIN)) {
-          router.push('/admin/programs');
+        // Redirect based on role (priority order)
+        if (user.roles.includes(UserRole.STAGER) || user.roles.includes(UserRole.CANDIDATE)) {
+          router.push('/stager');
+        } else if (user.roles.includes(UserRole.RECRUITER)) {
+          router.push('/hr');
         } else if (user.roles.includes(UserRole.HM)) {
           router.push('/hm/inbox');
-        } else if (user.roles.includes(UserRole.RECRUITER)) {
-          router.push('/recruiter/dashboard');
+        } else if (user.roles.includes(UserRole.ADMIN)) {
+          router.push('/admin/programs');
         } else {
           router.push('/login');
         }

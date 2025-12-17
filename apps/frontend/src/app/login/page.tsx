@@ -10,10 +10,6 @@ import {
   Button,
   Typography,
   Container,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Alert,
 } from '@mui/material';
 import { useAuth } from '@/providers/AuthProvider';
@@ -24,7 +20,6 @@ export default function LoginPage() {
   const { login } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<UserRole>(UserRole.RECRUITER);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -34,22 +29,8 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      await login(username, password, role);
-      
-      // Redirect based on role
-      switch (role) {
-        case UserRole.ADMIN:
-          router.push('/admin/programs');
-          break;
-        case UserRole.HM:
-          router.push('/hm/inbox');
-          break;
-        case UserRole.RECRUITER:
-          router.push('/recruiter/dashboard');
-          break;
-        default:
-          router.push('/');
-      }
+      // Login will call /api/auth/me and redirect automatically
+      await login(username, password);
     } catch (err) {
       setError('Ошибка авторизации. Проверьте учетные данные.');
     } finally {
@@ -57,23 +38,12 @@ export default function LoginPage() {
     }
   };
 
-  const handleQuickLogin = (user: string, pass: string, userRole: UserRole) => {
+  const handleQuickLogin = (user: string, pass: string) => {
     setUsername(user);
     setPassword(pass);
-    setRole(userRole);
     
-    login(user, pass, userRole).then(() => {
-      switch (userRole) {
-        case UserRole.ADMIN:
-          router.push('/admin/programs');
-          break;
-        case UserRole.HM:
-          router.push('/hm/inbox');
-          break;
-        case UserRole.RECRUITER:
-          router.push('/recruiter/dashboard');
-          break;
-      }
+    login(user, pass).catch(() => {
+      setError('Ошибка авторизации. Проверьте учетные данные.');
     });
   };
 
@@ -120,14 +90,6 @@ export default function LoginPage() {
                 margin="normal"
                 required
               />
-              <FormControl fullWidth margin="normal">
-                <InputLabel>Роль</InputLabel>
-                <Select value={role} onChange={(e) => setRole(e.target.value as UserRole)} label="Роль">
-                  <MenuItem value={UserRole.RECRUITER}>Recruiter</MenuItem>
-                  <MenuItem value={UserRole.HM}>Hiring Manager</MenuItem>
-                  <MenuItem value={UserRole.ADMIN}>Admin</MenuItem>
-                </Select>
-              </FormControl>
 
               <Button
                 type="submit"
@@ -149,21 +111,21 @@ export default function LoginPage() {
                 <Button
                   size="small"
                   variant="outlined"
-                  onClick={() => handleQuickLogin('recruiter', 'recruiter123', UserRole.RECRUITER)}
+                  onClick={() => handleQuickLogin('recruiter', 'recruiter123')}
                 >
-                  Recruiter
+                  HR (Recruiter)
                 </Button>
                 <Button
                   size="small"
                   variant="outlined"
-                  onClick={() => handleQuickLogin('hm', 'hm123', UserRole.HM)}
+                  onClick={() => handleQuickLogin('stager', 'stager123')}
                 >
-                  Hiring Manager
+                  Stager (Intern)
                 </Button>
                 <Button
                   size="small"
                   variant="outlined"
-                  onClick={() => handleQuickLogin('admin', 'admin123', UserRole.ADMIN)}
+                  onClick={() => handleQuickLogin('admin', 'admin123')}
                 >
                   Admin
                 </Button>

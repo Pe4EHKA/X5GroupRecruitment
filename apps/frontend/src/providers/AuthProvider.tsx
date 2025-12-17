@@ -1,13 +1,15 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
 import { User, UserRole } from '@/types';
+import axios from 'axios';
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (username: string, password: string, role?: UserRole) => Promise<void>;
+  login: (username: string, password: string) => Promise<void>;
   logout: () => void;
   hasRole: (role: UserRole) => boolean;
 }
@@ -18,42 +20,72 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     // Check if user is logged in on mount
     const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    const storedAuth = localStorage.getItem('authCredentials');
+    
+    if (storedUser && storedAuth) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (e) {
+        console.error('Failed to parse stored user', e);
+        localStorage.removeItem('user');
+        localStorage.removeItem('authCredentials');
+      }
     }
     setIsLoading(false);
   }, []);
 
-  const login = async (username: string, password: string, role?: UserRole) => {
+  const login = async (username: string, password: string) => {
     try {
-      // In dev mode, create a mock user based on role
-      // In production, this would call the backend API
-      
-      // SECURITY NOTE: Storing credentials in localStorage is for DEV ONLY
-      // For production, implement proper JWT token management with HTTP-only cookies
-      localStorage.setItem('username', username);
-      localStorage.setItem('password', password);
+      // Store credentials for Basic Auth
+      const credentials = btoa(`${username}:${password}`);
+      localStorage.setItem('authCredentials', credentials);
 
-      // Create mock user (in production, get from API)
-      const mockUser: User = {
-        id: 1,
-        username,
-        email: `${username}@x5.ru`,
-        fullName: username.charAt(0).toUpperCase() + username.slice(1),
-        roles: role ? [role] : [UserRole.RECRUITER],
+      // Call /api/auth/me to get user info
+      const response = await axios.get(`${API_URL}/api/auth/me`, {
+        headers: {
+          'Authorization': `Basic ${credentials}`,
+        },
+      });
+
+      const userInfo = response.data;
+      const mappedUser: User = {
+        id: userInfo.id,
+        username: userInfo.username,
+        email: userInfo.email,
+        fullName: userInfo.displayName,
+        roles: userInfo.roles,
       };
 
-      setUser(mockUser);
-      localStorage.setItem('user', JSON.stringify(mockUser));
+      setUser(mappedUser);
+      localStorage.setItem('user', JSON.stringify(mappedUser));
+
+      // Auto-redirect based on primary role
+      const roles = userInfo.roles;
+      if (roles.includes('STAGER') || roles.includes('CANDIDATE')) {
+        router.push('/stager');
+      } else if (roles.includes('RECRUITER')) {
+        router.push('/hr');
+      } else if (roles.includes('HM')) {
+        router.push('/hm/inbox');
+      } else if (roles.includes('ADMIN')) {
+        router.push('/admin/programs');
+      } else {
+        router.push('/');
+      }
     } catch (error) {
       console.error('Login error:', error);
+      localStorage.removeItem('authCredentials');
+      localStorage.removeItem('user');
       throw error;
     }
   };
@@ -61,9 +93,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');
-    localStorage.removeItem('username');
-    localStorage.removeItem('password');
-    localStorage.removeItem('authToken');
+    localStorage.removeItem('authCredentials');
+    router.push('/login');
   };
 
   const hasRole = (role: UserRole): boolean => {

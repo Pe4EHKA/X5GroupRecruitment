@@ -7,8 +7,6 @@ const statusConfig: Record<
 > = {
   [ApplicationStatus.NEW]: { label: 'Новая', color: 'info' },
   [ApplicationStatus.SCREENING]: { label: 'Скрининг', color: 'primary' },
-  [ApplicationStatus.PENDING_HM_REVIEW]: { label: 'Ожидает HM', color: 'warning' },
-  [ApplicationStatus.HM_REVIEW]: { label: 'На рассмотрении HM', color: 'warning' },
   [ApplicationStatus.INTERVIEW_SCHEDULED]: { label: 'Интервью назначено', color: 'primary' },
   [ApplicationStatus.INTERVIEW_COMPLETED]: { label: 'Интервью завершено', color: 'primary' },
   [ApplicationStatus.APPROVED]: { label: 'Одобрено', color: 'success' },

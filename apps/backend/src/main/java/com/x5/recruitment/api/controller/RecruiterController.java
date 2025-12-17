@@ -43,7 +43,6 @@ public class RecruiterController {
         Map<String, Long> metrics = new HashMap<>();
         metrics.put("newCount", applicationService.countByStatus(ApplicationStatus.NEW));
         metrics.put("screeningCount", applicationService.countByStatus(ApplicationStatus.SCREENING));
-        metrics.put("hmReviewCount", applicationService.countByStatus(ApplicationStatus.PENDING_HM_REVIEW));
         metrics.put("interviewCount", applicationService.countByStatus(ApplicationStatus.INTERVIEW_SCHEDULED) 
             + applicationService.countByStatus(ApplicationStatus.INTERVIEW_COMPLETED));
         metrics.put("approvedCount", applicationService.countByStatus(ApplicationStatus.APPROVED));
@@ -88,22 +87,6 @@ public class RecruiterController {
             @AuthenticationPrincipal UserDetails principal) {
         
         User user = userService.getUserEntityByUsername(principal.getUsername());
-        ApplicationDto application = applicationService.changeStatus(id, request, user);
-        return ResponseEntity.ok(application);
-    }
-
-    @Operation(summary = "Send to HM review", description = "Send application to hiring manager for review")
-    @PostMapping("/applications/{id}/send-to-hm")
-    public ResponseEntity<ApplicationDto> sendToHmReview(
-            @PathVariable Long id,
-            @AuthenticationPrincipal UserDetails principal) {
-        
-        User user = userService.getUserEntityByUsername(principal.getUsername());
-        ChangeStatusRequest request = ChangeStatusRequest.builder()
-            .newStatus(ApplicationStatus.PENDING_HM_REVIEW)
-            .comment("Sent to HM for review")
-            .build();
-        
         ApplicationDto application = applicationService.changeStatus(id, request, user);
         return ResponseEntity.ok(application);
     }

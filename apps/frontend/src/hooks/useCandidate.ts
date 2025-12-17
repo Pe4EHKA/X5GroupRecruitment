@@ -19,7 +19,8 @@ export function useCandidateStatus(token: string) {
       const response = await api.get<CandidateStatus>(`/api/candidate/status?token=${token}`);
       return response.data;
     },
-    enabled: !!token,
+    enabled: !!token && token.length > 0,
+    retry: false,
   });
 }
 

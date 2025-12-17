@@ -97,14 +97,6 @@ export default function RecruiterDashboard() {
             </Grid>
             <Grid item xs={12} sm={6} md={4}>
               <MetricCard
-                title="На рассмотрении HM"
-                value={metrics?.hmReviewCount || 0}
-                icon={<Schedule />}
-                color="#ff9800"
-              />
-            </Grid>
-            <Grid item xs={12} sm={6} md={4}>
-              <MetricCard
                 title="На интервью"
                 value={metrics?.interviewCount || 0}
                 icon={<Schedule />}

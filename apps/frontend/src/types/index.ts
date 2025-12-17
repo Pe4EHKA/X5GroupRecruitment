@@ -18,8 +18,6 @@ export enum UserStatus {
 export enum ApplicationStatus {
   NEW = 'NEW',
   SCREENING = 'SCREENING',
-  PENDING_HM_REVIEW = 'PENDING_HM_REVIEW',
-  HM_REVIEW = 'HM_REVIEW',
   INTERVIEW_SCHEDULED = 'INTERVIEW_SCHEDULED',
   INTERVIEW_COMPLETED = 'INTERVIEW_COMPLETED',
   APPROVED = 'APPROVED',
@@ -262,25 +260,10 @@ export interface ChangeStatusRequest {
   comment?: string;
 }
 
-export interface SendToHmRequest {
-  hmId: number;
-  comment?: string;
-}
-
-export interface HmDecisionRequest {
-  decision: 'APPROVE' | 'REJECT' | 'NEEDS_INFO';
-  overallAssessment?: string;
-  strengths?: string;
-  areasForGrowth?: string;
-  recommendations?: string;
-  talentPool?: boolean;
-}
-
 // Dashboard metrics
 export interface DashboardMetrics {
   newCount: number;
   screeningCount: number;
-  hmReviewCount: number;
   interviewCount: number;
   approvedCount: number;
   rejectedCount: number;

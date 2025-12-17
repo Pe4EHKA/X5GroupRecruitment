@@ -39,8 +39,6 @@ import { useApplications } from '@/hooks/useHr';
 const STATUS_COLORS: Record<ApplicationStatus, string> = {
   [ApplicationStatus.NEW]: '#2196f3',
   [ApplicationStatus.SCREENING]: '#9c27b0',
-  [ApplicationStatus.PENDING_HM_REVIEW]: '#ff9800',
-  [ApplicationStatus.HM_REVIEW]: '#ff9800',
   [ApplicationStatus.INTERVIEW_SCHEDULED]: '#00bcd4',
   [ApplicationStatus.INTERVIEW_COMPLETED]: '#00bcd4',
   [ApplicationStatus.APPROVED]: '#4caf50',
@@ -55,8 +53,6 @@ const STATUS_COLORS: Record<ApplicationStatus, string> = {
 const STATUS_LABELS: Record<ApplicationStatus, string> = {
   [ApplicationStatus.NEW]: 'Новые',
   [ApplicationStatus.SCREENING]: 'На скрининге',
-  [ApplicationStatus.PENDING_HM_REVIEW]: 'Ожидают HM',
-  [ApplicationStatus.HM_REVIEW]: 'На рассмотрении HM',
   [ApplicationStatus.INTERVIEW_SCHEDULED]: 'Интервью назначено',
   [ApplicationStatus.INTERVIEW_COMPLETED]: 'Интервью завершено',
   [ApplicationStatus.APPROVED]: 'Одобрено',
@@ -141,7 +137,7 @@ export default function HRDashboard() {
                 {[
                   ApplicationStatus.NEW,
                   ApplicationStatus.SCREENING,
-                  ApplicationStatus.PENDING_HM_REVIEW,
+                  ApplicationStatus.INTERVIEW_SCHEDULED,
                   ApplicationStatus.APPROVED,
                   ApplicationStatus.REJECTED,
                 ].map((status) => (

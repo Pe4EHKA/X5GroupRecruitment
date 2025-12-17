@@ -16,11 +16,6 @@ public enum ApplicationStatus {
     SCREENING,
     
     /**
-     * Application passed screening, waiting for HM review
-     */
-    PENDING_HM_REVIEW,
-    
-    /**
      * Scheduled for interview
      */
     INTERVIEW_SCHEDULED,

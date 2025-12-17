@@ -1,8 +1,13 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
-// In production/docker, use the Next.js rewrites proxy (no baseURL)
-// In development, can use direct backend URL
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
+// Determine the API base URL based on environment
+// - Client-side (browser): empty string to use same origin, which will be localhost:3000
+//   Browser will then make requests to localhost:8080 directly (no proxy needed)
+// - Server-side (SSR): use API_INTERNAL_URL if set (for Docker: http://backend:8080)
+const isServer = typeof window === 'undefined';
+const API_BASE_URL = isServer 
+  ? (process.env.API_INTERNAL_URL || 'http://localhost:8080')
+  : 'http://localhost:8080'; // Browser connects directly to backend
 
 // Create axios instance
 export const apiClient: AxiosInstance = axios.create({

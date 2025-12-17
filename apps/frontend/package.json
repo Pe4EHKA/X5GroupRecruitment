@@ -1,0 +1,44 @@
+{
+  "name": "@x5/frontend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "X5 Tech Recruitment System - Frontend",
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start -p 3000",
+    "lint": "next lint",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "openapi:generate": "openapi-generator-cli generate -i http://localhost:8080/api-docs -g typescript-fetch -o ./src/lib/api-client --additional-properties=supportsES6=true,typescriptThreePlus=true"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@hookform/resolvers": "^3.10.0",
+    "@mui/icons-material": "^6.3.0",
+    "@mui/lab": "^6.0.0-beta.20",
+    "@mui/material": "^6.3.0",
+    "@tanstack/react-query": "^5.68.2",
+    "@tanstack/react-query-devtools": "^5.68.2",
+    "axios": "^1.13.2",
+    "date-fns": "^4.1.0",
+    "next": "^15.5.9",
+    "notistack": "^3.0.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-hook-form": "^7.54.2",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@openapitools/openapi-generator-cli": "^2.15.3",
+    "@playwright/test": "^1.51.1",
+    "@types/node": "^22.12.0",
+    "@types/react": "^18.3.27",
+    "@types/react-dom": "^18.3.7",
+    "eslint": "^9.17.0",
+    "eslint-config-next": "^15.5.9",
+    "msw": "^2.7.0",
+    "typescript": "^5.7.3"
+  }
+}

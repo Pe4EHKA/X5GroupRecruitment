@@ -1,0 +1,325 @@
+'use client';
+
+import { useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import {
+  Box,
+  Paper,
+  Typography,
+  CircularProgress,
+  Grid,
+  Divider,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  TextField,
+  Card,
+  CardContent,
+  List,
+  ListItem,
+  ListItemText,
+  Chip,
+} from '@mui/material';
+import { ArrowBack } from '@mui/icons-material';
+import DashboardLayout from '@/components/DashboardLayout';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import StatusBadge from '@/components/StatusBadge';
+import { UserRole, ApplicationStatus } from '@/types';
+import { useApplication, useChangeStatus } from '@/hooks/useRecruiter';
+import { getCandidateFullName, getCandidateEmail, getCandidatePhone, getCandidateUniversity, getCandidateCourse } from '@/lib/utils';
+import { format } from 'date-fns';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+const changeStatusSchema = z.object({
+  status: z.nativeEnum(ApplicationStatus),
+  comment: z.string().optional(),
+});
+
+type ChangeStatusForm = z.infer<typeof changeStatusSchema>;
+
+export default function ApplicationDetailPage() {
+  const params = useParams();
+  const router = useRouter();
+  const applicationId = parseInt(params.id as string);
+
+  const { data: application, isLoading } = useApplication(applicationId);
+  const changeStatusMutation = useChangeStatus();
+
+  const [statusDialogOpen, setStatusDialogOpen] = useState(false);
+
+  const statusForm = useForm<ChangeStatusForm>({
+    resolver: zodResolver(changeStatusSchema),
+    defaultValues: {
+      status: ApplicationStatus.SCREENING,
+      comment: '',
+    },
+  });
+
+  const handleChangeStatus = (data: ChangeStatusForm) => {
+    changeStatusMutation.mutate(
+      { id: applicationId, data },
+      {
+        onSuccess: () => {
+          setStatusDialogOpen(false);
+          statusForm.reset();
+        },
+      }
+    );
+  };
+
+  if (isLoading) {
+    return (
+      <ProtectedRoute allowedRoles={[UserRole.RECRUITER]}>
+        <DashboardLayout>
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+            <CircularProgress />
+          </Box>
+        </DashboardLayout>
+      </ProtectedRoute>
+    );
+  }
+
+  if (!application) {
+    return (
+      <ProtectedRoute allowedRoles={[UserRole.RECRUITER]}>
+        <DashboardLayout>
+          <Typography>Заявка не найдена</Typography>
+        </DashboardLayout>
+      </ProtectedRoute>
+    );
+  }
+
+  return (
+    <ProtectedRoute allowedRoles={[UserRole.RECRUITER]}>
+      <DashboardLayout>
+        <Box>
+          <Button startIcon={<ArrowBack />} onClick={() => router.back()} sx={{ mb: 2 }}>
+            Назад
+          </Button>
+
+          <Typography variant="h4" gutterBottom>
+            Заявка #{application.id}
+          </Typography>
+
+          {/* Actions */}
+          <Box sx={{ mb: 3, display: 'flex', gap: 2 }}>
+            <Button variant="contained" onClick={() => setStatusDialogOpen(true)}>
+              Изменить статус
+            </Button>
+          </Box>
+
+          <Grid container spacing={3}>
+            {/* Candidate Info */}
+            <Grid item xs={12} md={6}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    Информация о кандидате
+                  </Typography>
+                  <Divider sx={{ mb: 2 }} />
+                  <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                      <Typography variant="body2" color="text.secondary">
+                        ФИО
+                      </Typography>
+                      <Typography variant="body1">{getCandidateFullName(application.candidate)}</Typography>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography variant="body2" color="text.secondary">
+                        Email
+                      </Typography>
+                      <Typography variant="body1">{getCandidateEmail(application.candidate)}</Typography>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography variant="body2" color="text.secondary">
+                        Телефон
+                      </Typography>
+                      <Typography variant="body1">{getCandidatePhone(application.candidate)}</Typography>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography variant="body2" color="text.secondary">
+                        Университет
+                      </Typography>
+                      <Typography variant="body1">{getCandidateUniversity(application.candidate)}</Typography>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography variant="body2" color="text.secondary">
+                        Курс
+                      </Typography>
+                      <Typography variant="body1">{getCandidateCourse(application.candidate)}</Typography>
+                    </Grid>
+                  </Grid>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            {/* Application Info */}
+            <Grid item xs={12} md={6}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    Информация о заявке
+                  </Typography>
+                  <Divider sx={{ mb: 2 }} />
+                  <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                      <Typography variant="body2" color="text.secondary">
+                        Вакансия
+                      </Typography>
+                      <Typography variant="body1">{application.vacancyTitle}</Typography>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography variant="body2" color="text.secondary">
+                        Статус
+                      </Typography>
+                      <StatusBadge status={application.status} />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography variant="body2" color="text.secondary">
+                        Рекрутер
+                      </Typography>
+                      <Typography variant="body1">{application.recruiterName || '-'}</Typography>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography variant="body2" color="text.secondary">
+                        HM
+                      </Typography>
+                      <Typography variant="body1">{application.hmName || '-'}</Typography>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography variant="body2" color="text.secondary">
+                        Дата создания
+                      </Typography>
+                      <Typography variant="body1">
+                        {format(new Date(application.createdAt), 'dd.MM.yyyy HH:mm')}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography variant="body2" color="text.secondary">
+                        Последнее обновление
+                      </Typography>
+                      <Typography variant="body1">
+                        {format(new Date(application.updatedAt), 'dd.MM.yyyy HH:mm')}
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            {/* Status History */}
+            <Grid item xs={12}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    История статусов
+                  </Typography>
+                  <Divider sx={{ mb: 2 }} />
+                  <List>
+                    {application.statusHistory?.map((history) => (
+                      <ListItem key={history.id}>
+                        <ListItemText
+                          primary={
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <StatusBadge status={history.status} />
+                              <Typography variant="body2">{history.comment}</Typography>
+                            </Box>
+                          }
+                          secondary={`${history.changedBy} • ${format(
+                            new Date(history.changedAt),
+                            'dd.MM.yyyy HH:mm'
+                          )}`}
+                        />
+                      </ListItem>
+                    ))}
+                    {(!application.statusHistory || application.statusHistory.length === 0) && (
+                      <ListItem>
+                        <ListItemText primary="Нет истории" />
+                      </ListItem>
+                    )}
+                  </List>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            {/* Feedbacks */}
+            {application.feedbacks && application.feedbacks.length > 0 && (
+              <Grid item xs={12}>
+                <Card>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      Фидбеки
+                    </Typography>
+                    <Divider sx={{ mb: 2 }} />
+                    {application.feedbacks.map((feedback) => (
+                      <Box key={feedback.id} sx={{ mb: 2 }}>
+                        <Typography variant="subtitle2">
+                          {feedback.hmName} •{' '}
+                          <Chip
+                            label={feedback.decision}
+                            size="small"
+                            color={feedback.decision === 'APPROVE' ? 'success' : 'error'}
+                          />
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {feedback.overallAssessment}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {format(new Date(feedback.createdAt), 'dd.MM.yyyy HH:mm')}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </CardContent>
+                </Card>
+              </Grid>
+            )}
+          </Grid>
+
+          {/* Change Status Dialog */}
+          <Dialog open={statusDialogOpen} onClose={() => setStatusDialogOpen(false)} maxWidth="sm" fullWidth>
+            <form onSubmit={statusForm.handleSubmit(handleChangeStatus)}>
+              <DialogTitle>Изменить статус</DialogTitle>
+              <DialogContent>
+                <FormControl fullWidth sx={{ mt: 2 }}>
+                  <InputLabel>Статус</InputLabel>
+                  <Select
+                    {...statusForm.register('status')}
+                    defaultValue={ApplicationStatus.SCREENING}
+                    label="Статус"
+                  >
+                    <MenuItem value={ApplicationStatus.SCREENING}>Скрининг</MenuItem>
+                    <MenuItem value={ApplicationStatus.INTERVIEW_SCHEDULED}>Интервью назначено</MenuItem>
+                    <MenuItem value={ApplicationStatus.APPROVED}>Одобрено</MenuItem>
+                    <MenuItem value={ApplicationStatus.REJECTED}>Отклонено</MenuItem>
+                  </Select>
+                </FormControl>
+                <TextField
+                  {...statusForm.register('comment')}
+                  fullWidth
+                  label="Комментарий"
+                  multiline
+                  rows={3}
+                  sx={{ mt: 2 }}
+                />
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={() => setStatusDialogOpen(false)}>Отмена</Button>
+                <Button type="submit" variant="contained" disabled={changeStatusMutation.isPending}>
+                  Сохранить
+                </Button>
+              </DialogActions>
+            </form>
+          </Dialog>
+        </Box>
+      </DashboardLayout>
+    </ProtectedRoute>
+  );
+}

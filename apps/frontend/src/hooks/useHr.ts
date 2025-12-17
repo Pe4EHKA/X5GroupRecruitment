@@ -62,9 +62,10 @@ export const useResetTraineePassword = () => {
   const { enqueueSnackbar } = useSnackbar();
 
   return useMutation({
-    mutationFn: async (traineeId: number) => {
+    mutationFn: async ({ traineeId, newPassword }: { traineeId: number; newPassword?: string }) => {
       const response = await api.post<PasswordResetResponse>(
-        `/api/hr/trainees/${traineeId}/password/reset`
+        `/api/hr/trainees/${traineeId}/password/reset`,
+        newPassword ? { newPassword } : undefined
       );
       return response.data;
     },

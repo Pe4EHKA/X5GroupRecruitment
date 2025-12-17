@@ -1,6 +1,8 @@
 package com.x5.recruitment.api.controller;
 
 import com.x5.recruitment.api.dto.admin.*;
+import com.x5.recruitment.api.dto.PasswordResetRequest;
+import com.x5.recruitment.api.dto.PasswordResetResponse;
 import com.x5.recruitment.application.service.UserService;
 import com.x5.recruitment.domain.model.UserRole;
 import com.x5.recruitment.domain.model.UserStatus;
@@ -118,10 +120,22 @@ public class AdminUserController {
     public ResponseEntity<UserResponse> updateUserStatus(
         @Parameter(description = "User ID")
         @PathVariable Long id,
-        
+
         @Valid @RequestBody UpdateStatusRequest request
     ) {
         UserResponse user = userService.updateUserStatus(id, request);
         return ResponseEntity.ok(user);
+    }
+
+    @PostMapping("/{id}/password/reset")
+    @Operation(summary = "Reset user password", description = "Reset password for any user and optionally set a custom value")
+    public ResponseEntity<PasswordResetResponse> resetUserPassword(
+        @Parameter(description = "User ID")
+        @PathVariable Long id,
+
+        @RequestBody(required = false) PasswordResetRequest request
+    ) {
+        PasswordResetResponse response = userService.resetUserPassword(id, request);
+        return ResponseEntity.ok(response);
     }
 }

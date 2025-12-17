@@ -1,5 +1,6 @@
 package com.x5.recruitment.application.service;
 
+import com.x5.recruitment.api.dto.PasswordResetRequest;
 import com.x5.recruitment.api.dto.PasswordResetResponse;
 import com.x5.recruitment.api.dto.admin.*;
 import com.x5.recruitment.domain.model.*;
@@ -229,7 +230,7 @@ public class UserService {
      * Reset password for trainee (STAGER/CANDIDATE) and return a temporary password
      */
     @Transactional
-    public PasswordResetResponse resetTraineePassword(Long traineeId) {
+    public PasswordResetResponse resetTraineePassword(Long traineeId, PasswordResetRequest request) {
         User user = userRepository.findById(traineeId)
             .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + traineeId));
 
@@ -237,20 +238,45 @@ public class UserService {
             throw new ConflictException("Password reset is only available for trainee accounts");
         }
 
-        String temporaryPassword = generatePlainPassword();
-        user.setPasswordHash(passwordEncoder.encode(temporaryPassword));
+        return resetPasswordInternal(user, request, "RESET_TRAINEE_PASSWORD");
+    }
+
+    /**
+     * Reset password for any user (admin-level operation)
+     */
+    @Transactional
+    public PasswordResetResponse resetUserPassword(Long userId, PasswordResetRequest request) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+
+        return resetPasswordInternal(user, request, "RESET_USER_PASSWORD");
+    }
+
+    private PasswordResetResponse resetPasswordInternal(User user, PasswordResetRequest request, String auditAction) {
+        String plainPassword;
+        if (request != null && request.getNewPassword() != null && !request.getNewPassword().isBlank()) {
+            plainPassword = request.getNewPassword();
+        } else {
+            plainPassword = generatePlainPassword();
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(plainPassword));
         user.setUpdatedBy(getCurrentUserId());
         userRepository.save(user);
 
-        createAuditEvent("RESET_TRAINEE_PASSWORD", "USER", user.getId(),
-            String.format("Temporary password issued for user: %s", user.getUsername()));
+        createAuditEvent(auditAction, "USER", user.getId(),
+            String.format("Password reset for user: %s", user.getUsername()));
 
-        log.info("Temporary password generated for trainee {} (id: {}) by user: {}",
-            user.getUsername(), user.getId(), getCurrentUserId());
+        log.info("Password reset for user {} (id: {}) by user: {}", user.getUsername(), user.getId(), getCurrentUserId());
 
         return PasswordResetResponse.builder()
-            .traineeId(user.getId())
-            .temporaryPassword(temporaryPassword)
+            .userId(user.getId())
+            .traineeId(user.getRoles().contains(UserRole.STAGER) || user.getRoles().contains(UserRole.CANDIDATE)
+                ? user.getId() : null)
+            .username(user.getUsername())
+            .temporaryPassword(plainPassword)
+            .password(plainPassword)
+            .generated(request == null || request.getNewPassword() == null || request.getNewPassword().isBlank())
             .build();
     }
 

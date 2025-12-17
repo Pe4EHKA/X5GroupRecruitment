@@ -24,6 +24,8 @@ public class ImportBatchDto {
     private Integer totalRows;
     private Integer successRows;
     private Integer failedRows;
+    private Integer usersCreated;
+    private Integer usersLinked;
     private Boolean completed;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

@@ -256,7 +256,7 @@ export interface CandidateStatus {
 
 // Request DTOs
 export interface ChangeStatusRequest {
-  status: ApplicationStatus;
+  newStatus: ApplicationStatus;
   comment?: string;
 }
 

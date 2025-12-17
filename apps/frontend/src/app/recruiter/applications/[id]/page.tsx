@@ -39,7 +39,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
 const changeStatusSchema = z.object({
-  status: z.nativeEnum(ApplicationStatus),
+  newStatus: z.nativeEnum(ApplicationStatus),
   comment: z.string().optional(),
 });
 
@@ -58,7 +58,7 @@ export default function ApplicationDetailPage() {
   const statusForm = useForm<ChangeStatusForm>({
     resolver: zodResolver(changeStatusSchema),
     defaultValues: {
-      status: ApplicationStatus.SCREENING,
+      newStatus: ApplicationStatus.SCREENING,
       comment: '',
     },
   });
@@ -291,7 +291,7 @@ export default function ApplicationDetailPage() {
                 <FormControl fullWidth sx={{ mt: 2 }}>
                   <InputLabel>Статус</InputLabel>
                   <Select
-                    {...statusForm.register('status')}
+                    {...statusForm.register('newStatus')}
                     defaultValue={ApplicationStatus.SCREENING}
                     label="Статус"
                   >

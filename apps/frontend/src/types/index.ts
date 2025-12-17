@@ -4,6 +4,7 @@ export enum UserRole {
   RECRUITER = 'RECRUITER',
   HM = 'HM',
   CANDIDATE = 'CANDIDATE',
+  STAGER = 'STAGER',
 }
 
 // User status enum
@@ -254,4 +255,18 @@ export interface PageResponse<T> {
   totalPages: number;
   size: number;
   number: number;
+}
+
+// Stager profile type
+export interface StagerProfileDto {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  city?: string;
+  university?: string;
+  course?: string;
+  telegram?: string;
+  birthYear?: number;
 }

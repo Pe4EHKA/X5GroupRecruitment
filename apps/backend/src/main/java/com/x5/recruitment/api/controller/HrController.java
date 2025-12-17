@@ -4,6 +4,7 @@ import com.x5.recruitment.api.dto.ApplicationDetailDto;
 import com.x5.recruitment.api.dto.ApplicationDto;
 import com.x5.recruitment.api.dto.ChangeStatusRequest;
 import com.x5.recruitment.api.dto.PageResponseDto;
+import com.x5.recruitment.api.dto.PasswordResetResponse;
 import com.x5.recruitment.api.dto.questionnaire.*;
 import com.x5.recruitment.application.service.ApplicationService;
 import com.x5.recruitment.application.service.StatisticsService;
@@ -117,10 +118,21 @@ public class HrController {
             @PathVariable Long id,
             @Valid @RequestBody ChangeStatusRequest request,
             @AuthenticationPrincipal UserDetails principal) {
-        
+
         User user = userService.getUserEntityByUsername(principal.getUsername());
         ApplicationDto application = applicationService.changeStatus(id, request, user);
         return ResponseEntity.ok(application);
+    }
+
+    @Operation(
+        summary = "Reset trainee password",
+        description = "Generate a temporary password for a trainee account so HR can verify access"
+    )
+    @PostMapping("/trainees/{traineeId}/password/reset")
+    public ResponseEntity<PasswordResetResponse> resetTraineePassword(
+            @PathVariable Long traineeId) {
+        PasswordResetResponse response = userService.resetTraineePassword(traineeId);
+        return ResponseEntity.ok(response);
     }
 
     // ========== Vacancy Question Management ==========

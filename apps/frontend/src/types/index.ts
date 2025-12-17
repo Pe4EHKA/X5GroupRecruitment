@@ -58,6 +58,11 @@ export interface AdminUser {
   updatedAt: string;
 }
 
+export interface PasswordResetResponse {
+  traineeId: number;
+  temporaryPassword: string;
+}
+
 // Create user request
 export interface CreateUserRequest {
   username: string;

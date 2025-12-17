@@ -1,5 +1,6 @@
 package com.x5.recruitment.application.service;
 
+import com.x5.recruitment.api.dto.PasswordResetResponse;
 import com.x5.recruitment.api.dto.admin.*;
 import com.x5.recruitment.domain.model.*;
 import com.x5.recruitment.domain.repository.AuditEventRepository;
@@ -225,6 +226,35 @@ public class UserService {
     }
 
     /**
+     * Reset password for trainee (STAGER/CANDIDATE) and return a temporary password
+     */
+    @Transactional
+    public PasswordResetResponse resetTraineePassword(Long traineeId) {
+        User user = userRepository.findById(traineeId)
+            .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + traineeId));
+
+        if (!user.getRoles().contains(UserRole.STAGER) && !user.getRoles().contains(UserRole.CANDIDATE)) {
+            throw new ConflictException("Password reset is only available for trainee accounts");
+        }
+
+        String temporaryPassword = generatePlainPassword();
+        user.setPasswordHash(passwordEncoder.encode(temporaryPassword));
+        user.setUpdatedBy(getCurrentUserId());
+        userRepository.save(user);
+
+        createAuditEvent("RESET_TRAINEE_PASSWORD", "USER", user.getId(),
+            String.format("Temporary password issued for user: %s", user.getUsername()));
+
+        log.info("Temporary password generated for trainee {} (id: {}) by user: {}",
+            user.getUsername(), user.getId(), getCurrentUserId());
+
+        return PasswordResetResponse.builder()
+            .traineeId(user.getId())
+            .temporaryPassword(temporaryPassword)
+            .build();
+    }
+
+    /**
      * Check if user is the last active admin
      * Throws ConflictException if true
      */
@@ -247,6 +277,15 @@ public class UserService {
         // Generate random password if not provided
         String randomPassword = UUID.randomUUID().toString();
         return passwordEncoder.encode(randomPassword);
+    }
+
+    /**
+     * Generate random temporary password for manual reset operations
+     */
+    private String generatePlainPassword() {
+        return UUID.randomUUID().toString()
+            .replace("-", "")
+            .substring(0, 12);
     }
 
     /**

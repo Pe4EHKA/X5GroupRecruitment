@@ -13,6 +13,7 @@ import {
   InputLabel,
   Chip,
   Button,
+  Alert,
   Table,
   TableBody,
   TableCell,
@@ -34,7 +35,8 @@ import {
 import DashboardLayout from '@/components/DashboardLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { UserRole, ApplicationStatus } from '@/types';
-import { useApplications } from '@/hooks/useHr';
+import { useApplications, useResetTraineePassword } from '@/hooks/useHr';
+import { useSnackbar } from 'notistack';
 
 const STATUS_COLORS: Record<ApplicationStatus, string> = {
   [ApplicationStatus.NEW]: '#2196f3',
@@ -66,10 +68,13 @@ const STATUS_LABELS: Record<ApplicationStatus, string> = {
 
 export default function HRDashboard() {
   const router = useRouter();
+  const { enqueueSnackbar } = useSnackbar();
   const [search, setSearch] = useState('');
   const [selectedStatuses, setSelectedStatuses] = useState<ApplicationStatus[]>([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(20);
+  const [traineeId, setTraineeId] = useState('');
+  const [temporaryPassword, setTemporaryPassword] = useState<string | null>(null);
 
   const { data, isLoading, refetch } = useApplications({
     statuses: selectedStatuses.length > 0 ? selectedStatuses : undefined,
@@ -77,6 +82,8 @@ export default function HRDashboard() {
     page,
     size: rowsPerPage,
   });
+
+  const resetPassword = useResetTraineePassword();
 
   const handleStatusToggle = (status: ApplicationStatus) => {
     setSelectedStatuses((prev) =>
@@ -98,6 +105,22 @@ export default function HRDashboard() {
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
+  };
+
+  const handlePasswordReset = async () => {
+    const parsedId = parseInt(traineeId, 10);
+    if (!parsedId) {
+      enqueueSnackbar('Введите корректный ID стажера', { variant: 'warning' });
+      return;
+    }
+
+    try {
+      const response = await resetPassword.mutateAsync(parsedId);
+      setTemporaryPassword(response.temporaryPassword);
+    } catch (error) {
+      // Notifications handled in mutation
+      console.error(error);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -122,6 +145,39 @@ export default function HRDashboard() {
               Обновить
             </Button>
           </Box>
+
+          <Paper sx={{ p: 3, mb: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              Доступ к кабинету стажера
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              Сбросьте пароль стажера, чтобы выдать временные учётные данные для проверки роли.
+            </Typography>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ sm: 'flex-end' }}>
+              <TextField
+                label="ID стажера"
+                type="number"
+                value={traineeId}
+                onChange={(e) => {
+                  setTraineeId(e.target.value);
+                  setTemporaryPassword(null);
+                }}
+                sx={{ maxWidth: 240 }}
+              />
+              <Button
+                variant="contained"
+                onClick={handlePasswordReset}
+                disabled={resetPassword.isPending}
+              >
+                Сбросить пароль
+              </Button>
+            </Stack>
+            {temporaryPassword && (
+              <Alert severity="success" sx={{ mt: 2 }}>
+                Временный пароль: <strong>{temporaryPassword}</strong>
+              </Alert>
+            )}
+          </Paper>
 
           <Paper sx={{ p: 3, mb: 3 }}>
             <Typography variant="h6" gutterBottom>

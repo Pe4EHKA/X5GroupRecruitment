@@ -1,6 +1,12 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080';
+// Determine the API base URL based on environment
+// - Client-side (browser): connect to backend at localhost:8080 directly
+// - Server-side (SSR): use API_INTERNAL_URL if set (for Docker: http://backend:8080)
+const isServer = typeof window === 'undefined';
+const API_BASE_URL = isServer 
+  ? (process.env.API_INTERNAL_URL || 'http://localhost:8080')
+  : 'http://localhost:8080'; // Browser connects directly to backend
 
 // Create axios instance
 export const apiClient: AxiosInstance = axios.create({
@@ -14,19 +20,11 @@ export const apiClient: AxiosInstance = axios.create({
 // Request interceptor to add auth token
 apiClient.interceptors.request.use(
   (config) => {
-    // Get token from localStorage (or context)
+    // Get auth credentials from localStorage
     if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('authToken');
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-      
-      // For dev mode with basic auth
-      const username = localStorage.getItem('username');
-      const password = localStorage.getItem('password');
-      if (username && password && !token) {
-        const basicAuth = btoa(`${username}:${password}`);
-        config.headers.Authorization = `Basic ${basicAuth}`;
+      const authCredentials = localStorage.getItem('authCredentials');
+      if (authCredentials) {
+        config.headers.Authorization = `Basic ${authCredentials}`;
       }
     }
     return config;
@@ -41,11 +39,10 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Redirect to login or refresh token
+      // Redirect to login on unauthorized
       if (typeof window !== 'undefined') {
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('username');
-        localStorage.removeItem('password');
+        localStorage.removeItem('authCredentials');
+        localStorage.removeItem('user');
         window.location.href = '/login';
       }
     }

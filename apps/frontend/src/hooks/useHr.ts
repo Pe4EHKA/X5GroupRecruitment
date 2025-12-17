@@ -1,19 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
+import api from '@/lib/api';
 import { ApplicationDto, ApplicationDetailDto, PageResponse, ApplicationStatus } from '@/types';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
-
-// Get auth credentials from localStorage
-const getAuthHeader = () => {
-  if (typeof window !== 'undefined') {
-    const credentials = localStorage.getItem('authCredentials');
-    if (credentials) {
-      return { Authorization: `Basic ${credentials}` };
-    }
-  }
-  return {};
-};
 
 interface ApplicationFilters {
   statuses?: ApplicationStatus[];
@@ -49,9 +36,8 @@ export const useApplications = (filters: ApplicationFilters) => {
       params.append('page', (filters.page ?? 0).toString());
       params.append('size', (filters.size ?? 20).toString());
       
-      const response = await axios.get(
-        `${API_URL}/api/hr/applications?${params.toString()}`,
-        { headers: getAuthHeader() }
+      const response = await api.get<PageResponse<ApplicationDto>>(
+        `/api/hr/applications?${params.toString()}`
       );
       return response.data;
     },
@@ -62,9 +48,8 @@ export const useApplication = (id: number) => {
   return useQuery<ApplicationDetailDto>({
     queryKey: ['hr', 'application', id],
     queryFn: async () => {
-      const response = await axios.get(
-        `${API_URL}/api/hr/applications/${id}`,
-        { headers: getAuthHeader() }
+      const response = await api.get<ApplicationDetailDto>(
+        `/api/hr/applications/${id}`
       );
       return response.data;
     },

@@ -70,6 +70,8 @@ public class XlsxImportService {
             .totalRows(0)
             .successRows(0)
             .failedRows(0)
+            .usersCreated(0)
+            .usersLinked(0)
             .completed(false)
             .build();
         batch = batchRepository.save(batch);

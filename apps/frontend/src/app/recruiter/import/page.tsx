@@ -84,14 +84,18 @@ export default function ImportPage() {
           {/* Result section */}
           {result && (
             <>
-              <Alert severity={result.batch.errorCount > 0 ? 'warning' : 'success'} sx={{ mb: 3 }}>
+              <Alert severity={result.batch.failedRows > 0 ? 'warning' : 'success'} sx={{ mb: 3 }}>
                 <Typography variant="subtitle1">Результат импорта</Typography>
                 <Typography variant="body2">
                   Обработано строк: {result.batch.totalRows}
                   <br />
-                  Успешно: {result.batch.successCount}
+                  Успешно: {result.batch.successRows}
                   <br />
-                  Ошибок: {result.batch.errorCount}
+                  Ошибок: {result.batch.failedRows}
+                  <br />
+                  Новые аккаунты: {result.batch.usersCreated}
+                  <br />
+                  Существующие аккаунты: {result.batch.usersLinked}
                 </Typography>
               </Alert>
 
@@ -118,8 +122,8 @@ export default function ImportPage() {
                             <TableCell>{error.errorCode}</TableCell>
                             <TableCell>{error.errorMessage}</TableCell>
                             <TableCell>
-                              <Typography variant="caption" sx={{ maxWidth: 300, display: 'block' }}>
-                                {error.rowData || '-'}
+                              <Typography variant="caption" sx={{ maxWidth: 300, display: 'block', wordBreak: 'break-word' }}>
+                                {error.rawSnapshot ? JSON.stringify(error.rawSnapshot) : '-'}
                               </Typography>
                             </TableCell>
                           </TableRow>

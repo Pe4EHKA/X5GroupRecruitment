@@ -220,12 +220,17 @@ export interface Feedback {
 export interface ImportBatch {
   id: number;
   fileName: string;
-  uploadedBy: string;
+  uploadedById?: number;
+  uploadedByName?: string;
   uploadedAt: string;
   totalRows: number;
-  successCount: number;
-  errorCount: number;
-  status: 'PROCESSING' | 'COMPLETED' | 'FAILED';
+  successRows: number;
+  failedRows: number;
+  usersCreated: number;
+  usersLinked: number;
+  completed: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ImportRowError {
@@ -234,12 +239,14 @@ export interface ImportRowError {
   rowNumber: number;
   errorCode: string;
   errorMessage: string;
-  rowData?: string;
+  rawSnapshot?: Record<string, unknown>;
+  createdAt?: string;
 }
 
 export interface ImportResult {
   batch: ImportBatch;
   errors: ImportRowError[];
+  totalErrors: number;
 }
 
 // Candidate status DTO

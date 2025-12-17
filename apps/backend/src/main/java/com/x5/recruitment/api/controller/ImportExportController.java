@@ -3,6 +3,7 @@ package com.x5.recruitment.api.controller;
 import com.x5.recruitment.api.dto.ImportBatchDto;
 import com.x5.recruitment.api.dto.ImportResultDto;
 import com.x5.recruitment.api.dto.ImportRowErrorDto;
+import com.x5.recruitment.api.exception.GlobalExceptionHandler;
 import com.x5.recruitment.application.service.ImportExportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 /**
  * REST API for Import/Export operations.
@@ -30,17 +33,25 @@ public class ImportExportController {
 
     private final ImportExportService importExportService;
 
-    @Operation(summary = "Import applications", 
+    @Operation(summary = "Import applications",
                description = "Import applications from XLSX file with detailed validation and error reporting")
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ImportResultDto> importApplications(
+    public ResponseEntity<?> importApplications(
             @RequestParam("file") MultipartFile file) throws IOException {
-        
-        if (!file.getOriginalFilename().endsWith(".xlsx") && 
-            !file.getOriginalFilename().endsWith(".xls")) {
-            return ResponseEntity.badRequest().build();
+
+        String originalName = file.getOriginalFilename();
+        if (originalName == null || originalName.isBlank()) {
+            GlobalExceptionHandler.ErrorResponse error = new GlobalExceptionHandler.ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.name(),
+                "Имя файла обязательно", LocalDateTime.now());
+            return ResponseEntity.badRequest().body(error);
         }
-        
+
+        if (!originalName.endsWith(".xlsx") && !originalName.endsWith(".xls")) {
+            throw new IllegalArgumentException("Допустим только импорт файлов .xlsx или .xls");
+        }
+
         ImportResultDto result = importExportService.importFromExcel(file);
         return ResponseEntity.ok(result);
     }

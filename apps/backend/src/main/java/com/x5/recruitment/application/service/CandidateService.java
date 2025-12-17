@@ -120,8 +120,21 @@ public class CandidateService {
             .fullName(candidate.getFullName())
             .email(candidate.getEmail())
             .phone(candidate.getPhone())
+            .telegram(candidate.getTelegram())
+            .city(candidate.getCity())
             .university(candidate.getUniversity())
+            .otherUniversity(candidate.getOtherUniversity())
+            .speciality(candidate.getSpeciality())
+            .otherSpeciality(candidate.getOtherSpeciality())
             .course(candidate.getCourse())
+            .schedule(candidate.getSchedule())
+            .source(candidate.getSource())
+            .citizenship(candidate.getCitizenship())
+            .birthYear(candidate.getBirthYear())
+            .otherCity(candidate.getOtherCity())
+            .languages(candidate.getLanguages())
+            .additionalInfo(candidate.getAdditionalInfo())
+            .resumePath(candidate.getResumePath())
             .statusToken(candidate.getAccessToken())
             .build();
         
@@ -199,6 +212,12 @@ public class CandidateService {
             .course(candidate.getCourse())
             .telegram(candidate.getTelegram())
             .birthYear(candidate.getBirthYear())
+            .citizenship(candidate.getCitizenship())
+            .speciality(candidate.getSpeciality())
+            .schedule(candidate.getSchedule())
+            .source(candidate.getSource())
+            .languages(candidate.getLanguages())
+            .additionalInfo(candidate.getAdditionalInfo())
             .build();
     }
     

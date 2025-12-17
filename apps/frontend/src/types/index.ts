@@ -107,8 +107,21 @@ export interface Candidate {
   email: string;
   fullName: string;
   phone: string;
+  telegram?: string;
+  city?: string;
   university?: string;
+  otherUniversity?: string;
+  speciality?: string;
+  otherSpeciality?: string;
   course?: string;  // Changed from number to string to match backend
+  schedule?: string;
+  source?: string;
+  citizenship?: string;
+  birthYear?: number;
+  otherCity?: string;
+  languages?: string[];
+  additionalInfo?: string;
+  resumePath?: string;
   statusToken: string;
   createdAt?: string;  // Made optional as it's not in CandidateDto
 }
@@ -119,8 +132,21 @@ export interface CandidateDto {
   fullName: string;
   email: string;
   phone?: string;
+  telegram?: string;
+  city?: string;
   university?: string;
+  otherUniversity?: string;
+  speciality?: string;
+  otherSpeciality?: string;
   course?: string;
+  schedule?: string;
+  source?: string;
+  citizenship?: string;
+  birthYear?: number;
+  otherCity?: string;
+  languages?: string[];
+  additionalInfo?: string;
+  resumePath?: string;
   statusToken?: string;
 }
 
@@ -296,6 +322,8 @@ export interface ApplicationFilters {
   dateFrom?: string;
   dateTo?: string;
   slaBreached?: boolean;
+  vacancyId?: number;
+  search?: string;
   page?: number;
   size?: number;
   sort?: string;
@@ -340,4 +368,10 @@ export interface StagerProfileDto {
   course?: string;
   telegram?: string;
   birthYear?: number;
+  citizenship?: string;
+  speciality?: string;
+  schedule?: string;
+  source?: string;
+  languages?: string[];
+  additionalInfo?: string;
 }

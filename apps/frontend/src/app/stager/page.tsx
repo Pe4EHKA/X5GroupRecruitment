@@ -29,7 +29,7 @@ import {
 import DashboardLayout from '@/components/DashboardLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { UserRole, ApplicationStatus } from '@/types';
-import { useMyApplications } from '@/hooks/useStager';
+import { useMyApplications, useMyProfile } from '@/hooks/useStager';
 
 const STATUS_COLORS: Record<ApplicationStatus, string> = {
   [ApplicationStatus.NEW]: '#2196f3',
@@ -75,6 +75,7 @@ const getStatusIcon = (status: ApplicationStatus) => {
 
 export default function StagerDashboard() {
   const { data: applications, isLoading } = useMyApplications();
+  const { data: profile, isLoading: isProfileLoading } = useMyProfile();
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString('ru-RU', {
@@ -97,7 +98,7 @@ export default function StagerDashboard() {
             Здесь вы можете отслеживать статус вашей заявки на стажировку
           </Typography>
 
-          {isLoading ? (
+          {isLoading || isProfileLoading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
               <CircularProgress />
             </Box>
@@ -107,6 +108,99 @@ export default function StagerDashboard() {
             </Alert>
           ) : (
             <Box>
+              {profile && (
+                <Paper sx={{ p: 3, mb: 3 }}>
+                  <Typography variant="h6" gutterBottom>
+                    Мои данные
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <Typography variant="body2" color="text.secondary">
+                        ФИО
+                      </Typography>
+                      <Typography variant="body1">{`${profile.firstName} ${profile.lastName}`}</Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <Typography variant="body2" color="text.secondary">
+                        Email
+                      </Typography>
+                      <Typography variant="body1">{profile.email}</Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <Typography variant="body2" color="text.secondary">
+                        Телефон
+                      </Typography>
+                      <Typography variant="body1">{profile.phone || '—'}</Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <Typography variant="body2" color="text.secondary">
+                        Город
+                      </Typography>
+                      <Typography variant="body1">{profile.city || '—'}</Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <Typography variant="body2" color="text.secondary">
+                        Университет
+                      </Typography>
+                      <Typography variant="body1">{profile.university || '—'}</Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <Typography variant="body2" color="text.secondary">
+                        Специальность
+                      </Typography>
+                      <Typography variant="body1">{profile.speciality || '—'}</Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <Typography variant="body2" color="text.secondary">
+                        Курс
+                      </Typography>
+                      <Typography variant="body1">{profile.course || '—'}</Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <Typography variant="body2" color="text.secondary">
+                        Telegram
+                      </Typography>
+                      <Typography variant="body1">{profile.telegram || '—'}</Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <Typography variant="body2" color="text.secondary">
+                        Год рождения
+                      </Typography>
+                      <Typography variant="body1">{profile.birthYear || '—'}</Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <Typography variant="body2" color="text.secondary">
+                        Гражданство
+                      </Typography>
+                      <Typography variant="body1">{profile.citizenship || '—'}</Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <Typography variant="body2" color="text.secondary">
+                        График
+                      </Typography>
+                      <Typography variant="body1">{profile.schedule || '—'}</Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <Typography variant="body2" color="text.secondary">
+                        Источник
+                      </Typography>
+                      <Typography variant="body1">{profile.source || '—'}</Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <Typography variant="body2" color="text.secondary">
+                        Языки
+                      </Typography>
+                      <Typography variant="body1">{profile.languages?.join(', ') || '—'}</Typography>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Typography variant="body2" color="text.secondary">
+                        Дополнительная информация
+                      </Typography>
+                      <Typography variant="body1">{profile.additionalInfo || '—'}</Typography>
+                    </Grid>
+                  </Grid>
+                </Paper>
+              )}
               {applications.map((application) => (
                 <Paper key={application.id} sx={{ p: 3, mb: 3 }}>
                   <Grid container spacing={3}>

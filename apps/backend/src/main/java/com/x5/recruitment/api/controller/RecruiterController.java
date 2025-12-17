@@ -57,9 +57,11 @@ public class RecruiterController {
     @GetMapping("/applications")
     public ResponseEntity<Page<ApplicationDto>> getApplications(
             @RequestParam(required = false) ApplicationStatus status,
+            @RequestParam(required = false) Long vacancyId,
+            @RequestParam(required = false) String search,
             Pageable pageable) {
-        
-        Page<ApplicationDto> applications = applicationService.getApplicationsForRecruiter(status, pageable);
+
+        Page<ApplicationDto> applications = applicationService.getApplicationsForRecruiter(status, vacancyId, search, pageable);
         return ResponseEntity.ok(applications);
     }
 

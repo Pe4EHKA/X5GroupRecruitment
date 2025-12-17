@@ -87,6 +87,13 @@ public class Application {
     @Builder.Default
     private List<Feedback> feedbacks = new ArrayList<>();
 
+    /**
+     * Candidate's video presentation attached to the application
+     */
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "video_presentation_id")
+    private Media videoPresentation;
+
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

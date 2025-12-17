@@ -1,5 +1,7 @@
 package com.x5.recruitment.domain.model;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.x5.recruitment.domain.converter.JsonNodeConverter;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -53,8 +55,9 @@ public class Transcription {
     /**
      * Timestamped segments as JSON (optional)
      */
-    @Column(columnDefinition = "JSONB")
-    private String segments;
+    @Column(columnDefinition = "jsonb")
+    @Convert(converter = JsonNodeConverter.class)
+    private JsonNode segments;
 
     /**
      * Error message if transcription failed

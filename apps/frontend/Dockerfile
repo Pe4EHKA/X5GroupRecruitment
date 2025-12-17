@@ -5,8 +5,9 @@ FROM node:20-slim AS base
 FROM base AS deps
 WORKDIR /app
 
-# Copy the frontend package files
-COPY apps/frontend/package.json apps/frontend/package-lock.json ./
+# Copy the workspace package files (frontend uses the root lockfile)
+COPY package.json package-lock.json ./
+COPY apps/frontend/package.json ./apps/frontend/package.json
 
 # Install dependencies (use install instead of ci to handle workspace lockfile)
 # Note: strict-ssl is disabled for enterprise/CI environments with self-signed certificates

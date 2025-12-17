@@ -394,7 +394,7 @@ public class ApplicationService {
         Root<Application> countRoot = countQuery.from(Application.class);
         countQuery.select(cb.count(countRoot));
         
-        // Apply same predicates to count query
+        // Apply same WHERE predicates to count query (but no joins needed for counting)
         List<Predicate> countPredicates = new ArrayList<>();
         if (statuses != null && !statuses.isEmpty()) {
             countPredicates.add(countRoot.get("status").in(statuses));
@@ -412,7 +412,7 @@ public class ApplicationService {
         }
         if (search != null && !search.trim().isEmpty()) {
             String searchPattern = "%" + search.toLowerCase() + "%";
-            Join<Application, Candidate> countCandidate = countRoot.join("candidate", JoinType.LEFT);
+            Join<Application, Candidate> countCandidate = countRoot.join("candidate", JoinType.INNER);
             
             Predicate namePredicate = cb.or(
                 cb.like(cb.lower(countCandidate.get("firstName")), searchPattern),

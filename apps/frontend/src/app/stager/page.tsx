@@ -181,7 +181,7 @@ export default function StagerDashboard() {
                                     >
                                       {getStatusIcon(history.status)}
                                     </TimelineDot>
-                                    {index < application.statusHistory!.length - 1 && <TimelineConnector />}
+                                    {index < (application.statusHistory?.length ?? 0) - 1 && <TimelineConnector />}
                                   </TimelineSeparator>
                                   <TimelineContent>
                                     <Typography variant="body2" fontWeight="medium">

@@ -92,7 +92,8 @@ public class TranscriptionService {
         
         log.info("Simulating transcription for media {}", transcription.getMedia().getId());
         
-        // Simulate processing time
+        // Simulate processing time (MVP only - remove for production)
+        // In production, the actual API call will take time naturally
         try {
             Thread.sleep(2000);
         } catch (InterruptedException e) {

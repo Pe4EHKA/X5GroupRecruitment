@@ -103,9 +103,9 @@ public class StagerController {
             @PathVariable Long applicationId,
             @AuthenticationPrincipal UserDetails principal) {
         
-        // Verify the application belongs to the current user
+        // Verify the application belongs to the current user (throws exception if not)
         User user = userService.getUserEntityByUsername(principal.getUsername());
-        ApplicationDetailDto application = candidateService.getApplicationForCandidate(applicationId, user.getEmail());
+        candidateService.getApplicationForCandidate(applicationId, user.getEmail());
         
         QuestionnaireResponse questionnaire = questionnaireService.getQuestionnaire(applicationId);
         return ResponseEntity.ok(questionnaire);
@@ -121,9 +121,9 @@ public class StagerController {
             @Valid @RequestBody BatchAnswerRequest request,
             @AuthenticationPrincipal UserDetails principal) {
         
-        // Verify the application belongs to the current user
+        // Verify the application belongs to the current user (throws exception if not)
         User user = userService.getUserEntityByUsername(principal.getUsername());
-        ApplicationDetailDto application = candidateService.getApplicationForCandidate(applicationId, user.getEmail());
+        candidateService.getApplicationForCandidate(applicationId, user.getEmail());
         
         List<AnswerResponse> answers = answerService.submitAnswers(applicationId, request);
         return ResponseEntity.ok(answers);
@@ -138,9 +138,9 @@ public class StagerController {
             @PathVariable Long applicationId,
             @AuthenticationPrincipal UserDetails principal) {
         
-        // Verify the application belongs to the current user
+        // Verify the application belongs to the current user (throws exception if not)
         User user = userService.getUserEntityByUsername(principal.getUsername());
-        ApplicationDetailDto application = candidateService.getApplicationForCandidate(applicationId, user.getEmail());
+        candidateService.getApplicationForCandidate(applicationId, user.getEmail());
         
         List<AnswerResponse> answers = answerService.getAnswers(applicationId);
         return ResponseEntity.ok(answers);

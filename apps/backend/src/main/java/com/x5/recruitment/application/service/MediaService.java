@@ -162,6 +162,9 @@ public class MediaService {
         if (contentType == null || (!contentType.startsWith("video/"))) {
             throw new IllegalArgumentException("File must be a video");
         }
+
+        // TODO: Production enhancement - Add server-side content verification
+        // using file magic numbers or Apache Tika to prevent MIME type spoofing
     }
 
     /**

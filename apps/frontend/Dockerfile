@@ -5,8 +5,9 @@ FROM node:20-slim AS base
 FROM base AS deps
 WORKDIR /app
 
-# Copy the frontend package files
-COPY apps/frontend/package.json apps/frontend/package-lock.json ./
+# Copy the workspace package files (frontend uses the root lockfile)
+COPY package.json package-lock.json ./
+COPY apps/frontend/package.json ./apps/frontend/package.json
 
 # Install dependencies (use install instead of ci to handle workspace lockfile)
 # Note: strict-ssl is disabled for enterprise/CI environments with self-signed certificates
@@ -55,8 +56,11 @@ RUN mkdir .next && chown nextjs:nodejs .next
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+# Next.js outputs the standalone bundle under the workspace directory. Copy the
+# built frontend bundle from its nested path so server.js ends up at the image
+# root (/app/server.js) at runtime.
+COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/standalone/frontend ./
+COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/static ./.next/static
 
 USER nextjs
 

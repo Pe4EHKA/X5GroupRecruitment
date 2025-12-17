@@ -4,8 +4,11 @@ import com.x5.recruitment.api.dto.ApplicationDetailDto;
 import com.x5.recruitment.api.dto.ApplicationDto;
 import com.x5.recruitment.api.dto.ChangeStatusRequest;
 import com.x5.recruitment.api.dto.PageResponseDto;
+import com.x5.recruitment.api.dto.questionnaire.*;
 import com.x5.recruitment.application.service.ApplicationService;
+import com.x5.recruitment.application.service.StatisticsService;
 import com.x5.recruitment.application.service.UserService;
+import com.x5.recruitment.application.service.VacancyQuestionService;
 import com.x5.recruitment.domain.model.ApplicationStatus;
 import com.x5.recruitment.domain.model.User;
 import io.swagger.v3.oas.annotations.Operation;
@@ -40,6 +43,8 @@ public class HrController {
 
     private final ApplicationService applicationService;
     private final UserService userService;
+    private final VacancyQuestionService vacancyQuestionService;
+    private final StatisticsService statisticsService;
 
     @Operation(
         summary = "Get all applications with filters",
@@ -116,5 +121,94 @@ public class HrController {
         User user = userService.getUserEntityByUsername(principal.getUsername());
         ApplicationDto application = applicationService.changeStatus(id, request, user);
         return ResponseEntity.ok(application);
+    }
+
+    // ========== Vacancy Question Management ==========
+
+    @Operation(
+        summary = "Create question for vacancy",
+        description = "Add a new question to a vacancy questionnaire"
+    )
+    @PostMapping("/vacancies/{vacancyId}/questions")
+    public ResponseEntity<VacancyQuestionResponse> createQuestion(
+            @PathVariable Long vacancyId,
+            @Valid @RequestBody VacancyQuestionRequest request) {
+        
+        VacancyQuestionResponse question = vacancyQuestionService.createQuestion(vacancyId, request);
+        return ResponseEntity.ok(question);
+    }
+
+    @Operation(
+        summary = "Update vacancy question",
+        description = "Update an existing vacancy question"
+    )
+    @PutMapping("/vacancies/questions/{questionId}")
+    public ResponseEntity<VacancyQuestionResponse> updateQuestion(
+            @PathVariable Long questionId,
+            @Valid @RequestBody VacancyQuestionRequest request) {
+        
+        VacancyQuestionResponse question = vacancyQuestionService.updateQuestion(questionId, request);
+        return ResponseEntity.ok(question);
+    }
+
+    @Operation(
+        summary = "Get all questions for vacancy",
+        description = "Get all questions configured for a vacancy"
+    )
+    @GetMapping("/vacancies/{vacancyId}/questions")
+    public ResponseEntity<List<VacancyQuestionResponse>> getQuestions(
+            @PathVariable Long vacancyId) {
+        
+        List<VacancyQuestionResponse> questions = vacancyQuestionService.getQuestions(vacancyId);
+        return ResponseEntity.ok(questions);
+    }
+
+    @Operation(
+        summary = "Delete vacancy question",
+        description = "Delete a question from vacancy"
+    )
+    @DeleteMapping("/vacancies/questions/{questionId}")
+    public ResponseEntity<Void> deleteQuestion(@PathVariable Long questionId) {
+        vacancyQuestionService.deleteQuestion(questionId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(
+        summary = "Reorder vacancy questions",
+        description = "Update the order of questions in a vacancy"
+    )
+    @PutMapping("/vacancies/{vacancyId}/questions/reorder")
+    public ResponseEntity<Void> reorderQuestions(
+            @PathVariable Long vacancyId,
+            @RequestBody List<Long> questionIds) {
+        
+        vacancyQuestionService.reorderQuestions(vacancyId, questionIds);
+        return ResponseEntity.ok().build();
+    }
+
+    // ========== Application Statistics ==========
+
+    @Operation(
+        summary = "Get application statistics",
+        description = "Get detailed statistics for a specific application including answers and completion"
+    )
+    @GetMapping("/applications/{applicationId}/statistics")
+    public ResponseEntity<ApplicationStatisticsResponse> getApplicationStatistics(
+            @PathVariable Long applicationId) {
+        
+        ApplicationStatisticsResponse statistics = statisticsService.getApplicationStatistics(applicationId);
+        return ResponseEntity.ok(statistics);
+    }
+
+    @Operation(
+        summary = "Get vacancy statistics",
+        description = "Get statistics for all applications in a vacancy"
+    )
+    @GetMapping("/vacancies/{vacancyId}/statistics")
+    public ResponseEntity<List<ApplicationStatisticsResponse>> getVacancyStatistics(
+            @PathVariable Long vacancyId) {
+        
+        List<ApplicationStatisticsResponse> statistics = statisticsService.getVacancyStatistics(vacancyId);
+        return ResponseEntity.ok(statistics);
     }
 }

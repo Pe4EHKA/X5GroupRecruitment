@@ -3,7 +3,10 @@ package com.x5.recruitment.api.controller;
 import com.x5.recruitment.api.dto.ApplicationDetailDto;
 import com.x5.recruitment.api.dto.StagerProfileDto;
 import com.x5.recruitment.api.dto.UpdateStagerProfileRequest;
+import com.x5.recruitment.api.dto.questionnaire.*;
+import com.x5.recruitment.application.service.AnswerService;
 import com.x5.recruitment.application.service.CandidateService;
+import com.x5.recruitment.application.service.QuestionnaireService;
 import com.x5.recruitment.application.service.UserService;
 import com.x5.recruitment.domain.model.User;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,6 +34,8 @@ public class StagerController {
 
     private final CandidateService candidateService;
     private final UserService userService;
+    private final QuestionnaireService questionnaireService;
+    private final AnswerService answerService;
 
     @Operation(
         summary = "Get my applications",
@@ -84,5 +89,60 @@ public class StagerController {
         User user = userService.getUserEntityByUsername(principal.getUsername());
         StagerProfileDto profile = candidateService.getCandidateProfile(user.getEmail());
         return ResponseEntity.ok(profile);
+    }
+
+    // ========== Questionnaire Management ==========
+
+    @Operation(
+        summary = "Get questionnaire for application",
+        description = "Get the questionnaire (questions) for a specific application. " +
+                      "Questions are generated once and remain stable for the application."
+    )
+    @GetMapping("/application/{applicationId}/questionnaire")
+    public ResponseEntity<QuestionnaireResponse> getQuestionnaire(
+            @PathVariable Long applicationId,
+            @AuthenticationPrincipal UserDetails principal) {
+        
+        // Verify the application belongs to the current user
+        User user = userService.getUserEntityByUsername(principal.getUsername());
+        ApplicationDetailDto application = candidateService.getApplicationForCandidate(applicationId, user.getEmail());
+        
+        QuestionnaireResponse questionnaire = questionnaireService.getQuestionnaire(applicationId);
+        return ResponseEntity.ok(questionnaire);
+    }
+
+    @Operation(
+        summary = "Submit answers",
+        description = "Submit batch of answers for an application"
+    )
+    @PostMapping("/application/{applicationId}/answers")
+    public ResponseEntity<List<AnswerResponse>> submitAnswers(
+            @PathVariable Long applicationId,
+            @Valid @RequestBody BatchAnswerRequest request,
+            @AuthenticationPrincipal UserDetails principal) {
+        
+        // Verify the application belongs to the current user
+        User user = userService.getUserEntityByUsername(principal.getUsername());
+        ApplicationDetailDto application = candidateService.getApplicationForCandidate(applicationId, user.getEmail());
+        
+        List<AnswerResponse> answers = answerService.submitAnswers(applicationId, request);
+        return ResponseEntity.ok(answers);
+    }
+
+    @Operation(
+        summary = "Get my answers",
+        description = "Get all answers submitted for an application"
+    )
+    @GetMapping("/application/{applicationId}/answers")
+    public ResponseEntity<List<AnswerResponse>> getAnswers(
+            @PathVariable Long applicationId,
+            @AuthenticationPrincipal UserDetails principal) {
+        
+        // Verify the application belongs to the current user
+        User user = userService.getUserEntityByUsername(principal.getUsername());
+        ApplicationDetailDto application = candidateService.getApplicationForCandidate(applicationId, user.getEmail());
+        
+        List<AnswerResponse> answers = answerService.getAnswers(applicationId);
+        return ResponseEntity.ok(answers);
     }
 }

@@ -1,10 +1,13 @@
 package com.x5.recruitment.domain.model;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 
@@ -53,8 +56,9 @@ public class Transcription {
     /**
      * Timestamped segments as JSON (optional)
      */
-    @Column(columnDefinition = "JSONB")
-    private String segments;
+    @Column(columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private JsonNode segments;
 
     /**
      * Error message if transcription failed

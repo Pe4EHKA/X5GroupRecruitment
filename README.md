@@ -10,6 +10,7 @@
 - Автоматизацию коммуникаций с кандидатами
 - Принятие решений hiring manager'ами
 - Экспорт одобренных кандидатов во внутреннюю ATS
+- **Система анкетирования с поддержкой видео-интервью** (NEW)
 - **Полнофункциональный веб-интерфейс (MVP)**
 
 ## Архитектура - Monorepo (TurboRepo)
@@ -329,7 +330,18 @@ GET    /api/hr/applications                     - Список заявок с �
 GET    /api/hr/applications/{id}                - Детали заявки
 POST   /api/hr/applications/{id}/status         - Изменить статус
        Body: { status: "NEW", comment: "..." }
+
+# Questionnaire System (NEW)
+POST   /api/hr/vacancies/{id}/questions         - Создать вопрос для вакансии
+PUT    /api/hr/vacancies/questions/{id}         - Обновить вопрос
+GET    /api/hr/vacancies/{id}/questions         - Список вопросов вакансии
+DELETE /api/hr/vacancies/questions/{id}         - Удалить вопрос
+PUT    /api/hr/vacancies/{id}/questions/reorder - Изменить порядок вопросов
+GET    /api/hr/applications/{id}/statistics     - Статистика по заявке
+GET    /api/hr/vacancies/{id}/statistics        - Статистика по всем заявкам вакансии
 ```
+
+**Подробная документация**: [docs/QUESTIONNAIRE_API.md](docs/QUESTIONNAIRE_API.md)
 
 #### Stager API (`/api/stager`) - Новый интерфейс для стажёров
 
@@ -339,6 +351,20 @@ GET    /api/stager/application/{id}             - Получить конкре�
 GET    /api/stager/profile                      - Получить свой профиль
 PUT    /api/stager/profile                      - Обновить свой профиль
        Body: { phone, city, university, course, telegram, birthYear }
+
+# Questionnaire System (NEW)
+GET    /api/stager/application/{id}/questionnaire - Получить анкету для заявки
+POST   /api/stager/application/{id}/answers       - Отправить ответы (batch)
+GET    /api/stager/application/{id}/answers       - Получить свои ответы
+```
+
+#### Media API (`/api/media`) - Работа с видео (NEW)
+
+```
+POST   /api/media/upload                        - Загрузить видео
+GET    /api/media/{id}                          - Метаданные медиа (с транскрипцией)
+GET    /api/media/{id}/stream                   - Стриминг видео
+
 ```
 
 #### Recruiter API (`/api/recruiter`) - Legacy, сохранён для совместимости
@@ -682,28 +708,51 @@ curl -I http://localhost:3000/_next/static/chunks/webpack-*.js
 
 - Email-уведомления только логируются (не отправляются)
 - Basic Auth вместо OAuth2/JWT
-- Нет UI (только API)
+- ~~Нет UI (только API)~~ - **Добавлен веб-интерфейс**
 - Упрощенная валидация
 - Нет полнотекстового поиска
-- Нет файлового хранилища для резюме
+- ~~Нет файлового хранилища для резюме~~ - **Добавлено хранилище для видео**
 - Нет интеграции с внешней ATS (только экспорт)
+- Транскрипция видео использует заглушку (готово для интеграции с реальным API)
+
+## Новые возможности
+
+### ✨ Система анкетирования (декабрь 2025)
+
+Полнофункциональная система анкетирования для стажеров:
+
+- **Гибкий конструктор вопросов** - 6 типов вопросов (текст, число, дата, выбор, видео)
+- **Обязательные и опциональные вопросы** - с умной рандомизацией
+- **Валидация ответов** - настраиваемые правила для каждого вопроса
+- **Видео-интервью** - запись в браузере с автоматической транскрипцией
+- **Статистика и фильтрация** - детальная аналитика по ответам
+- **Стабильные анкеты** - фиксация вопросов на момент подачи заявки
+
+**Документация**: 
+- [QUESTIONNAIRE_API.md](docs/QUESTIONNAIRE_API.md) - API документация
+- [QUESTIONNAIRE_FEATURE.md](docs/QUESTIONNAIRE_FEATURE.md) - Описание функционала
+- [IMPLEMENTATION_SUMMARY.md](docs/IMPLEMENTATION_SUMMARY.md) - Технические детали
 
 ## Roadmap
 
 **Фаза 2:**
 - OAuth2/JWT авторизация
 - Полнотекстовый поиск по кандидатам
-- S3-совместимое хранилище для резюме
-- Веб-интерфейс для рекрутеров и HM
+- S3-совместимое хранилище для медиа-файлов
+- ~~Веб-интерфейс для рекрутеров и HM~~ - **Реализовано**
 - Email-templates и реальная отправка
 - Webhooks для интеграции с ATS
+- **Интеграция с реальным API транскрипции** (Google Speech-to-Text, AWS Transcribe)
+- **Frontend для системы анкетирования**
 
 **Фаза 3:**
 - ML для автоматического скрининга
 - Чат-бот для кандидатов
 - Календарная интеграция для интервью
-- Видео-интервью
+- ~~Видео-интервью~~ - **Реализовано**
 - Analytics dashboard
+- **Sentiment analysis для ответов на вопросы**
+- **Автоматический скоринг кандидатов**
 
 ## Поддержка
 

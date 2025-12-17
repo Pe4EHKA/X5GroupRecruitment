@@ -1,5 +1,6 @@
 # Builder stage with Maven + JDK 21
-FROM maven:3.9.9-eclipse-temurin-21 AS builder
+# Use gcr.io mirror to avoid intermittent Docker Hub auth errors
+FROM mirror.gcr.io/library/maven:3.9.9-eclipse-temurin-21 AS builder
 
 WORKDIR /app
 
@@ -26,7 +27,7 @@ RUN --mount=type=cache,target=/root/.m2 \
     mv target/*.jar app.jar
 
 # Runtime stage with JRE 21 for smaller image
-FROM eclipse-temurin:21-jre-jammy
+FROM mirror.gcr.io/library/eclipse-temurin:21-jre-jammy
 
 # Install curl for healthcheck
 RUN apt-get update && apt-get install -y --no-install-recommends curl && \

@@ -1,6 +1,8 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080';
+// In production/docker, use the Next.js rewrites proxy (no baseURL)
+// In development, can use direct backend URL
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 // Create axios instance
 export const apiClient: AxiosInstance = axios.create({
@@ -14,19 +16,11 @@ export const apiClient: AxiosInstance = axios.create({
 // Request interceptor to add auth token
 apiClient.interceptors.request.use(
   (config) => {
-    // Get token from localStorage (or context)
+    // Get auth credentials from localStorage
     if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('authToken');
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-      
-      // For dev mode with basic auth
-      const username = localStorage.getItem('username');
-      const password = localStorage.getItem('password');
-      if (username && password && !token) {
-        const basicAuth = btoa(`${username}:${password}`);
-        config.headers.Authorization = `Basic ${basicAuth}`;
+      const authCredentials = localStorage.getItem('authCredentials');
+      if (authCredentials) {
+        config.headers.Authorization = `Basic ${authCredentials}`;
       }
     }
     return config;
@@ -41,11 +35,10 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Redirect to login or refresh token
+      // Redirect to login on unauthorized
       if (typeof window !== 'undefined') {
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('username');
-        localStorage.removeItem('password');
+        localStorage.removeItem('authCredentials');
+        localStorage.removeItem('user');
         window.location.href = '/login';
       }
     }

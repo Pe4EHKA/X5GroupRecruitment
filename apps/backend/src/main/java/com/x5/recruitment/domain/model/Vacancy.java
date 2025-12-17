@@ -65,6 +65,13 @@ public class Vacancy {
     @JoinColumn(name = "hiring_manager_id")
     private User hiringManager;
 
+    /**
+     * Number of optional questions to show to each applicant (randomly selected)
+     */
+    @Column(name = "optional_questions_to_ask")
+    @Builder.Default
+    private Integer optionalQuestionsToAsk = 3;
+
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

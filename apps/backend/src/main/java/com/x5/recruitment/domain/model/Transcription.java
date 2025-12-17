@@ -57,6 +57,7 @@ public class Transcription {
      * Timestamped segments as JSON (optional)
      */
     @Column(columnDefinition = "jsonb")
+    @Convert(disableConversion = true)
     @JdbcTypeCode(SqlTypes.JSON)
     private JsonNode segments;
 

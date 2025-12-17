@@ -84,7 +84,7 @@ const getTranscriptionLabel = (status?: TranscriptionStatus) => {
   switch (status) {
     case TranscriptionStatus.DONE:
       return { label: 'Готово', color: 'success' as const };
-    case TranscriptionStatus.IN_PROGRESS:
+    case TranscriptionStatus.PROCESSING:
       return { label: 'Обработка', color: 'info' as const };
     case TranscriptionStatus.FAILED:
       return { label: 'Ошибка', color: 'error' as const };

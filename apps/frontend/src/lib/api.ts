@@ -1,8 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
 // Determine the API base URL based on environment
-// - Client-side (browser): empty string to use same origin, which will be localhost:3000
-//   Browser will then make requests to localhost:8080 directly (no proxy needed)
+// - Client-side (browser): connect to backend at localhost:8080 directly
 // - Server-side (SSR): use API_INTERNAL_URL if set (for Docker: http://backend:8080)
 const isServer = typeof window === 'undefined';
 const API_BASE_URL = isServer 

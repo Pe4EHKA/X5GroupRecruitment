@@ -25,18 +25,21 @@ import {
   ListItem,
   ListItemText,
   Chip,
+  Alert,
+  Stack,
 } from '@mui/material';
 import { ArrowBack } from '@mui/icons-material';
 import DashboardLayout from '@/components/DashboardLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import StatusBadge from '@/components/StatusBadge';
-import { UserRole, ApplicationStatus } from '@/types';
+import { UserRole, ApplicationStatus, TranscriptionStatus } from '@/types';
 import { useApplication, useChangeStatus } from '@/hooks/useRecruiter';
 import { getCandidateFullName, getCandidateEmail, getCandidatePhone, getCandidateUniversity, getCandidateCourse } from '@/lib/utils';
 import { format } from 'date-fns';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { API_BASE_URL } from '@/lib/api';
 
 const changeStatusSchema = z.object({
   newStatus: z.nativeEnum(ApplicationStatus),
@@ -73,6 +76,19 @@ export default function ApplicationDetailPage() {
         },
       }
     );
+  };
+
+  const getTranscriptionLabel = (status?: TranscriptionStatus) => {
+    switch (status) {
+      case TranscriptionStatus.DONE:
+        return { label: 'Готово', color: 'success' as const };
+      case TranscriptionStatus.PROCESSING:
+        return { label: 'Обработка', color: 'info' as const };
+      case TranscriptionStatus.FAILED:
+        return { label: 'Ошибка', color: 'error' as const };
+      default:
+        return { label: 'Ожидание', color: 'warning' as const };
+    }
   };
 
   if (isLoading) {
@@ -211,6 +227,61 @@ export default function ApplicationDetailPage() {
                       </Typography>
                     </Grid>
                   </Grid>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            <Grid item xs={12}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    Видео-визитка кандидата
+                  </Typography>
+                  <Divider sx={{ mb: 2 }} />
+                  {application.videoPresentation ? (
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} md={6}>
+                        <video
+                          controls
+                          style={{ width: '100%', borderRadius: 8 }}
+                          src={`${API_BASE_URL}${application.videoPresentation.streamUrl}`}
+                        />
+                      </Grid>
+                      <Grid item xs={12} md={6}>
+                        <Stack spacing={1}>
+                          <Stack direction="row" alignItems="center" spacing={1}>
+                            <Typography variant="body2" color="text.secondary">
+                              Статус транскрипции:
+                            </Typography>
+                            <Chip size="small" {...getTranscriptionLabel(application.videoPresentation.transcription?.status)} />
+                          </Stack>
+                          {application.videoPresentation.transcription?.text && (
+                            <Paper variant="outlined" sx={{ p: 2 }}>
+                              <Typography variant="subtitle2" gutterBottom>
+                                Транскрипция
+                              </Typography>
+                              <Typography variant="body2">
+                                {application.videoPresentation.transcription.text}
+                              </Typography>
+                            </Paper>
+                          )}
+                          {application.videoPresentation.transcription?.errorMessage && (
+                            <Alert severity="error">{application.videoPresentation.transcription.errorMessage}</Alert>
+                          )}
+                          {(!application.videoPresentation.transcription ||
+                            application.videoPresentation.transcription.status !== TranscriptionStatus.DONE) && (
+                            <Alert severity="info">
+                              Транскрипция формируется автоматически после загрузки видео. Обработка может занять несколько минут.
+                            </Alert>
+                          )}
+                        </Stack>
+                      </Grid>
+                    </Grid>
+                  ) : (
+                    <Typography variant="body2" color="text.secondary">
+                      Кандидат пока не загрузил видео-визитку.
+                    </Typography>
+                  )}
                 </CardContent>
               </Card>
             </Grid>

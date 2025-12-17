@@ -1,6 +1,7 @@
-import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import api from '@/lib/api';
-import { ApplicationDetail, CandidateStatus, StatusHistory } from '@/types';
+import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
+import { useSnackbar } from 'notistack';
+import api, { getErrorMessage } from '@/lib/api';
+import { ApplicationDetail, CandidateStatus, MediaResponse, StatusHistory } from '@/types';
 
 // Query keys
 export const candidateKeys = {
@@ -62,5 +63,36 @@ export function useCandidateStatusHistory(id: number): UseQueryResult<StatusHist
       return response.data;
     },
     enabled: !!id,
+  });
+}
+
+export function useUploadVideoPresentation(applicationId: number) {
+  const queryClient = useQueryClient();
+  const { enqueueSnackbar } = useSnackbar();
+
+  return useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await api.post<MediaResponse>(
+        `/api/candidate/me/applications/${applicationId}/video`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: candidateKeys.applications() });
+      enqueueSnackbar('Видео-визитка успешно загружена', { variant: 'success' });
+    },
+    onError: (error: any) => {
+      enqueueSnackbar(getErrorMessage(error), { variant: 'error' });
+    },
   });
 }

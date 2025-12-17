@@ -176,48 +176,57 @@ make build
 
 ## Веб-интерфейс (MVP)
 
-Система включает полнофункциональный веб-интерфейс для всех ролей:
+Система включает упрощенный веб-интерфейс с двумя основными ролями для MVP:
 
 ### Роли и доступ
 
-**Candidate (Кандидат)**
-- `/status/[token]` - Просмотр статуса своей заявки
-
-**Recruiter (Рекрутер)**
-- Dashboard с метриками и статистикой
-- Список заявок с фильтрами и поиском
+**HR (Recruiter)**
+- URL: `/hr`
+- Список всех заявок с расширенными фильтрами
+- Фильтрация по статусам (быстрые чипы)
+- Поиск по ФИО, email, телефону
 - Детальный просмотр заявок
-- Изменение статусов и назначение на HM
+- Изменение статусов
 - Импорт заявок из Excel
 - Экспорт одобренных кандидатов
 
-**HM (Hiring Manager)**
-- Входящие заявки на рассмотрении
-- Просмотр деталей кандидата
-- Принятие решений с структурированным фидбеком
-- Добавление в кадровый резерв
+**Stager (Стажёр/Кандидат)**
+- URL: `/stager`
+- Просмотр своей заявки
+- История изменения статусов (timeline)
+- Текущий статус и комментарии
+- Read-only доступ
 
-**Admin (Администратор)**
+**Admin (Администратор)** - для служебных целей
+- URL: `/admin`
 - Управление программами/вакансиями
 - Настройка шаблонов уведомлений
-- **Управление пользователями** (создание, редактирование, назначение ролей)
+- Управление пользователями
 - Журнал аудита
+
+**Candidate (публичный доступ)**
+- URL: `/status/[token]` - Просмотр статуса по токену (без авторизации)
 
 ### Тестовые пользователи
 
 ```
-Recruiter:
+HR (Recruiter):
   username: recruiter
   password: recruiter123
+  -> перенаправление на /hr
 
-HM:
-  username: hm
-  password: hm123
+Stager (Intern):
+  username: stager
+  password: stager123
+  -> перенаправление на /stager
 
 Admin:
   username: admin
   password: admin123
+  -> перенаправление на /admin/programs
 ```
+
+**Важно:** После логина роль определяется автоматически по учётной записи пользователя. Выбор роли при входе **отсутствует**.
 
 На странице логина есть кнопки быстрого входа для удобства.
 
@@ -283,7 +292,41 @@ ERD находится в файле `docs/ARCHITECTURE.md`.
 
 ### Основные эндпоинты
 
-#### Recruiter API (`/api/recruiter`)
+#### Auth API (`/api/auth`)
+
+```
+GET    /api/auth/me                             - Получить информацию о текущем пользователе (id, username, email, roles)
+```
+
+#### HR API (`/api/hr`) - Новый упрощённый интерфейс для MVP
+
+```
+GET    /api/hr/applications                     - Список заявок с расширенной фильтрацией
+       Query params:
+         - statuses: список статусов (multi-value)
+         - vacancyId: ID вакансии
+         - dateFrom: дата начала (YYYY-MM-DD)
+         - dateTo: дата окончания (YYYY-MM-DD)
+         - search: поиск по ФИО/email/телефону
+         - page: номер страницы (0-based)
+         - size: размер страницы
+       
+GET    /api/hr/applications/{id}                - Детали заявки
+POST   /api/hr/applications/{id}/status         - Изменить статус
+       Body: { status: "NEW", comment: "..." }
+```
+
+#### Stager API (`/api/stager`) - Новый интерфейс для стажёров
+
+```
+GET    /api/stager/application                  - Получить свои заявки
+GET    /api/stager/application/{id}             - Получить конкретную заявку (с проверкой владения)
+GET    /api/stager/profile                      - Получить свой профиль
+PUT    /api/stager/profile                      - Обновить свой профиль
+       Body: { phone, city, university, course, telegram, birthYear }
+```
+
+#### Recruiter API (`/api/recruiter`) - Legacy, сохранён для совместимости
 
 ```
 GET    /api/recruiter/applications              - Список заявок (с фильтрами)
@@ -301,10 +344,10 @@ GET    /api/hm/applications/{id}               - Детали заявки
 POST   /api/hm/applications/{id}/decision      - Принять решение (approve/reject)
 ```
 
-#### Candidate API (`/api/candidate`)
+#### Candidate API (`/api/candidate`) - Публичный доступ
 
 ```
-GET    /api/candidate/status?token={token}     - Статус заявок (по токену)
+GET    /api/candidate/status?token={token}     - Статус заявок (по токену, без авторизации)
 ```
 
 #### Import/Export API (`/api/import-export`)
@@ -331,24 +374,33 @@ PUT    /api/admin/users/{id}/status            - Обновить статус (
 
 Используется HTTP Basic Authentication.
 
-Тестовые пользователи (пароли одинаковые для всех: `admin123`):
+Тестовые пользователи:
 
+- **recruiter** / recruiter123 - роль RECRUITER (HR в MVP)
+- **stager** / stager123 - роль STAGER (Стажёр в MVP)
 - **admin** / admin123 - роль ADMIN
-- **recruiter** / recruiter123 - роль RECRUITER  
-- **hm** / hm123 - роль HM
+- **hm** / hm123 - роль HM (устаревшая, для совместимости)
 
 Пример запроса:
 ```bash
-curl -u recruiter:recruiter123 http://localhost:8080/api/recruiter/applications
+# Получить информацию о текущем пользователе
+curl -u recruiter:recruiter123 http://localhost:8080/api/auth/me
+
+# Получить список заявок (HR)
+curl -u recruiter:recruiter123 http://localhost:8080/api/hr/applications
+
+# Получить свои заявки (Stager)
+curl -u stager:stager123 http://localhost:8080/api/stager/application
 ```
 
 ### RBAC
 
-Роли:
-- **ADMIN** - полный доступ
-- **RECRUITER** - управление заявками, импорт/экспорт
-- **HM** - просмотр и принятие решений по заявкам
-- **CANDIDATE** - (не используется для входа, только для модели данных)
+Роли в MVP:
+- **RECRUITER** (HR в UI) - управление заявками, фильтрация, изменение статусов, импорт/экспорт
+- **STAGER** - просмотр своих заявок, истории статусов, обновление профиля
+- **ADMIN** - полный доступ ко всем функциям
+- **HM** - просмотр и принятие решений по заявкам (устаревшая роль, оставлена для совместимости)
+- **CANDIDATE** - публичный доступ по токену без авторизации
 
 ## Бизнес-процессы
 

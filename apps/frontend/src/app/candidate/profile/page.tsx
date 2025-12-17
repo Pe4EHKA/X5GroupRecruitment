@@ -71,7 +71,7 @@ function getStatusIcon(status: ApplicationStatus) {
       return <Cancel color="error" />;
     case ApplicationStatus.NEW:
     case ApplicationStatus.SCREENING:
-    case ApplicationStatus.PENDING_HM_REVIEW:
+    case ApplicationStatus.INTERVIEW_SCHEDULED:
       return <HourglassEmpty color="warning" />;
     default:
       return <Info color="info" />;
@@ -86,7 +86,7 @@ function getStatusColor(status: ApplicationStatus): 'success' | 'error' | 'warni
       return 'error';
     case ApplicationStatus.NEW:
     case ApplicationStatus.SCREENING:
-    case ApplicationStatus.PENDING_HM_REVIEW:
+    case ApplicationStatus.INTERVIEW_SCHEDULED:
       return 'warning';
     default:
       return 'info';

@@ -99,7 +99,7 @@ export default function ApplicationsPage() {
                     <MenuItem value="">Все</MenuItem>
                     <MenuItem value={ApplicationStatus.NEW}>Новые</MenuItem>
                     <MenuItem value={ApplicationStatus.SCREENING}>Скрининг</MenuItem>
-                    <MenuItem value={ApplicationStatus.PENDING_HM_REVIEW}>Ожидает HM</MenuItem>
+                    <MenuItem value={ApplicationStatus.INTERVIEW_SCHEDULED}>Интервью</MenuItem>
                     <MenuItem value={ApplicationStatus.APPROVED}>Одобрено</MenuItem>
                     <MenuItem value={ApplicationStatus.REJECTED}>Отклонено</MenuItem>
                   </Select>

@@ -34,8 +34,6 @@ import { useMyApplications } from '@/hooks/useStager';
 const STATUS_COLORS: Record<ApplicationStatus, string> = {
   [ApplicationStatus.NEW]: '#2196f3',
   [ApplicationStatus.SCREENING]: '#9c27b0',
-  [ApplicationStatus.PENDING_HM_REVIEW]: '#ff9800',
-  [ApplicationStatus.HM_REVIEW]: '#ff9800',
   [ApplicationStatus.INTERVIEW_SCHEDULED]: '#00bcd4',
   [ApplicationStatus.INTERVIEW_COMPLETED]: '#00bcd4',
   [ApplicationStatus.APPROVED]: '#4caf50',
@@ -50,8 +48,6 @@ const STATUS_COLORS: Record<ApplicationStatus, string> = {
 const STATUS_LABELS: Record<ApplicationStatus, string> = {
   [ApplicationStatus.NEW]: 'Новая заявка',
   [ApplicationStatus.SCREENING]: 'На рассмотрении',
-  [ApplicationStatus.PENDING_HM_REVIEW]: 'Ожидает решения',
-  [ApplicationStatus.HM_REVIEW]: 'На рассмотрении у менеджера',
   [ApplicationStatus.INTERVIEW_SCHEDULED]: 'Интервью назначено',
   [ApplicationStatus.INTERVIEW_COMPLETED]: 'Интервью завершено',
   [ApplicationStatus.APPROVED]: 'Одобрено',

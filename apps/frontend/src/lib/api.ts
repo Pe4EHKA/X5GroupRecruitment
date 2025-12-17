@@ -4,9 +4,18 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 // - Client-side (browser): connect to backend at localhost:8080 directly
 // - Server-side (SSR): use API_INTERNAL_URL if set (for Docker: http://backend:8080)
 const isServer = typeof window === 'undefined';
-const API_BASE_URL = isServer 
-  ? (process.env.API_INTERNAL_URL || 'http://localhost:8080')
-  : 'http://localhost:8080'; // Browser connects directly to backend
+const browserBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+export const API_BASE_URL = isServer
+  ? (process.env.API_INTERNAL_URL || browserBaseUrl)
+  : browserBaseUrl;
+
+export interface ApiError {
+  status?: number;
+  code?: string;
+  message: string;
+  fieldErrors?: Record<string, string>;
+  cause?: unknown;
+}
 
 // Create axios instance
 export const apiClient: AxiosInstance = axios.create({
@@ -16,6 +25,32 @@ export const apiClient: AxiosInstance = axios.create({
   },
   withCredentials: true,
 });
+
+const toApiError = (error: unknown): ApiError => {
+  if (axios.isAxiosError(error)) {
+    const responseData = error.response?.data as {
+      status?: number;
+      code?: string;
+      message?: string;
+      errors?: Record<string, string>;
+    };
+
+    return {
+      status: responseData?.status ?? error.response?.status,
+      code: responseData?.code,
+      message: responseData?.message || error.message || 'Неизвестная ошибка',
+      fieldErrors: responseData?.errors,
+      cause: error,
+    };
+  }
+
+  return {
+    message: error instanceof Error ? error.message : 'Неизвестная ошибка',
+    cause: error,
+  };
+};
+
+export const getErrorMessage = (error: unknown): string => toApiError(error).message;
 
 // Request interceptor to add auth token
 apiClient.interceptors.request.use(
@@ -38,7 +73,9 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const apiError = toApiError(error);
+
+    if (apiError.status === 401) {
       // Redirect to login on unauthorized
       if (typeof window !== 'undefined') {
         localStorage.removeItem('authCredentials');
@@ -46,7 +83,11 @@ apiClient.interceptors.response.use(
         window.location.href = '/login';
       }
     }
-    return Promise.reject(error);
+    if (process.env.NODE_ENV !== 'production') {
+      // eslint-disable-next-line no-console
+      console.error('API error', apiError);
+    }
+    return Promise.reject(apiError);
   }
 );
 

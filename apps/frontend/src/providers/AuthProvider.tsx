@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { User, UserRole } from '@/types';
-import axios from 'axios';
+import { apiClient, ApiError, getErrorMessage } from '@/lib/api';
 
 interface AuthContextType {
   user: User | null;
@@ -19,8 +19,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 interface AuthProviderProps {
   children: ReactNode;
 }
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
@@ -51,9 +49,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       localStorage.setItem('authCredentials', credentials);
 
       // Call /api/auth/me to get user info
-      const response = await axios.get(`${API_URL}/api/auth/me`, {
+      const response = await apiClient.get('/api/auth/me', {
         headers: {
-          'Authorization': `Basic ${credentials}`,
+          Authorization: `Basic ${credentials}`,
         },
       });
 
@@ -84,9 +82,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     } catch (error) {
       console.error('Login error:', error);
+      const message = getErrorMessage(error as ApiError);
       localStorage.removeItem('authCredentials');
       localStorage.removeItem('user');
-      throw error;
+      throw new Error(message);
     }
   };
 

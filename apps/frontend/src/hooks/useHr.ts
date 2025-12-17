@@ -1,6 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
-import api from '@/lib/api';
-import { ApplicationDto, ApplicationDetailDto, PageResponse, ApplicationStatus } from '@/types';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { useSnackbar } from 'notistack';
+import api, { getErrorMessage } from '@/lib/api';
+import { ApplicationDto, ApplicationDetailDto, PageResponse, ApplicationStatus, PasswordResetResponse } from '@/types';
 
 interface ApplicationFilters {
   statuses?: ApplicationStatus[];
@@ -54,5 +55,24 @@ export const useApplication = (id: number) => {
       return response.data;
     },
     enabled: !!id,
+  });
+};
+
+export const useResetTraineePassword = () => {
+  const { enqueueSnackbar } = useSnackbar();
+
+  return useMutation({
+    mutationFn: async (traineeId: number) => {
+      const response = await api.post<PasswordResetResponse>(
+        `/api/hr/trainees/${traineeId}/password/reset`
+      );
+      return response.data;
+    },
+    onSuccess: () => {
+      enqueueSnackbar('Временный пароль сгенерирован', { variant: 'success' });
+    },
+    onError: (error) => {
+      enqueueSnackbar(getErrorMessage(error), { variant: 'error' });
+    },
   });
 };

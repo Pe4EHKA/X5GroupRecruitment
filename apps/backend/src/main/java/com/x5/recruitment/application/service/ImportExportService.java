@@ -149,6 +149,8 @@ public class ImportExportService {
             .totalRows(batch.getTotalRows())
             .successRows(batch.getSuccessRows())
             .failedRows(batch.getFailedRows())
+            .usersCreated(batch.getUsersCreated())
+            .usersLinked(batch.getUsersLinked())
             .completed(batch.getCompleted())
             .createdAt(batch.getCreatedAt())
             .updatedAt(batch.getUpdatedAt())

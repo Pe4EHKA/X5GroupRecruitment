@@ -59,8 +59,12 @@ export interface AdminUser {
 }
 
 export interface PasswordResetResponse {
-  traineeId: number;
+  userId?: number;
+  traineeId?: number;
+  username?: string;
   temporaryPassword: string;
+  password?: string;
+  generated?: boolean;
 }
 
 // Create user request
@@ -304,6 +308,24 @@ export interface PageResponse<T> {
   totalPages: number;
   size: number;
   number: number;
+}
+
+export interface VacancyRequest {
+  code?: string;
+  title: string;
+  description?: string;
+  department?: string;
+  location?: string;
+  positionsAvailable?: number;
+  startDate?: string;
+  endDate?: string;
+  active?: boolean;
+}
+
+export interface Vacancy extends VacancyRequest {
+  id: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Stager profile type

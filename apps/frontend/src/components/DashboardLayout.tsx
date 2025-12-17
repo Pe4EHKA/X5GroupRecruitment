@@ -57,7 +57,7 @@ const menuItems: MenuItem[] = [
   { text: 'Входящие', icon: <Inbox />, path: '/hm/inbox', roles: [UserRole.HM] },
   
   // Admin menu
-  { text: 'Программы', icon: <Business />, path: '/admin/programs', roles: [UserRole.ADMIN] },
+  { text: 'Программы', icon: <Business />, path: '/admin/programs', roles: [UserRole.ADMIN, UserRole.RECRUITER] },
   { text: 'Шаблоны', icon: <Notifications />, path: '/admin/templates', roles: [UserRole.ADMIN] },
   { text: 'Пользователи', icon: <People />, path: '/admin/users', roles: [UserRole.ADMIN] },
   { text: 'Аудит', icon: <AdminPanelSettings />, path: '/admin/audit', roles: [UserRole.ADMIN] },

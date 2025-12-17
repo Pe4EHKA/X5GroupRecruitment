@@ -1,8 +1,8 @@
 package com.x5.recruitment.api.dto;
 
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,13 +26,17 @@ public class CreateApplicationRequest {
     @NotBlank(message = "Email is required")
     @Email(message = "Email should be valid")
     private String email;
-    
+
     private String phone;
-    
-    @NotNull(message = "Vacancy ID is required")
     private Long vacancyId;
+    private String vacancyTitle;
     
     private String coverLetter;
-    
+
     private String additionalInfo;
+
+    @AssertTrue(message = "Vacancy ID or title is required")
+    public boolean hasVacancyReference() {
+        return (vacancyId != null) || (vacancyTitle != null && !vacancyTitle.isBlank());
+    }
 }

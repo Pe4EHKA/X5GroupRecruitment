@@ -34,7 +34,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSnackbar } from 'notistack';
 import DashboardLayout from '@/components/DashboardLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import { UserRole, UserStatus, AdminUser, UpdateUserRequest, UpdateRolesRequest, UpdateStatusRequest } from '@/types';
+import { UserRole, UserStatus, AdminUser, UpdateUserRequest, UpdateRolesRequest, UpdateStatusRequest, PasswordResetResponse } from '@/types';
 import { adminUserService } from '@/services/adminUserService';
 
 interface PageProps {
@@ -55,6 +55,8 @@ export default function UserDetailsPage({ params }: PageProps) {
     open: boolean;
     action: 'disable' | 'removeAdmin' | null;
   }>({ open: false, action: null });
+  const [newPassword, setNewPassword] = useState('');
+  const [issuedPassword, setIssuedPassword] = useState<string | null>(null);
 
   // Fetch user
   const { data: user, isLoading, error } = useQuery({
@@ -128,6 +130,22 @@ export default function UserDetailsPage({ params }: PageProps) {
         { variant: 'error' }
       );
       setConfirmDialog({ open: false, action: null });
+    },
+  });
+
+  const resetPasswordMutation = useMutation({
+    mutationFn: () => adminUserService.resetPassword(userId, newPassword || undefined),
+    onSuccess: (response: PasswordResetResponse) => {
+      const password = response.password || response.temporaryPassword;
+      setIssuedPassword(password || null);
+      enqueueSnackbar('Пароль сброшен', { variant: 'success' });
+      setNewPassword('');
+    },
+    onError: (error: any) => {
+      enqueueSnackbar(
+        `Ошибка сброса пароля: ${error.response?.data?.message || error.message}`,
+        { variant: 'error' }
+      );
     },
   });
 
@@ -351,6 +369,37 @@ export default function UserDetailsPage({ params }: PageProps) {
                 >
                   Обновить статус
                 </Button>
+              </Paper>
+
+              {/* Password reset */}
+              <Paper sx={{ p: 3, mt: 3 }}>
+                <Typography variant="h6" gutterBottom>
+                  Сбросить пароль
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  Укажите новый пароль или оставьте поле пустым, чтобы сгенерировать временный.
+                </Typography>
+                <Box display="flex" gap={2} mb={2}>
+                  <TextField
+                    label="Новый пароль"
+                    type="text"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    fullWidth
+                  />
+                  <Button
+                    variant="contained"
+                    onClick={() => resetPasswordMutation.mutate()}
+                    disabled={resetPasswordMutation.isPending}
+                  >
+                    Сбросить
+                  </Button>
+                </Box>
+                {issuedPassword && (
+                  <Alert severity="success">
+                    Новый пароль: <strong>{issuedPassword}</strong>
+                  </Alert>
+                )}
               </Paper>
 
               {/* Metadata */}

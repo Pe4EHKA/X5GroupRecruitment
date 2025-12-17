@@ -3,6 +3,7 @@ package com.x5.recruitment.application.service;
 import com.x5.recruitment.api.dto.*;
 import com.x5.recruitment.domain.model.*;
 import com.x5.recruitment.domain.repository.*;
+import org.springframework.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -32,6 +33,7 @@ public class ApplicationService {
     private final ApplicationRepository applicationRepository;
     private final CandidateRepository candidateRepository;
     private final VacancyRepository vacancyRepository;
+    private final VacancyService vacancyService;
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
     private final EntityManager entityManager;
@@ -56,9 +58,16 @@ public class ApplicationService {
                 return candidateRepository.save(newCandidate);
             });
 
-        // Find vacancy
-        Vacancy vacancy = vacancyRepository.findById(request.getVacancyId())
-            .orElseThrow(() -> new IllegalArgumentException("Vacancy not found: " + request.getVacancyId()));
+        // Find or create vacancy
+        Vacancy vacancy;
+        if (request.getVacancyId() != null) {
+            vacancy = vacancyRepository.findById(request.getVacancyId())
+                .orElseThrow(() -> new IllegalArgumentException("Vacancy not found: " + request.getVacancyId()));
+        } else if (StringUtils.hasText(request.getVacancyTitle())) {
+            vacancy = vacancyService.findOrCreateByTitle(request.getVacancyTitle().trim());
+        } else {
+            throw new IllegalArgumentException("Vacancy reference is required");
+        }
 
         // Check for duplicate application
         if (applicationRepository.findByCandidateIdAndVacancyId(candidate.getId(), vacancy.getId()).isPresent()) {

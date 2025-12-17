@@ -1,6 +1,7 @@
 package com.x5.recruitment.domain.model;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.x5.recruitment.domain.converter.JsonNodeConverter;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -56,8 +57,8 @@ public class Transcription {
     /**
      * Timestamped segments as JSON (optional)
      */
-    @Column(columnDefinition = "JSONB")
-    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    @Convert(converter = JsonNodeConverter.class)
     private JsonNode segments;
 
     /**

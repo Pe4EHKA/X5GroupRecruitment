@@ -28,6 +28,7 @@ public class GlobalExceptionHandler {
         
         ErrorResponse error = new ErrorResponse(
             HttpStatus.NOT_FOUND.value(),
+            HttpStatus.NOT_FOUND.name(),
             ex.getMessage(),
             LocalDateTime.now()
         );
@@ -41,6 +42,7 @@ public class GlobalExceptionHandler {
         
         ErrorResponse error = new ErrorResponse(
             HttpStatus.CONFLICT.value(),
+            HttpStatus.CONFLICT.name(),
             ex.getMessage(),
             LocalDateTime.now()
         );
@@ -54,6 +56,7 @@ public class GlobalExceptionHandler {
         
         ErrorResponse error = new ErrorResponse(
             HttpStatus.BAD_REQUEST.value(),
+            HttpStatus.BAD_REQUEST.name(),
             ex.getMessage(),
             LocalDateTime.now()
         );
@@ -67,6 +70,7 @@ public class GlobalExceptionHandler {
         
         ErrorResponse error = new ErrorResponse(
             HttpStatus.CONFLICT.value(),
+            HttpStatus.CONFLICT.name(),
             ex.getMessage(),
             LocalDateTime.now()
         );
@@ -80,6 +84,7 @@ public class GlobalExceptionHandler {
         
         ErrorResponse error = new ErrorResponse(
             HttpStatus.FORBIDDEN.value(),
+            HttpStatus.FORBIDDEN.name(),
             "Access denied",
             LocalDateTime.now()
         );
@@ -100,6 +105,7 @@ public class GlobalExceptionHandler {
 
         ValidationErrorResponse response = new ValidationErrorResponse(
             HttpStatus.BAD_REQUEST.value(),
+            HttpStatus.BAD_REQUEST.name(),
             "Validation failed",
             errors,
             LocalDateTime.now()
@@ -114,6 +120,7 @@ public class GlobalExceptionHandler {
         
         ErrorResponse error = new ErrorResponse(
             HttpStatus.INTERNAL_SERVER_ERROR.value(),
+            HttpStatus.INTERNAL_SERVER_ERROR.name(),
             "An unexpected error occurred. Please contact support if the issue persists.",
             LocalDateTime.now()
         );
@@ -127,6 +134,7 @@ public class GlobalExceptionHandler {
         
         ErrorResponse error = new ErrorResponse(
             HttpStatus.INTERNAL_SERVER_ERROR.value(),
+            HttpStatus.INTERNAL_SERVER_ERROR.name(),
             "An unexpected error occurred",
             LocalDateTime.now()
         );
@@ -134,12 +142,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 
-    public record ErrorResponse(int status, String message, LocalDateTime timestamp) {}
-    
+    public record ErrorResponse(int status, String code, String message, LocalDateTime timestamp) {}
+
     public record ValidationErrorResponse(
-        int status, 
-        String message, 
-        Map<String, String> errors, 
+        int status,
+        String code,
+        String message,
+        Map<String, String> errors,
         LocalDateTime timestamp
     ) {}
 }

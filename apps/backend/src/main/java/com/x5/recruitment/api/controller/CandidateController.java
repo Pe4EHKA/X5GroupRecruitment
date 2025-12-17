@@ -34,9 +34,9 @@ public class CandidateController {
     @GetMapping("/status")
     public ResponseEntity<List<CandidateStatusDto>> getStatus(
             @RequestParam(required = true) String token) {
-        
+
         if (token == null || token.isBlank()) {
-            return ResponseEntity.badRequest().build();
+            throw new IllegalArgumentException("Token parameter is required");
         }
         
         List<CandidateStatusDto> statuses = candidateService.getCandidateStatus(token);

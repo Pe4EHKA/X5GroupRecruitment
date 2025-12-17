@@ -728,10 +728,26 @@ curl -I http://localhost:3000/_next/static/chunks/webpack-*.js
 - **Статистика и фильтрация** - детальная аналитика по ответам
 - **Стабильные анкеты** - фиксация вопросов на момент подачи заявки
 
-**Документация**: 
+**Документация**:
 - [QUESTIONNAIRE_API.md](docs/QUESTIONNAIRE_API.md) - API документация
 - [QUESTIONNAIRE_FEATURE.md](docs/QUESTIONNAIRE_FEATURE.md) - Описание функционала
 - [IMPLEMENTATION_SUMMARY.md](docs/IMPLEMENTATION_SUMMARY.md) - Технические детали
+- [endpoint-registry.md](docs/endpoint-registry.md) - карта доступных REST-эндпоинтов
+
+## Проверка API и фронтенда
+
+- Импорт/экспорт и доступы описаны в [endpoint-registry.md](docs/endpoint-registry.md).
+- Ошибки валидации и авторизации возвращают структурированный JSON `{ status, code, message, errors? }`.
+
+### Быстрые smoke-check команды
+
+```bash
+# Backend: интеграционные тесты (включая импорт Excel и /api/auth/me)
+cd apps/backend && mvn test
+
+# Frontend: линт и типобезопасная сборка
+cd apps/frontend && npm run lint && npm run build
+```
 
 ## Roadmap
 

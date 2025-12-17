@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSnackbar } from 'notistack';
-import api from '@/lib/api';
+import api, { getErrorMessage } from '@/lib/api';
 import {
   Application,
   ApplicationDetail,
@@ -82,7 +82,7 @@ export function useChangeStatus() {
       enqueueSnackbar('Статус успешно изменен', { variant: 'success' });
     },
     onError: (error: any) => {
-      enqueueSnackbar(error.response?.data?.message || 'Ошибка изменения статуса', { variant: 'error' });
+      enqueueSnackbar(getErrorMessage(error), { variant: 'error' });
     },
   });
 }
@@ -110,7 +110,7 @@ export function useImportXlsx() {
       enqueueSnackbar('Файл успешно импортирован', { variant: 'success' });
     },
     onError: (error: any) => {
-      enqueueSnackbar(error.response?.data?.message || 'Ошибка импорта файла', { variant: 'error' });
+      enqueueSnackbar(getErrorMessage(error), { variant: 'error' });
     },
   });
 }
@@ -141,7 +141,7 @@ export function useExportApproved() {
       enqueueSnackbar('Файл успешно скачан', { variant: 'success' });
     },
     onError: (error: any) => {
-      enqueueSnackbar('Ошибка экспорта файла', { variant: 'error' });
+      enqueueSnackbar(getErrorMessage(error), { variant: 'error' });
     },
   });
 }

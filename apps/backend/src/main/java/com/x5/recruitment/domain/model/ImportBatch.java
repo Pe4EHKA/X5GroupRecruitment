@@ -32,21 +32,27 @@ public class ImportBatch {
     @Column(name = "uploaded_at", nullable = false)
     private LocalDateTime uploadedAt;
 
+    @Builder.Default
     @Column(name = "total_rows", nullable = false)
     private Integer totalRows = 0;
 
+    @Builder.Default
     @Column(name = "success_rows", nullable = false)
     private Integer successRows = 0;
 
+    @Builder.Default
     @Column(name = "failed_rows", nullable = false)
     private Integer failedRows = 0;
 
+    @Builder.Default
     @Column(name = "users_created", nullable = false)
     private Integer usersCreated = 0;
 
+    @Builder.Default
     @Column(name = "users_linked", nullable = false)
     private Integer usersLinked = 0;
 
+    @Builder.Default
     @Column(name = "completed", nullable = false)
     private Boolean completed = false;
 
@@ -62,6 +68,26 @@ public class ImportBatch {
         updatedAt = LocalDateTime.now();
         if (uploadedAt == null) {
             uploadedAt = LocalDateTime.now();
+        }
+
+        // Defensive defaults for counters created via Lombok builder
+        if (totalRows == null) {
+            totalRows = 0;
+        }
+        if (successRows == null) {
+            successRows = 0;
+        }
+        if (failedRows == null) {
+            failedRows = 0;
+        }
+        if (usersCreated == null) {
+            usersCreated = 0;
+        }
+        if (usersLinked == null) {
+            usersLinked = 0;
+        }
+        if (completed == null) {
+            completed = false;
         }
     }
 

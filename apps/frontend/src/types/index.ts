@@ -118,12 +118,15 @@ export interface CandidateDto {
 }
 
 // ApplicationDto from backend API (list view)
+// Use this interface when consuming data from backend API endpoints
 export interface ApplicationDto {
   id: number;
   candidate?: CandidateDto;
-  // Deprecated fields for backward compatibility
+  // @deprecated Use candidate.id instead. Backend maintains for compatibility.
   candidateId?: number;
+  // @deprecated Use candidate.fullName instead. Backend maintains for compatibility.
   candidateName?: string;
+  // @deprecated Use candidate.email instead. Backend maintains for compatibility.
   candidateEmail?: string;
   vacancyId: number;
   vacancyTitle: string;
@@ -134,8 +137,9 @@ export interface ApplicationDto {
   recruiterName?: string;
   hmId?: number;
   hmName?: string;
-  // Deprecated fields
+  // @deprecated Use recruiterId/recruiterName instead. Backend maintains for compatibility.
   assignedRecruiterId?: number;
+  // @deprecated Use recruiterId/recruiterName instead. Backend maintains for compatibility.
   assignedRecruiterName?: string;
   screeningScore?: number;
   createdAt: string;
@@ -144,7 +148,9 @@ export interface ApplicationDto {
   currentComment?: string;
 }
 
-// Application type (for backward compatibility)
+// Application type (legacy interface)
+// @deprecated Use ApplicationDto instead for new code. This interface exists for backward compatibility
+// with existing frontend code that expects non-optional candidate field.
 export interface Application {
   id: number;
   candidate: Candidate;

@@ -55,31 +55,57 @@ X5GroupRecruitment/
 
 ### Требования
 
-- Java 21+
-- Node.js 18+ и npm 9+
-- Docker и Docker Compose
-- Maven 3.8+
+- **Docker и Docker Compose** (рекомендуется) - для контейнеризованного запуска
+- Java 21+ - для локальной разработки backend
+- Node.js 18+ и npm 9+ - для локальной разработки frontend
+- Maven 3.8+ - для локальной разработки backend
 
-### Установка
+### 🐳 Запуск в Docker (Рекомендуется)
+
+Самый простой способ запустить весь стек одной командой:
 
 ```bash
 # Клонировать репозиторий
 git clone https://github.com/Pe4EHKA/X5GroupRecruitment.git
 cd X5GroupRecruitment
 
-# Установить все зависимости
-make install
+# Собрать и запустить все сервисы (БД + Backend + Frontend)
+docker compose up --build
 ```
 
-### Запуск для разработки
+**Готово!** Все сервисы доступны:
+- 🌐 **Frontend UI**: http://localhost:3000
+- 🔧 **Backend API**: http://localhost:8080
+- 📚 **Swagger UI**: http://localhost:8080/swagger-ui.html
+- 🗄️ **PostgreSQL**: localhost:5432 (recruitment/recruitment123)
+
+Для остановки:
+```bash
+# Нажмите Ctrl+C, затем:
+docker compose down
+```
+
+Для просмотра логов:
+```bash
+docker compose logs -f              # все сервисы
+docker compose logs -f frontend     # только frontend
+docker compose logs -f backend      # только backend
+```
+
+### 💻 Запуск для разработки (без Docker)
+
+Для разработки с hot reload:
 
 ```bash
-# Запустить full stack (БД + Backend + Frontend) одной командой
+# 1. Установить все зависимости
+make install
+
+# 2. Запустить full stack одной командой
 make dev
 ```
 
 После запуска будут доступны:
-- **Frontend**: http://localhost:3000
+- **Frontend**: http://localhost:3000 (с hot reload)
 - **Backend API**: http://localhost:8080
 - **Swagger UI**: http://localhost:8080/swagger-ui.html
 - **PostgreSQL**: localhost:5432
@@ -90,29 +116,37 @@ make dev
 make down
 ```
 
-### Просмотр логов
-
-```bash
-make logs
-```
-
 ### Альтернативные команды запуска
 
 ```bash
 # Только база данных
 make db-up
 
-# Только backend
+# Только backend (требует запущенную БД)
 make backend
 
-# Только frontend
+# Только frontend (требует запущенный backend)
 make frontend
 
-# Docker Compose (все в контейнерах)
-make docker-up
+# Docker Compose с пересборкой
+docker compose up --build
+
+# Docker Compose в фоновом режиме
+docker compose up -d
 
 # Остановить Docker Compose
-make docker-down
+docker compose down
+
+# Удалить все данные (включая БД)
+docker compose down -v
+```
+
+### Просмотр логов
+
+```bash
+make logs                          # все Docker сервисы
+docker compose logs -f frontend    # только frontend
+docker compose logs -f backend     # только backend
 ```
 
 ### Проверка работоспособности
@@ -467,6 +501,115 @@ GET /actuator/metrics  - Метрики
 5. Добавить rate limiting
 6. Настроить мониторинг (Prometheus, Grafana)
 7. Добавить distributed tracing (Zipkin, Jaeger)
+
+## Устранение неполадок
+
+### Frontend не загружается / 404 на JS файлах
+
+**Проблема:** При открытии http://localhost:3000 видите ошибки 404 на файлах `/_next/static/chunks/*.js`
+
+**Решение:**
+1. Пересоберите frontend контейнер:
+   ```bash
+   docker compose build frontend
+   docker compose up -d frontend
+   ```
+
+2. Проверьте логи frontend:
+   ```bash
+   docker compose logs frontend
+   ```
+
+3. Убедитесь, что контейнер запустился успешно:
+   ```bash
+   docker compose ps
+   # STATUS должен быть "Up" или "healthy"
+   ```
+
+### Backend не стартует / ошибки подключения к БД
+
+**Проблема:** Backend падает с ошибками соединения с PostgreSQL
+
+**Решение:**
+1. Проверьте, что PostgreSQL запустилась и healthy:
+   ```bash
+   docker compose ps postgres
+   # STATUS должен быть "Up (healthy)"
+   ```
+
+2. Если PostgreSQL не healthy, перезапустите:
+   ```bash
+   docker compose restart postgres
+   docker compose restart backend
+   ```
+
+### Порты уже заняты
+
+**Проблема:** Ошибка `Bind for 0.0.0.0:3000 failed: port is already allocated`
+
+**Решение:**
+1. Найдите процесс, занимающий порт:
+   ```bash
+   # Linux/Mac
+   lsof -i :3000    # для frontend
+   lsof -i :8080    # для backend
+   lsof -i :5432    # для postgres
+   
+   # Windows
+   netstat -ano | findstr :3000
+   ```
+
+2. Остановите процесс или измените порты в `docker-compose.yml`
+
+### SSL/Certificate ошибки при сборке
+
+**Проблема:** Maven или npm падают с ошибками SSL сертификатов
+
+**Решение:** Dockerfiles уже содержат обход SSL для enterprise окружений:
+- Frontend: `npm config set strict-ssl false`
+- Backend: `-Dmaven.resolver.transport=wagon`
+
+Если проблема сохраняется, проверьте корпоративный прокси.
+
+### Очистка и пересборка
+
+Если ничего не помогает, полная очистка:
+
+```bash
+# Остановить все контейнеры
+docker compose down
+
+# Удалить volumes (ВНИМАНИЕ: удалит все данные БД!)
+docker compose down -v
+
+# Очистить Docker build cache
+docker builder prune -a
+
+# Пересобрать все с нуля
+docker compose build --no-cache
+docker compose up
+```
+
+### Проверка работоспособности
+
+Убедитесь, что все работает:
+
+```bash
+# Проверка frontend
+curl http://localhost:3000
+# Должен вернуть HTML с <!DOCTYPE html>
+
+# Проверка backend
+curl http://localhost:8080/actuator/health
+# Должен вернуть: {"status":"UP"}
+
+# Проверка статики frontend
+curl -I http://localhost:3000/_next/static/chunks/webpack-*.js
+# Должен вернуть: HTTP/1.1 200 OK
+
+# Или запустите smoke tests
+./docs/smoke.sh
+```
 
 ## Известные ограничения MVP
 

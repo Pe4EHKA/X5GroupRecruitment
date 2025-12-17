@@ -5,12 +5,15 @@ WORKDIR /app
 
 # Pre-download dependencies to speed up subsequent builds
 COPY apps/backend/pom.xml ./pom.xml
+# Note: dependency:go-offline can fail in CI with self-signed certs, but actual build will re-download
+# Using || true to allow build to continue - dependencies will be downloaded during the package phase
 RUN --mount=type=cache,target=/root/.m2 \
     mvn -B -DskipTests \
     -Dmaven.wagon.http.ssl.insecure=true \
     -Dmaven.wagon.http.ssl.allowall=true \
     -Dmaven.wagon.http.ssl.ignore.validity.dates=true \
-    dependency:go-offline
+    -Dmaven.resolver.transport=wagon \
+    dependency:go-offline || true
 
 # Copy source code and build
 COPY apps/backend/src ./src
@@ -18,7 +21,8 @@ RUN --mount=type=cache,target=/root/.m2 \
     mvn clean package -DskipTests -B \
     -Dmaven.wagon.http.ssl.insecure=true \
     -Dmaven.wagon.http.ssl.allowall=true \
-    -Dmaven.wagon.http.ssl.ignore.validity.dates=true && \
+    -Dmaven.wagon.http.ssl.ignore.validity.dates=true \
+    -Dmaven.resolver.transport=wagon && \
     mv target/*.jar app.jar
 
 # Runtime stage with JRE 21 for smaller image

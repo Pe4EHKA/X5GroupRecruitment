@@ -74,6 +74,7 @@ export default function HRDashboard() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(20);
   const [traineeId, setTraineeId] = useState('');
+  const [customPassword, setCustomPassword] = useState('');
   const [temporaryPassword, setTemporaryPassword] = useState<string | null>(null);
 
   const { data, isLoading, refetch } = useApplications({
@@ -115,8 +116,12 @@ export default function HRDashboard() {
     }
 
     try {
-      const response = await resetPassword.mutateAsync(parsedId);
+      const response = await resetPassword.mutateAsync({
+        traineeId: parsedId,
+        newPassword: customPassword || undefined,
+      });
       setTemporaryPassword(response.temporaryPassword);
+      setCustomPassword('');
     } catch (error) {
       // Notifications handled in mutation
       console.error(error);
@@ -163,6 +168,13 @@ export default function HRDashboard() {
                   setTemporaryPassword(null);
                 }}
                 sx={{ maxWidth: 240 }}
+              />
+              <TextField
+                label="Новый пароль (опционально)"
+                type="text"
+                value={customPassword}
+                onChange={(e) => setCustomPassword(e.target.value)}
+                sx={{ maxWidth: 260 }}
               />
               <Button
                 variant="contained"

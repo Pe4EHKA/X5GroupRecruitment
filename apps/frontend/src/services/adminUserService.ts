@@ -72,4 +72,14 @@ export const adminUserService = {
     const { data } = await api.put<AdminUser>(`/api/admin/users/${id}/status`, request);
     return data;
   },
+
+  /**
+   * Reset user password and optionally set a custom one
+   */
+  async resetPassword(id: number, newPassword?: string) {
+    const { data } = await api.post(`/api/admin/users/${id}/password/reset`, {
+      newPassword,
+    });
+    return data;
+  },
 };

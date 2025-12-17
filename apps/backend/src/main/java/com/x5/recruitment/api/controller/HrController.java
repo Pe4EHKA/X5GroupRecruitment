@@ -4,6 +4,7 @@ import com.x5.recruitment.api.dto.ApplicationDetailDto;
 import com.x5.recruitment.api.dto.ApplicationDto;
 import com.x5.recruitment.api.dto.ChangeStatusRequest;
 import com.x5.recruitment.api.dto.PageResponseDto;
+import com.x5.recruitment.api.dto.PasswordResetRequest;
 import com.x5.recruitment.api.dto.PasswordResetResponse;
 import com.x5.recruitment.api.dto.questionnaire.*;
 import com.x5.recruitment.application.service.ApplicationService;
@@ -130,8 +131,9 @@ public class HrController {
     )
     @PostMapping("/trainees/{traineeId}/password/reset")
     public ResponseEntity<PasswordResetResponse> resetTraineePassword(
-            @PathVariable Long traineeId) {
-        PasswordResetResponse response = userService.resetTraineePassword(traineeId);
+            @PathVariable Long traineeId,
+            @RequestBody(required = false) PasswordResetRequest request) {
+        PasswordResetResponse response = userService.resetTraineePassword(traineeId, request);
         return ResponseEntity.ok(response);
     }
 

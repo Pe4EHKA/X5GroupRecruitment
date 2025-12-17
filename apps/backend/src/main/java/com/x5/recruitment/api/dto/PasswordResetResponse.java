@@ -13,6 +13,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PasswordResetResponse {
+    private Long userId;
     private Long traineeId;
+    private String username;
     private String temporaryPassword;
+    private String password;
+    private boolean generated;
 }

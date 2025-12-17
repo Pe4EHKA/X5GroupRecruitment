@@ -42,10 +42,17 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // Public endpoints
                 .requestMatchers("/api/candidate/**").permitAll()
+                .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                 
-                // Recruiter endpoints
+                // HR endpoints (RECRUITER role in MVP)
+                .requestMatchers("/api/hr/**").hasAnyRole("RECRUITER", "ADMIN")
+                
+                // Stager endpoints
+                .requestMatchers("/api/stager/**").hasAnyRole("STAGER", "CANDIDATE", "ADMIN")
+                
+                // Recruiter endpoints (legacy, kept for backward compatibility)
                 .requestMatchers("/api/recruiter/**").hasAnyRole("RECRUITER", "ADMIN")
                 
                 // HM endpoints

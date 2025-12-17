@@ -179,4 +179,75 @@ public class CandidateService {
             default -> "Status update in progress.";
         };
     }
+    
+    /**
+     * Get candidate profile by email.
+     */
+    public StagerProfileDto getCandidateProfile(String email) {
+        log.debug("Fetching profile for candidate email: {}", email);
+        
+        Candidate candidate = candidateRepository.findByEmail(email)
+            .orElseThrow(() -> new IllegalArgumentException("Candidate not found"));
+        
+        return StagerProfileDto.builder()
+            .id(candidate.getId())
+            .firstName(candidate.getFirstName())
+            .lastName(candidate.getLastName())
+            .email(candidate.getEmail())
+            .phone(candidate.getPhone())
+            .city(candidate.getCity())
+            .university(candidate.getUniversity())
+            .course(candidate.getCourse())
+            .telegram(candidate.getTelegram())
+            .birthYear(candidate.getBirthYear())
+            .build();
+    }
+    
+    /**
+     * Update candidate profile.
+     */
+    @Transactional
+    public StagerProfileDto updateCandidateProfile(String email, UpdateStagerProfileRequest request) {
+        log.debug("Updating profile for candidate email: {}", email);
+        
+        Candidate candidate = candidateRepository.findByEmail(email)
+            .orElseThrow(() -> new IllegalArgumentException("Candidate not found"));
+        
+        // Update only provided fields
+        if (request.getPhone() != null) {
+            candidate.setPhone(request.getPhone());
+        }
+        if (request.getCity() != null) {
+            candidate.setCity(request.getCity());
+        }
+        if (request.getUniversity() != null) {
+            candidate.setUniversity(request.getUniversity());
+        }
+        if (request.getCourse() != null) {
+            candidate.setCourse(request.getCourse());
+        }
+        if (request.getTelegram() != null) {
+            candidate.setTelegram(request.getTelegram());
+        }
+        if (request.getBirthYear() != null) {
+            candidate.setBirthYear(request.getBirthYear());
+        }
+        
+        candidate = candidateRepository.save(candidate);
+        
+        log.info("Updated profile for candidate: {}", email);
+        
+        return StagerProfileDto.builder()
+            .id(candidate.getId())
+            .firstName(candidate.getFirstName())
+            .lastName(candidate.getLastName())
+            .email(candidate.getEmail())
+            .phone(candidate.getPhone())
+            .city(candidate.getCity())
+            .university(candidate.getUniversity())
+            .course(candidate.getCourse())
+            .telegram(candidate.getTelegram())
+            .birthYear(candidate.getBirthYear())
+            .build();
+    }
 }

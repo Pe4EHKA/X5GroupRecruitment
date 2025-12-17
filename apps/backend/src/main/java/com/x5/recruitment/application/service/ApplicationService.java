@@ -6,10 +6,17 @@ import com.x5.recruitment.domain.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,6 +34,7 @@ public class ApplicationService {
     private final VacancyRepository vacancyRepository;
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
+    private final EntityManager entityManager;
 
     /**
      * Create new application (with candidate deduplication).
@@ -298,5 +306,132 @@ public class ApplicationService {
             .feedbacks(feedbackDtos)
             .interviews(interviewDtos)
             .build();
+    }
+    
+    /**
+     * Get applications with advanced filters for HR dashboard.
+     * Supports filtering by status, vacancy, date range, and search.
+     */
+    @Transactional(readOnly = true)
+    public Page<ApplicationDto> getApplicationsWithFilters(
+            List<ApplicationStatus> statuses,
+            Long vacancyId,
+            LocalDate dateFrom,
+            LocalDate dateTo,
+            String search,
+            Pageable pageable) {
+        
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Application> query = cb.createQuery(Application.class);
+        Root<Application> application = query.from(Application.class);
+        
+        // Fetch joins to avoid N+1 queries
+        application.fetch("candidate", JoinType.LEFT);
+        application.fetch("vacancy", JoinType.LEFT);
+        application.fetch("assignedRecruiter", JoinType.LEFT);
+        
+        List<Predicate> predicates = new ArrayList<>();
+        
+        // Status filter
+        if (statuses != null && !statuses.isEmpty()) {
+            predicates.add(application.get("status").in(statuses));
+        }
+        
+        // Vacancy filter
+        if (vacancyId != null) {
+            predicates.add(cb.equal(application.get("vacancy").get("id"), vacancyId));
+        }
+        
+        // Date range filter
+        if (dateFrom != null) {
+            LocalDateTime startOfDay = dateFrom.atStartOfDay();
+            predicates.add(cb.greaterThanOrEqualTo(application.get("createdAt"), startOfDay));
+        }
+        if (dateTo != null) {
+            LocalDateTime endOfDay = dateTo.atTime(23, 59, 59);
+            predicates.add(cb.lessThanOrEqualTo(application.get("createdAt"), endOfDay));
+        }
+        
+        // Search filter (candidate name, email, phone)
+        if (search != null && !search.trim().isEmpty()) {
+            String searchPattern = "%" + search.toLowerCase() + "%";
+            Join<Application, Candidate> candidate = application.join("candidate", JoinType.LEFT);
+            
+            Predicate namePredicate = cb.or(
+                cb.like(cb.lower(candidate.get("firstName")), searchPattern),
+                cb.like(cb.lower(candidate.get("lastName")), searchPattern)
+            );
+            Predicate emailPredicate = cb.like(cb.lower(candidate.get("email")), searchPattern);
+            Predicate phonePredicate = cb.like(cb.lower(candidate.get("phone")), searchPattern);
+            
+            predicates.add(cb.or(namePredicate, emailPredicate, phonePredicate));
+        }
+        
+        query.where(predicates.toArray(new Predicate[0]));
+        
+        // Apply sorting
+        if (pageable.getSort().isSorted()) {
+            List<Order> orders = new ArrayList<>();
+            pageable.getSort().forEach(order -> {
+                if (order.isAscending()) {
+                    orders.add(cb.asc(application.get(order.getProperty())));
+                } else {
+                    orders.add(cb.desc(application.get(order.getProperty())));
+                }
+            });
+            query.orderBy(orders);
+        }
+        
+        // Execute query with pagination
+        TypedQuery<Application> typedQuery = entityManager.createQuery(query);
+        typedQuery.setFirstResult((int) pageable.getOffset());
+        typedQuery.setMaxResults(pageable.getPageSize());
+        
+        List<Application> applications = typedQuery.getResultList();
+        
+        // Count query for total elements
+        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+        Root<Application> countRoot = countQuery.from(Application.class);
+        countQuery.select(cb.count(countRoot));
+        
+        // Apply same predicates to count query
+        List<Predicate> countPredicates = new ArrayList<>();
+        if (statuses != null && !statuses.isEmpty()) {
+            countPredicates.add(countRoot.get("status").in(statuses));
+        }
+        if (vacancyId != null) {
+            countPredicates.add(cb.equal(countRoot.get("vacancy").get("id"), vacancyId));
+        }
+        if (dateFrom != null) {
+            LocalDateTime startOfDay = dateFrom.atStartOfDay();
+            countPredicates.add(cb.greaterThanOrEqualTo(countRoot.get("createdAt"), startOfDay));
+        }
+        if (dateTo != null) {
+            LocalDateTime endOfDay = dateTo.atTime(23, 59, 59);
+            countPredicates.add(cb.lessThanOrEqualTo(countRoot.get("createdAt"), endOfDay));
+        }
+        if (search != null && !search.trim().isEmpty()) {
+            String searchPattern = "%" + search.toLowerCase() + "%";
+            Join<Application, Candidate> countCandidate = countRoot.join("candidate", JoinType.LEFT);
+            
+            Predicate namePredicate = cb.or(
+                cb.like(cb.lower(countCandidate.get("firstName")), searchPattern),
+                cb.like(cb.lower(countCandidate.get("lastName")), searchPattern)
+            );
+            Predicate emailPredicate = cb.like(cb.lower(countCandidate.get("email")), searchPattern);
+            Predicate phonePredicate = cb.like(cb.lower(countCandidate.get("phone")), searchPattern);
+            
+            countPredicates.add(cb.or(namePredicate, emailPredicate, phonePredicate));
+        }
+        
+        countQuery.where(countPredicates.toArray(new Predicate[0]));
+        Long total = entityManager.createQuery(countQuery).getSingleResult();
+        
+        // Map to DTOs
+        List<ApplicationDto> dtos = applications.stream()
+            .map(this::mapToDto)
+            .toList();
+        
+        return new PageImpl<>(dtos, pageable, total);
     }
 }

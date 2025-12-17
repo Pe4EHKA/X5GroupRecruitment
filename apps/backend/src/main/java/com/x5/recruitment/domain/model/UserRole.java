@@ -11,7 +11,7 @@ public enum UserRole {
     ADMIN,
     
     /**
-     * Recruiter managing candidate pipeline
+     * Recruiter managing candidate pipeline (HR role in MVP)
      */
     RECRUITER,
     
@@ -23,5 +23,11 @@ public enum UserRole {
     /**
      * Candidate viewing their application status
      */
-    CANDIDATE
+    CANDIDATE,
+    
+    /**
+     * Stager (Intern/Candidate) with authenticated access to own application
+     * MVP role for simplified UI
+     */
+    STAGER
 }

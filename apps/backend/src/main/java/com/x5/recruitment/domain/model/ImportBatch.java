@@ -41,6 +41,12 @@ public class ImportBatch {
     @Column(name = "failed_rows", nullable = false)
     private Integer failedRows = 0;
 
+    @Column(name = "users_created", nullable = false)
+    private Integer usersCreated = 0;
+
+    @Column(name = "users_linked", nullable = false)
+    private Integer usersLinked = 0;
+
     @Column(name = "completed", nullable = false)
     private Boolean completed = false;
 
@@ -76,6 +82,20 @@ public class ImportBatch {
      */
     public void incrementFailure() {
         this.failedRows++;
+    }
+
+    /**
+     * Increment users created counter.
+     */
+    public void incrementUsersCreated() {
+        this.usersCreated++;
+    }
+
+    /**
+     * Increment users linked counter.
+     */
+    public void incrementUsersLinked() {
+        this.usersLinked++;
     }
 
     /**

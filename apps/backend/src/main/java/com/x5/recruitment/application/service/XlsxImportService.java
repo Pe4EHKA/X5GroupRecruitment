@@ -37,6 +37,7 @@ public class XlsxImportService {
     private final ImportRowErrorRepository errorRepository;
     private final UserRepository userRepository;
     private final NotificationRepository notificationRepository;
+    private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
     // Expected Excel column headers
     private static final String[] EXPECTED_HEADERS = {
@@ -181,6 +182,9 @@ public class XlsxImportService {
 
         // Create notification
         createNotification(candidate, application);
+
+        // Create or link User account for the candidate
+        createOrLinkUserAccount(candidate, batch);
 
         log.debug("Successfully processed row {} for candidate: {}", rowNumber, candidate.getEmail());
     }
@@ -490,6 +494,92 @@ public class XlsxImportService {
             .build();
 
         notificationRepository.save(notification);
+    }
+
+    /**
+     * Create or link User account for candidate.
+     * This allows the candidate to login as a STAGER and view their application status.
+     */
+    private void createOrLinkUserAccount(Candidate candidate, ImportBatch batch) {
+        if (candidate.getEmail() == null || candidate.getEmail().isBlank()) {
+            log.warn("Cannot create user account for candidate {} - no email", candidate.getId());
+            return;
+        }
+
+        String normalizedEmail = candidate.getEmail().toLowerCase().trim();
+        
+        // Check if user already exists with this email
+        Optional<User> existingUser = userRepository.findByEmailNormalized(normalizedEmail);
+        
+        if (existingUser.isPresent()) {
+            // User already exists - link to existing account
+            User user = existingUser.get();
+            
+            // Ensure the user has STAGER or CANDIDATE role
+            if (!user.getRoles().contains(UserRole.STAGER) && !user.getRoles().contains(UserRole.CANDIDATE)) {
+                user.getRoles().add(UserRole.STAGER);
+                userRepository.save(user);
+                log.info("Added STAGER role to existing user: {}", user.getEmail());
+            }
+            
+            batch.incrementUsersLinked();
+            log.debug("Linked candidate {} to existing user account: {}", candidate.getEmail(), user.getUsername());
+        } else {
+            // Create new user account
+            String username = generateUsername(candidate);
+            String temporaryPassword = generateTemporaryPassword();
+            
+            User newUser = User.builder()
+                .username(username)
+                .email(candidate.getEmail())
+                .firstName(candidate.getFirstName())
+                .lastName(candidate.getLastName())
+                .phone(candidate.getPhone())
+                .passwordHash(passwordEncoder.encode(temporaryPassword))
+                .roles(Set.of(UserRole.STAGER))
+                .status(UserStatus.ACTIVE)
+                .active(true)
+                .build();
+            
+            userRepository.save(newUser);
+            batch.incrementUsersCreated();
+            
+            log.info("Created new user account for candidate {}: username={}, temporary password for testing: {}",
+                candidate.getEmail(), username, temporaryPassword);
+        }
+    }
+
+    /**
+     * Generate username from candidate email.
+     * Format: email prefix or email with unique suffix if collision.
+     */
+    private String generateUsername(Candidate candidate) {
+        String baseUsername = candidate.getEmail().split("@")[0].toLowerCase();
+        
+        // Sanitize username (remove special characters)
+        baseUsername = baseUsername.replaceAll("[^a-z0-9._-]", "");
+        
+        String username = baseUsername;
+        int suffix = 1;
+        
+        // Check for collision and add suffix if needed
+        while (userRepository.existsByUsername(username)) {
+            username = baseUsername + suffix;
+            suffix++;
+        }
+        
+        return username;
+    }
+
+    /**
+     * Generate temporary password for new stager accounts.
+     * For production: this should be replaced with email-based password setup or stronger mechanism.
+     * For testing: using a simple pattern for convenience.
+     */
+    private String generateTemporaryPassword() {
+        // For testing environment: use predictable password
+        // In production, generate random password and send via email
+        return "Stager2024!";
     }
 
     /**

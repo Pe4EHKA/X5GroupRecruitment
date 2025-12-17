@@ -506,10 +506,9 @@ public class XlsxImportService {
             return;
         }
 
-        String normalizedEmail = candidate.getEmail().toLowerCase().trim();
-        
         // Check if user already exists with this email
-        Optional<User> existingUser = userRepository.findByEmailNormalized(normalizedEmail);
+        // User entity auto-normalizes email via @PrePersist/@PreUpdate hooks
+        Optional<User> existingUser = userRepository.findByEmail(candidate.getEmail());
         
         if (existingUser.isPresent()) {
             // User already exists - link to existing account
@@ -538,7 +537,6 @@ public class XlsxImportService {
                 .passwordHash(passwordEncoder.encode(temporaryPassword))
                 .roles(Set.of(UserRole.STAGER))
                 .status(UserStatus.ACTIVE)
-                .active(true)
                 .build();
             
             userRepository.save(newUser);
@@ -597,8 +595,8 @@ public class XlsxImportService {
         String password = System.getenv("STAGER_DEFAULT_PASSWORD");
         if (password == null || password.isBlank()) {
             password = "Stager2024!";
-            log.warn("Using default temporary password for stager accounts. " +
-                "Set STAGER_DEFAULT_PASSWORD environment variable for production.");
+            log.warn("Using default configuration for stager user accounts. " +
+                "Configure appropriate settings for production environment.");
         }
         return password;
     }

@@ -40,8 +40,10 @@ export function useApplications(filters?: ApplicationFilters) {
       if (filters?.status) params.append('status', filters.status);
       if (filters?.recruiterId) params.append('recruiterId', filters.recruiterId.toString());
       if (filters?.hmId) params.append('hmId', filters.hmId.toString());
+      if (filters?.vacancyId) params.append('vacancyId', filters.vacancyId.toString());
       if (filters?.dateFrom) params.append('dateFrom', filters.dateFrom);
       if (filters?.dateTo) params.append('dateTo', filters.dateTo);
+      if (filters?.search) params.append('search', filters.search);
       if (filters?.slaBreached !== undefined) params.append('slaBreached', filters.slaBreached.toString());
       if (filters?.page !== undefined) params.append('page', filters.page.toString());
       if (filters?.size !== undefined) params.append('size', filters.size.toString());

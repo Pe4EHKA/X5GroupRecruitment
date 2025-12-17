@@ -23,4 +23,10 @@ public class StagerProfileDto {
     private String course;
     private String telegram;
     private Integer birthYear;
+    private String citizenship;
+    private String speciality;
+    private String schedule;
+    private String source;
+    private java.util.List<String> languages;
+    private String additionalInfo;
 }

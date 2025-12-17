@@ -23,8 +23,10 @@ import {
   MenuItem,
   Grid,
   Button,
+  InputAdornment,
 } from '@mui/material';
-import { Visibility, Warning } from '@mui/icons-material';
+import { Visibility, Search as SearchIcon } from '@mui/icons-material';
+import { useQuery } from '@tanstack/react-query';
 import DashboardLayout from '@/components/DashboardLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import StatusBadge from '@/components/StatusBadge';
@@ -32,6 +34,7 @@ import { UserRole, ApplicationStatus, ApplicationFilters } from '@/types';
 import { useApplications } from '@/hooks/useRecruiter';
 import { getCandidateFullName, getCandidateEmail } from '@/lib/utils';
 import { format } from 'date-fns';
+import { vacancyService } from '@/services/vacancyService';
 
 export default function ApplicationsPage() {
   const router = useRouter();
@@ -42,6 +45,7 @@ export default function ApplicationsPage() {
     size: 25,
   });
 
+  const { data: vacancies } = useQuery({ queryKey: ['vacancies'], queryFn: vacancyService.list });
   const { data, isLoading } = useApplications(filters);
 
   const handleChangePage = (_: unknown, newPage: number) => {
@@ -88,6 +92,45 @@ export default function ApplicationsPage() {
           {/* Filters */}
           <Paper sx={{ p: 2, mb: 3 }}>
             <Grid container spacing={2}>
+              <Grid item xs={12} sm={6} md={3}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="Поиск по кандидату"
+                  placeholder="ФИО, email или телефон"
+                  value={filters.search || ''}
+                  onChange={(e) => handleFilterChange('search', e.target.value || undefined)}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Вакансия</InputLabel>
+                  <Select
+                    value={filters.vacancyId || ''}
+                    label="Вакансия"
+                    onChange={(e) =>
+                      handleFilterChange(
+                        'vacancyId',
+                        e.target.value ? Number(e.target.value) : undefined
+                      )
+                    }
+                  >
+                    <MenuItem value="">Все</MenuItem>
+                    {vacancies?.map((vacancy) => (
+                      <MenuItem key={vacancy.id} value={vacancy.id}>
+                        {vacancy.title}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
               <Grid item xs={12} sm={6} md={3}>
                 <FormControl fullWidth size="small">
                   <InputLabel>Статус</InputLabel>

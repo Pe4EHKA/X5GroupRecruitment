@@ -51,6 +51,7 @@ const menuItems: MenuItem[] = [
   { text: 'Заявки', icon: <Assignment />, path: '/recruiter/applications', roles: [UserRole.RECRUITER] },
   { text: 'Импорт', icon: <Upload />, path: '/recruiter/import', roles: [UserRole.RECRUITER] },
   { text: 'Экспорт', icon: <Download />, path: '/recruiter/export', roles: [UserRole.RECRUITER] },
+  { text: 'HR Dashboard', icon: <People />, path: '/hr', roles: [UserRole.RECRUITER, UserRole.ADMIN] },
   
   // HM menu
   { text: 'Входящие', icon: <Inbox />, path: '/hm/inbox', roles: [UserRole.HM] },

@@ -204,7 +204,8 @@ public class MediaService {
     /**
      * Convert Media to response DTO
      */
-    private MediaResponse toResponse(Media media) {
+    @Transactional(readOnly = true)
+    public MediaResponse toResponse(Media media) {
         MediaResponse.MediaResponseBuilder builder = MediaResponse.builder()
             .id(media.getId())
             .storageKey(media.getStorageKey())

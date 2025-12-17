@@ -1,15 +1,21 @@
 package com.x5.recruitment.application.service;
 
 import com.x5.recruitment.api.dto.*;
+import com.x5.recruitment.api.dto.questionnaire.MediaResponse;
+import com.x5.recruitment.api.dto.questionnaire.VideoUploadResponse;
 import com.x5.recruitment.domain.model.Application;
 import com.x5.recruitment.domain.model.ApplicationStatus;
 import com.x5.recruitment.domain.model.Candidate;
+import com.x5.recruitment.domain.model.Media;
+import com.x5.recruitment.domain.model.User;
 import com.x5.recruitment.domain.repository.ApplicationRepository;
 import com.x5.recruitment.domain.repository.CandidateRepository;
+import com.x5.recruitment.domain.repository.MediaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,6 +31,8 @@ public class CandidateService {
 
     private final CandidateRepository candidateRepository;
     private final ApplicationRepository applicationRepository;
+    private final MediaRepository mediaRepository;
+    private final MediaService mediaService;
 
     /**
      * Get candidate applications by access token.
@@ -100,6 +108,31 @@ public class CandidateService {
             .collect(Collectors.toList());
     }
 
+    /**
+     * Upload or replace candidate's video presentation for a specific application.
+     */
+    @Transactional
+    public MediaResponse uploadVideoPresentation(Long applicationId, String email, MultipartFile file, User uploadedBy) {
+        log.info("Uploading video presentation for application {} by candidate {}", applicationId, email);
+
+        Application application = applicationRepository.findById(applicationId)
+            .orElseThrow(() -> new IllegalArgumentException("Application not found"));
+
+        if (!application.getCandidate().getEmail().equals(email)) {
+            throw new SecurityException("You do not have permission to modify this application");
+        }
+
+        VideoUploadResponse uploadResponse = mediaService.uploadVideo(file, uploadedBy);
+
+        Media media = mediaRepository.findById(uploadResponse.getMediaId())
+            .orElseThrow(() -> new IllegalStateException("Uploaded media not found: " + uploadResponse.getMediaId()));
+
+        application.setVideoPresentation(media);
+        applicationRepository.save(application);
+
+        return mediaService.toResponse(media);
+    }
+
     private CandidateStatusDto mapToStatusDto(Application application) {
         return CandidateStatusDto.builder()
             .candidateName(application.getCandidate().getFullName())
@@ -113,6 +146,11 @@ public class CandidateService {
 
     private ApplicationDetailDto mapToDetailDto(Application application) {
         Candidate candidate = application.getCandidate();
+
+        MediaResponse videoPresentation = null;
+        if (application.getVideoPresentation() != null) {
+            videoPresentation = mediaService.toResponse(application.getVideoPresentation());
+        }
         
         // Create nested CandidateDto
         CandidateDto candidateDto = CandidateDto.builder()
@@ -175,6 +213,7 @@ public class CandidateService {
             .currentComment(getStatusDescription(application.getStatus()))
             .preferences(preferenceDtos)
             .statusHistory(statusHistoryDtos)
+            .videoPresentation(videoPresentation)
             .build();
     }
 

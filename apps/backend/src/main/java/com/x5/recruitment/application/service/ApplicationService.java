@@ -1,6 +1,7 @@
 package com.x5.recruitment.application.service;
 
 import com.x5.recruitment.api.dto.*;
+import com.x5.recruitment.api.dto.questionnaire.MediaResponse;
 import com.x5.recruitment.domain.model.*;
 import com.x5.recruitment.domain.repository.*;
 import org.springframework.util.StringUtils;
@@ -37,6 +38,7 @@ public class ApplicationService {
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
     private final EntityManager entityManager;
+    private final MediaService mediaService;
 
     /**
      * Create new application (with candidate deduplication).
@@ -174,6 +176,11 @@ public class ApplicationService {
     private ApplicationDto mapToDto(Application application) {
         Candidate candidate = application.getCandidate();
         User assignedRecruiter = application.getAssignedRecruiter();
+
+        MediaResponse videoPresentation = null;
+        if (application.getVideoPresentation() != null) {
+            videoPresentation = mediaService.toResponse(application.getVideoPresentation());
+        }
         
         // Create nested CandidateDto
         CandidateDto candidateDto = CandidateDto.builder()
@@ -220,6 +227,7 @@ public class ApplicationService {
             .createdAt(application.getCreatedAt())
             .updatedAt(application.getUpdatedAt())
             .statusChangedAt(application.getUpdatedAt())
+            .videoPresentation(videoPresentation)
             .build();
     }
     
@@ -229,6 +237,11 @@ public class ApplicationService {
     private ApplicationDetailDto mapToDetailDto(Application application) {
         Candidate candidate = application.getCandidate();
         User assignedRecruiter = application.getAssignedRecruiter();
+
+        MediaResponse videoPresentation = null;
+        if (application.getVideoPresentation() != null) {
+            videoPresentation = mediaService.toResponse(application.getVideoPresentation());
+        }
         
         // Create nested CandidateDto
         CandidateDto candidateDto = CandidateDto.builder()
@@ -327,6 +340,7 @@ public class ApplicationService {
             .statusHistory(statusHistoryDtos)
             .feedbacks(feedbackDtos)
             .interviews(interviewDtos)
+            .videoPresentation(videoPresentation)
             .build();
     }
     

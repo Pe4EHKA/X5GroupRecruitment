@@ -3,17 +3,20 @@ package com.x5.recruitment.api.controller;
 import com.x5.recruitment.api.dto.ApplicationDetailDto;
 import com.x5.recruitment.api.dto.CandidateStatusDto;
 import com.x5.recruitment.api.dto.StatusHistoryDto;
+import com.x5.recruitment.api.dto.questionnaire.MediaResponse;
 import com.x5.recruitment.application.service.CandidateService;
 import com.x5.recruitment.application.service.UserService;
 import com.x5.recruitment.domain.model.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -64,6 +67,19 @@ public class CandidateController {
         User user = userService.getUserEntityByUsername(principal.getUsername());
         ApplicationDetailDto application = candidateService.getApplicationForCandidate(id, user.getEmail());
         return ResponseEntity.ok(application);
+    }
+
+    @Operation(summary = "Upload my video presentation", description = "Upload or update video introduction for my application")
+    @PostMapping(value = "/me/applications/{id}/video", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('CANDIDATE')")
+    public ResponseEntity<MediaResponse> uploadMyVideoPresentation(
+            @PathVariable Long id,
+            @RequestParam("file") MultipartFile file,
+            @AuthenticationPrincipal UserDetails principal) {
+
+        User user = userService.getUserEntityByUsername(principal.getUsername());
+        MediaResponse media = candidateService.uploadVideoPresentation(id, user.getEmail(), file, user);
+        return ResponseEntity.ok(media);
     }
 
     @Operation(summary = "Get my status history", description = "Get status history for a specific application")

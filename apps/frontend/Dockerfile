@@ -64,6 +64,7 @@ RUN mkdir .next && chown nextjs:nodejs .next
 # standalone build inside a workspace folder (e.g., /standalone/frontend) or at
 # the root of /standalone.
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./standalone
+
 RUN SERVER_DIR=$(find ./standalone -maxdepth 2 -type f -name server.js -printf '%h' -quit) && \
     if [ -z "$SERVER_DIR" ]; then \
       echo "Could not locate standalone server.js in /app/.next/standalone" >&2; \

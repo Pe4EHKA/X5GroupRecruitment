@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 import {
   Box,
   Typography,
@@ -10,6 +12,9 @@ import {
   Grid,
   Card,
   CardContent,
+  Divider,
+  Stack,
+  Button,
 } from '@mui/material';
 import {
   Timeline,
@@ -28,8 +33,10 @@ import {
 } from '@mui/icons-material';
 import DashboardLayout from '@/components/DashboardLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import { UserRole, ApplicationStatus } from '@/types';
-import { useMyApplications, useMyProfile } from '@/hooks/useStager';
+import VideoRecorder from '@/components/VideoRecorder';
+import { UserRole, ApplicationStatus, TranscriptionStatus, ApplicationDetailDto } from '@/types';
+import { useMyApplications, useMyProfile, useUploadStagerVideo } from '@/hooks/useStager';
+import { API_BASE_URL } from '@/lib/api';
 
 const STATUS_COLORS: Record<ApplicationStatus, string> = {
   [ApplicationStatus.NEW]: '#2196f3',
@@ -72,6 +79,102 @@ const getStatusIcon = (status: ApplicationStatus) => {
       return <ScheduleIcon />;
   }
 };
+
+const getTranscriptionLabel = (status?: TranscriptionStatus) => {
+  switch (status) {
+    case TranscriptionStatus.DONE:
+      return { label: 'Готово', color: 'success' as const };
+    case TranscriptionStatus.PROCESSING:
+      return { label: 'Обработка', color: 'info' as const };
+    case TranscriptionStatus.FAILED:
+      return { label: 'Ошибка', color: 'error' as const };
+    case TranscriptionStatus.PENDING:
+      return { label: 'В очереди', color: 'warning' as const };
+    default:
+      return { label: 'Неизвестно', color: 'default' as const };
+  }
+};
+
+function VideoSection({ application }: { application: ApplicationDetailDto }) {
+  const [recordedFile, setRecordedFile] = useState<File | null>(null);
+  const videoUpload = useUploadStagerVideo(application.id);
+
+  const handleUpload = () => {
+    if (!recordedFile) return;
+
+    videoUpload.mutate(recordedFile, {
+      onSuccess: () => setRecordedFile(null),
+    });
+  };
+
+  return (
+    <Card variant="outlined">
+      <CardContent>
+        <Typography variant="h6" gutterBottom>
+          Видео-визитка
+        </Typography>
+        <Divider sx={{ mb: 2 }} />
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={6}>
+            {application.videoPresentation ? (
+              <Stack spacing={2}>
+                <video
+                  controls
+                  style={{ width: '100%', borderRadius: 8 }}
+                  src={`${API_BASE_URL}${application.videoPresentation.streamUrl}`}
+                />
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <Typography variant="body2" color="text.secondary">
+                    Статус транскрипции:
+                  </Typography>
+                  <Chip size="small" {...getTranscriptionLabel(application.videoPresentation.transcription?.status)} />
+                </Stack>
+                {application.videoPresentation.transcription?.text && (
+                  <Paper variant="outlined" sx={{ p: 2 }}>
+                    <Typography variant="subtitle2" gutterBottom>
+                      Транскрипция
+                    </Typography>
+                    <Typography variant="body2">{application.videoPresentation.transcription.text}</Typography>
+                  </Paper>
+                )}
+                {application.videoPresentation.transcription?.errorMessage && (
+                  <Alert severity="error">{application.videoPresentation.transcription.errorMessage}</Alert>
+                )}
+                {(!application.videoPresentation.transcription ||
+                  application.videoPresentation.transcription.status !== TranscriptionStatus.DONE) && (
+                  <Alert severity="info">Транскрипция появится после обработки. Обычно это занимает пару минут.</Alert>
+                )}
+              </Stack>
+            ) : (
+              <Alert severity="info">Сначала запишите и загрузите видео-визитку.</Alert>
+            )}
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              Запишите короткое видео до 5 минут с рассказом о себе. После загрузки рекрутер увидит ролик и его текстовую
+              расшифровку.
+            </Typography>
+            <VideoRecorder onRecordingComplete={(file) => setRecordedFile(file)} maxDurationSeconds={300} />
+            <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+              <Button
+                variant="contained"
+                onClick={handleUpload}
+                disabled={!recordedFile || videoUpload.isPending}
+              >
+                {videoUpload.isPending ? 'Загрузка...' : 'Загрузить'}
+              </Button>
+              {recordedFile && (
+                <Typography variant="body2" color="text.secondary" sx={{ alignSelf: 'center' }}>
+                  Файл: {recordedFile.name}
+                </Typography>
+              )}
+            </Stack>
+          </Grid>
+        </Grid>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function StagerDashboard() {
   const { data: applications, isLoading } = useMyApplications();
@@ -303,6 +406,10 @@ export default function StagerDashboard() {
                           )}
                         </CardContent>
                       </Card>
+                    </Grid>
+
+                    <Grid item xs={12}>
+                      <VideoSection application={application} />
                     </Grid>
                   </Grid>
                 </Paper>

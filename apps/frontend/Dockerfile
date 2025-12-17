@@ -1,5 +1,6 @@
 # Use Node 20 slim for better compatibility with Next.js 15 and to avoid alpine musl issues
-FROM node:20-slim AS base
+# Pull from gcr.io mirror to avoid transient Docker Hub auth outages
+FROM mirror.gcr.io/library/node:20-slim AS base
 
 # Install dependencies only when needed
 FROM base AS deps

@@ -29,6 +29,13 @@ export enum ApplicationStatus {
   ON_HOLD = 'ON_HOLD',
 }
 
+export enum TranscriptionStatus {
+  PENDING = 'PENDING',
+  PROCESSING = 'PROCESSING',
+  DONE = 'DONE',
+  FAILED = 'FAILED',
+}
+
 // User type
 export interface User {
   id: number;
@@ -179,6 +186,7 @@ export interface ApplicationDto {
   updatedAt: string;
   statusChangedAt: string;
   currentComment?: string;
+  videoPresentation?: MediaResponse;
 }
 
 // Application type (legacy interface)
@@ -198,6 +206,7 @@ export interface Application {
   updatedAt: string;
   statusChangedAt: string;
   currentComment?: string;
+  videoPresentation?: MediaResponse;
 }
 
 // ApplicationDetailDto from backend API (detail view)
@@ -294,6 +303,28 @@ export interface CandidateStatus {
     currentComment?: string;
     nextStep?: string;
   }>;
+}
+
+export interface TranscriptionResponse {
+  id: number;
+  status: TranscriptionStatus;
+  text?: string;
+  language?: string;
+  errorMessage?: string;
+  attempts?: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface MediaResponse {
+  id: number;
+  storageKey: string;
+  mimeType: string;
+  fileSize?: number;
+  duration?: number;
+  streamUrl: string;
+  transcription?: TranscriptionResponse;
+  createdAt?: string;
 }
 
 // Request DTOs

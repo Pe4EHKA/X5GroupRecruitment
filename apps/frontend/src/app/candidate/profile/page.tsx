@@ -8,6 +8,7 @@ import {
   Typography,
   CircularProgress,
   Grid,
+  Button,
   Divider,
   List,
   ListItem,
@@ -16,6 +17,8 @@ import {
   Tab,
   Paper,
   Chip,
+  Alert,
+  Stack,
 } from '@mui/material';
 import {
   Timeline,
@@ -35,11 +38,13 @@ import {
 import DashboardLayout from '@/components/DashboardLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import StatusBadge from '@/components/StatusBadge';
-import { UserRole, ApplicationStatus } from '@/types';
-import { useCandidateApplications } from '@/hooks/useCandidate';
+import VideoRecorder from '@/components/VideoRecorder';
+import { UserRole, ApplicationStatus, TranscriptionStatus } from '@/types';
+import { useCandidateApplications, useUploadVideoPresentation } from '@/hooks/useCandidate';
 import { getCandidateFullName, getCandidateEmail, getCandidatePhone, getCandidateUniversity, getCandidateCourse } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import { API_BASE_URL } from '@/lib/api';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -96,9 +101,33 @@ function getStatusColor(status: ApplicationStatus): 'success' | 'error' | 'warni
 export default function CandidateProfilePage() {
   const [tabValue, setTabValue] = useState(0);
   const { data: applications, isLoading } = useCandidateApplications();
+  const [recordedFile, setRecordedFile] = useState<File | null>(null);
+  const applicationId = applications && applications.length > 0 ? applications[0].id : 0;
+  const videoUpload = useUploadVideoPresentation(applicationId);
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
+  };
+
+  const handleUploadVideo = () => {
+    if (!recordedFile || !applicationId) return;
+
+    videoUpload.mutate(recordedFile, {
+      onSuccess: () => setRecordedFile(null),
+    });
+  };
+
+  const getTranscriptionLabel = (status?: TranscriptionStatus) => {
+    switch (status) {
+      case TranscriptionStatus.DONE:
+        return { label: 'Готово', color: 'success' as const };
+      case TranscriptionStatus.PROCESSING:
+        return { label: 'Обработка', color: 'info' as const };
+      case TranscriptionStatus.FAILED:
+        return { label: 'Ошибка', color: 'error' as const };
+      default:
+        return { label: 'Ожидание', color: 'warning' as const };
+    }
   };
 
   if (isLoading) {
@@ -174,6 +203,7 @@ export default function CandidateProfilePage() {
               <Tab label="Статус" id="tab-0" aria-controls="tabpanel-0" />
               <Tab label="История" id="tab-1" aria-controls="tabpanel-1" />
               <Tab label="Данные" id="tab-2" aria-controls="tabpanel-2" />
+              <Tab label="Видео-визитка" id="tab-3" aria-controls="tabpanel-3" />
             </Tabs>
           </Paper>
 
@@ -351,6 +381,96 @@ export default function CandidateProfilePage() {
                   </Card>
                 </Grid>
               )}
+            </Grid>
+          </TabPanel>
+
+          <TabPanel value={tabValue} index={3}>
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={6}>
+                <Card>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      Моя видео-визитка
+                    </Typography>
+                    <Divider sx={{ mb: 2 }} />
+                    {application.videoPresentation ? (
+                      <Stack spacing={2}>
+                        <video
+                          controls
+                          style={{ width: '100%', borderRadius: 8 }}
+                          src={`${API_BASE_URL}${application.videoPresentation.streamUrl}`}
+                        />
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <Typography variant="body2" color="text.secondary">
+                            Статус транскрипции:
+                          </Typography>
+                          <Chip
+                            size="small"
+                            {...getTranscriptionLabel(application.videoPresentation.transcription?.status)}
+                          />
+                        </Stack>
+                        {application.videoPresentation.transcription?.text && (
+                          <Paper variant="outlined" sx={{ p: 2 }}>
+                            <Typography variant="subtitle2" gutterBottom>
+                              Транскрипция
+                            </Typography>
+                            <Typography variant="body2">
+                              {application.videoPresentation.transcription.text}
+                            </Typography>
+                          </Paper>
+                        )}
+                        {application.videoPresentation.transcription?.errorMessage && (
+                          <Alert severity="error">{application.videoPresentation.transcription.errorMessage}</Alert>
+                        )}
+                        {(!application.videoPresentation.transcription ||
+                          application.videoPresentation.transcription.status !== TranscriptionStatus.DONE) && (
+                          <Alert severity="info">
+                            Транскрипция появится после обработки. Обычно это занимает пару минут.
+                          </Alert>
+                        )}
+                      </Stack>
+                    ) : (
+                      <Alert severity="info">
+                        Вы еще не добавили видео-визитку. Запишите её и загрузите через форму справа.
+                      </Alert>
+                    )}
+                  </CardContent>
+                </Card>
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <Card>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      Записать и загрузить
+                    </Typography>
+                    <Divider sx={{ mb: 2 }} />
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      Запишите короткое видео до 5 минут с рассказом о себе. Видео сохранится в системе и будет доступно
+                      рекрутеру вместе с текстовой расшифровкой.
+                    </Typography>
+                    <VideoRecorder
+                      onRecordingComplete={(file) => setRecordedFile(file)}
+                      disabled={videoUpload.isPending || !applicationId}
+                      maxDurationSeconds={300}
+                    />
+                    <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+                      <Button
+                        variant="contained"
+                        onClick={handleUploadVideo}
+                        disabled={!recordedFile || videoUpload.isPending || !applicationId}
+                      >
+                        {videoUpload.isPending ? 'Загрузка...' : 'Загрузить'}
+                      </Button>
+                      {recordedFile && (
+                        <Typography variant="body2" color="text.secondary" sx={{ alignSelf: 'center' }}>
+                          Файл: {recordedFile.name}
+                        </Typography>
+                      )}
+                    </Stack>
+                  </CardContent>
+                </Card>
+              </Grid>
             </Grid>
           </TabPanel>
         </Box>

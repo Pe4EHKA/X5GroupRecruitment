@@ -1,5 +1,6 @@
 package com.x5.recruitment.api.dto;
 
+import com.x5.recruitment.api.dto.questionnaire.MediaResponse;
 import com.x5.recruitment.domain.model.ApplicationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -50,4 +51,9 @@ public class ApplicationDto {
     private LocalDateTime updatedAt;
     private LocalDateTime statusChangedAt;
     private String currentComment;
+
+    /**
+     * Candidate's video presentation metadata and transcription
+     */
+    private MediaResponse videoPresentation;
 }

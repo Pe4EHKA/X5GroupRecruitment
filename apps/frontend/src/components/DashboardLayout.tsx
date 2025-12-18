@@ -1,9 +1,11 @@
 'use client';
 
-import { ReactNode, useState } from 'react';
+import { ReactNode, useMemo, useState } from 'react';
 import {
   AppBar,
+  Avatar,
   Box,
+  Divider,
   Drawer,
   IconButton,
   List,
@@ -13,10 +15,10 @@ import {
   ListItemText,
   Toolbar,
   Typography,
-  Divider,
-  Avatar,
   Menu,
   MenuItem,
+  Stack,
+  Chip,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -38,25 +40,20 @@ import { UserRole } from '@/types';
 
 const DRAWER_WIDTH = 260;
 
-interface MenuItem {
+interface MenuItemLink {
   text: string;
   icon: ReactNode;
   path: string;
   roles: UserRole[];
 }
 
-const menuItems: MenuItem[] = [
-  // Recruiter menu
+const menuItems: MenuItemLink[] = [
   { text: 'Dashboard', icon: <Dashboard />, path: '/recruiter/dashboard', roles: [UserRole.RECRUITER] },
   { text: 'Заявки', icon: <Assignment />, path: '/recruiter/applications', roles: [UserRole.RECRUITER] },
   { text: 'Импорт', icon: <Upload />, path: '/recruiter/import', roles: [UserRole.RECRUITER] },
   { text: 'Экспорт', icon: <Download />, path: '/recruiter/export', roles: [UserRole.RECRUITER] },
   { text: 'HR Dashboard', icon: <People />, path: '/hr', roles: [UserRole.RECRUITER, UserRole.ADMIN] },
-  
-  // HM menu
   { text: 'Входящие', icon: <Inbox />, path: '/hm/inbox', roles: [UserRole.HM] },
-  
-  // Admin menu
   { text: 'Программы', icon: <Business />, path: '/admin/programs', roles: [UserRole.ADMIN, UserRole.RECRUITER] },
   { text: 'Шаблоны', icon: <Notifications />, path: '/admin/templates', roles: [UserRole.ADMIN] },
   { text: 'Пользователи', icon: <People />, path: '/admin/users', roles: [UserRole.ADMIN] },
@@ -73,6 +70,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  const filteredMenuItems = useMemo(
+    () => menuItems.filter((item) => item.roles.some((role) => user?.roles.includes(role))),
+    [user?.roles]
+  );
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -97,44 +99,79 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     router.push('/login');
   };
 
-  const filteredMenuItems = menuItems.filter((item) =>
-    item.roles.some((role) => user?.roles.includes(role))
-  );
-
   const drawer = (
-    <Box>
-      <Toolbar>
-        <Typography variant="h6" noWrap component="div">
-          X5 Recruitment
-        </Typography>
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <Toolbar sx={{ px: 3, py: 2 }}>
+        <Stack spacing={0.5}>
+          <Typography variant="subtitle2" color="text.secondary">
+            X5 Recruitment
+          </Typography>
+          <Typography variant="h6" sx={{ color: '#fff' }}>
+            Control Center
+          </Typography>
+        </Stack>
       </Toolbar>
-      <Divider />
-      <List>
+      <Divider sx={{ borderColor: 'rgba(255,255,255,0.06)' }} />
+      <List sx={{ flex: 1, py: 1 }}>
         {filteredMenuItems.map((item) => (
           <ListItem key={item.path} disablePadding>
             <ListItemButton
               selected={pathname === item.path}
               onClick={() => handleMenuClick(item.path)}
+              sx={{
+                px: 3,
+                py: 1.25,
+                borderRadius: 2,
+                mx: 1,
+                color: '#e2e8f0',
+                '&.Mui-selected': {
+                  background: 'linear-gradient(135deg, rgba(79,70,229,0.32), rgba(14,165,233,0.28))',
+                  color: '#fff',
+                },
+                '&:hover': {
+                  backgroundColor: 'rgba(255,255,255,0.08)',
+                },
+              }}
             >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
+              <ListItemIcon sx={{ color: 'inherit', minWidth: 36 }}>{item.icon}</ListItemIcon>
+              <ListItemText primary={item.text} primaryTypographyProps={{ fontWeight: 700 }} />
             </ListItemButton>
           </ListItem>
         ))}
       </List>
+      <Box sx={{ px: 3, pb: 2 }}>
+        <Chip
+          label={user?.roles.join(', ')}
+          size="small"
+          sx={{
+            color: '#e2e8f0',
+            borderColor: 'rgba(255,255,255,0.15)',
+            backgroundColor: 'rgba(255,255,255,0.05)',
+          }}
+          variant="outlined"
+        />
+      </Box>
     </Box>
   );
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box
+      sx={{
+        display: 'flex',
+        minHeight: '100vh',
+        background: 'linear-gradient(180deg, #f7f8fc 0%, #edf1f7 100%)',
+      }}
+    >
       <AppBar
         position="fixed"
+        color="inherit"
         sx={{
           width: { sm: `calc(100% - ${DRAWER_WIDTH}px)` },
           ml: { sm: `${DRAWER_WIDTH}px` },
+          backdropFilter: 'blur(10px)',
         }}
       >
-        <Toolbar>
+        <Toolbar sx={{ minHeight: 72, px: { xs: 2, md: 4 } }}>
           <IconButton
             color="inherit"
             aria-label="open drawer"
@@ -144,22 +181,20 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             {filteredMenuItems.find((item) => item.path === pathname)?.text || 'Dashboard'}
           </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography variant="body2">{user?.fullName}</Typography>
-            <IconButton onClick={handleProfileMenuOpen} color="inherit">
-              <Avatar sx={{ width: 32, height: 32 }}>
+          <Stack direction="row" spacing={1.5} alignItems="center">
+            <Typography variant="body2" color="text.secondary">
+              {user?.fullName}
+            </Typography>
+            <IconButton onClick={handleProfileMenuOpen} color="inherit" sx={{ border: '1px solid', borderColor: 'divider' }}>
+              <Avatar sx={{ width: 36, height: 36 }}>
                 <AccountCircle />
               </Avatar>
             </IconButton>
-          </Box>
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleProfileMenuClose}
-          >
+          </Stack>
+          <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleProfileMenuClose}>
             <MenuItem onClick={handleLogout}>
               <ListItemIcon>
                 <Logout fontSize="small" />
@@ -169,17 +204,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </Menu>
         </Toolbar>
       </AppBar>
-      <Box
-        component="nav"
-        sx={{ width: { sm: DRAWER_WIDTH }, flexShrink: { sm: 0 } }}
-      >
+      <Box component="nav" sx={{ width: { sm: DRAWER_WIDTH }, flexShrink: { sm: 0 } }}>
         <Drawer
           variant="temporary"
           open={mobileOpen}
           onClose={handleDrawerToggle}
-          ModalProps={{
-            keepMounted: true,
-          }}
+          ModalProps={{ keepMounted: true }}
           sx={{
             display: { xs: 'block', sm: 'none' },
             '& .MuiDrawer-paper': { boxSizing: 'border-box', width: DRAWER_WIDTH },
@@ -202,12 +232,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         component="main"
         sx={{
           flexGrow: 1,
-          p: 3,
+          p: { xs: 2.5, md: 4 },
           width: { sm: `calc(100% - ${DRAWER_WIDTH}px)` },
         }}
       >
         <Toolbar />
-        {children}
+        <Box sx={{ maxWidth: 1440, mx: 'auto', width: '100%', display: 'grid', gap: 3 }}>{children}</Box>
       </Box>
     </Box>
   );

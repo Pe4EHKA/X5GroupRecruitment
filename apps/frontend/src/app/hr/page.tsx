@@ -1,16 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Box,
   Typography,
   Paper,
   TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   Chip,
   Button,
   Alert,
@@ -21,35 +17,42 @@ import {
   TableHead,
   TableRow,
   TablePagination,
-  CircularProgress,
   Stack,
   IconButton,
   InputAdornment,
+  Grid,
+  Skeleton,
+  Divider,
+  Collapse,
 } from '@mui/material';
 import {
   Search as SearchIcon,
   FilterList as FilterIcon,
   Clear as ClearIcon,
   Refresh as RefreshIcon,
+  LockReset,
 } from '@mui/icons-material';
 import DashboardLayout from '@/components/DashboardLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { UserRole, ApplicationStatus } from '@/types';
 import { useApplications, useResetTraineePassword } from '@/hooks/useHr';
 import { useSnackbar } from 'notistack';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { keyframes } from '@mui/system';
 
 const STATUS_COLORS: Record<ApplicationStatus, string> = {
-  [ApplicationStatus.NEW]: '#2196f3',
-  [ApplicationStatus.SCREENING]: '#9c27b0',
-  [ApplicationStatus.INTERVIEW_SCHEDULED]: '#00bcd4',
-  [ApplicationStatus.INTERVIEW_COMPLETED]: '#00bcd4',
-  [ApplicationStatus.APPROVED]: '#4caf50',
-  [ApplicationStatus.REJECTED]: '#f44336',
-  [ApplicationStatus.OFFER_SENT]: '#8bc34a',
-  [ApplicationStatus.OFFER_ACCEPTED]: '#4caf50',
-  [ApplicationStatus.OFFER_DECLINED]: '#f44336',
-  [ApplicationStatus.WITHDRAWN]: '#9e9e9e',
-  [ApplicationStatus.ON_HOLD]: '#607d8b',
+  [ApplicationStatus.NEW]: '#4f46e5',
+  [ApplicationStatus.SCREENING]: '#7c3aed',
+  [ApplicationStatus.INTERVIEW_SCHEDULED]: '#0ea5e9',
+  [ApplicationStatus.INTERVIEW_COMPLETED]: '#0ea5e9',
+  [ApplicationStatus.APPROVED]: '#10b981',
+  [ApplicationStatus.REJECTED]: '#ef4444',
+  [ApplicationStatus.OFFER_SENT]: '#8b5cf6',
+  [ApplicationStatus.OFFER_ACCEPTED]: '#22c55e',
+  [ApplicationStatus.OFFER_DECLINED]: '#f97316',
+  [ApplicationStatus.WITHDRAWN]: '#64748b',
+  [ApplicationStatus.ON_HOLD]: '#f59e0b',
 };
 
 const STATUS_LABELS: Record<ApplicationStatus, string> = {
@@ -66,6 +69,11 @@ const STATUS_LABELS: Record<ApplicationStatus, string> = {
   [ApplicationStatus.ON_HOLD]: 'На удержании',
 };
 
+const fadeIn = keyframes`
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+`;
+
 export default function HRDashboard() {
   const router = useRouter();
   const { enqueueSnackbar } = useSnackbar();
@@ -76,6 +84,7 @@ export default function HRDashboard() {
   const [traineeId, setTraineeId] = useState('');
   const [customPassword, setCustomPassword] = useState('');
   const [temporaryPassword, setTemporaryPassword] = useState<string | null>(null);
+  const [filtersOpen, setFiltersOpen] = useState(true);
 
   const { data, isLoading, refetch } = useApplications({
     statuses: selectedStatuses.length > 0 ? selectedStatuses : undefined,
@@ -90,7 +99,7 @@ export default function HRDashboard() {
     setSelectedStatuses((prev) =>
       prev.includes(status) ? prev.filter((s) => s !== status) : [...prev, status]
     );
-    setPage(0); // Reset to first page when filter changes
+    setPage(0);
   };
 
   const handleClearFilters = () => {
@@ -123,7 +132,6 @@ export default function HRDashboard() {
       setTemporaryPassword(response.temporaryPassword);
       setCustomPassword('');
     } catch (error) {
-      // Notifications handled in mutation
       console.error(error);
     }
   };
@@ -136,138 +144,194 @@ export default function HRDashboard() {
     });
   };
 
+  const tableSkeleton = useMemo(
+    () =>
+      Array.from({ length: 6 }).map((_, index) => (
+        <TableRow key={index}>
+          {Array.from({ length: 6 }).map((__, cellIndex) => (
+            <TableCell key={cellIndex}>
+              <Skeleton variant="text" width={cellIndex === 0 ? 140 : 100} />
+            </TableCell>
+          ))}
+        </TableRow>
+      )),
+    []
+  );
+
   return (
     <ProtectedRoute allowedRoles={[UserRole.RECRUITER, UserRole.ADMIN]}>
       <DashboardLayout>
-        <Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-            <Typography variant="h4">HR Dashboard</Typography>
-            <Button
-              variant="outlined"
-              startIcon={<RefreshIcon />}
-              onClick={() => refetch()}
-            >
-              Обновить
-            </Button>
-          </Box>
-
-          <Paper sx={{ p: 3, mb: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Доступ к кабинету стажера
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Сбросьте пароль стажера, чтобы выдать временные учётные данные для проверки роли.
-            </Typography>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ sm: 'flex-end' }}>
-              <TextField
-                label="ID стажера"
-                type="number"
-                value={traineeId}
-                onChange={(e) => {
-                  setTraineeId(e.target.value);
-                  setTemporaryPassword(null);
-                }}
-                sx={{ maxWidth: 240 }}
-              />
-              <TextField
-                label="Новый пароль (опционально)"
-                type="text"
-                value={customPassword}
-                onChange={(e) => setCustomPassword(e.target.value)}
-                sx={{ maxWidth: 260 }}
-              />
+        <Box sx={{ animation: `${fadeIn} 220ms ease` }}>
+          <PageHeader
+            title="HR кабинет"
+            subtitle="Следите за статусами кандидатов, управляйте доступом и быстро реагируйте на воронку подбора."
+            chipLabel="Hiring Operations"
+            actions={
               <Button
-                variant="contained"
-                onClick={handlePasswordReset}
-                disabled={resetPassword.isPending}
+                variant="outlined"
+                startIcon={<RefreshIcon />}
+                onClick={() => refetch()}
+                sx={{ alignSelf: 'flex-start' }}
               >
-                Сбросить пароль
+                Обновить данные
               </Button>
-            </Stack>
-            {temporaryPassword && (
-              <Alert severity="success" sx={{ mt: 2 }}>
-                Временный пароль: <strong>{temporaryPassword}</strong>
-              </Alert>
-            )}
-          </Paper>
+            }
+          />
 
-          <Paper sx={{ p: 3, mb: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Фильтры
-            </Typography>
-
-            {/* Quick filter chips */}
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="caption" color="text.secondary" gutterBottom>
-                Быстрые фильтры:
-              </Typography>
-              <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mt: 1 }}>
-                {[
-                  ApplicationStatus.NEW,
-                  ApplicationStatus.SCREENING,
-                  ApplicationStatus.INTERVIEW_SCHEDULED,
-                  ApplicationStatus.APPROVED,
-                  ApplicationStatus.REJECTED,
-                ].map((status) => (
-                  <Chip
-                    key={status}
-                    label={STATUS_LABELS[status]}
-                    onClick={() => handleStatusToggle(status)}
-                    color={selectedStatuses.includes(status) ? 'primary' : 'default'}
-                    variant={selectedStatuses.includes(status) ? 'filled' : 'outlined'}
-                    sx={{
-                      borderColor: selectedStatuses.includes(status) ? undefined : STATUS_COLORS[status],
-                      color: selectedStatuses.includes(status) ? undefined : STATUS_COLORS[status],
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={5}>
+              <Paper sx={{ p: 3, display: 'grid', gap: 2 }}>
+                <Stack direction="row" spacing={1.5} alignItems="center">
+                  <LockReset color="primary" />
+                  <Box>
+                    <Typography variant="h6">Доступ к кабинету стажера</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Сбросьте пароль стажера, чтобы выдать временные учётные данные для проверки роли.
+                    </Typography>
+                  </Box>
+                </Stack>
+                <Stack spacing={1.5}>
+                  <TextField
+                    label="ID стажера"
+                    type="number"
+                    value={traineeId}
+                    onChange={(e) => {
+                      setTraineeId(e.target.value);
+                      setTemporaryPassword(null);
                     }}
                   />
-                ))}
-              </Stack>
-            </Box>
+                  <TextField
+                    label="Новый пароль (опционально)"
+                    type="text"
+                    value={customPassword}
+                    onChange={(e) => setCustomPassword(e.target.value)}
+                  />
+                  <Button
+                    variant="contained"
+                    onClick={handlePasswordReset}
+                    disabled={resetPassword.isPending}
+                  >
+                    Сбросить пароль
+                  </Button>
+                  {temporaryPassword && (
+                    <Alert severity="success" sx={{ mt: 1 }}>
+                      Временный пароль: <strong>{temporaryPassword}</strong>
+                    </Alert>
+                  )}
+                </Stack>
+              </Paper>
+            </Grid>
 
-            {/* Search */}
-            <TextField
-              fullWidth
-              placeholder="Поиск по ФИО, email или телефону..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
-                endAdornment: search && (
-                  <InputAdornment position="end">
-                    <IconButton size="small" onClick={() => setSearch('')}>
-                      <ClearIcon />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
+            <Grid item xs={12} md={7}>
+              <Paper sx={{ p: 3, display: 'grid', gap: 2 }}>
+                <Stack direction="row" spacing={1.5} alignItems="center" justifyContent="space-between">
+                  <Stack spacing={0.5}>
+                    <Typography variant="h6">Фильтры по заявкам</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Быстро переключайтесь между основными статусами или найдите кандидата по контактам.
+                    </Typography>
+                  </Stack>
+                  <IconButton onClick={() => setFiltersOpen((prev) => !prev)}>
+                    <FilterIcon />
+                  </IconButton>
+                </Stack>
+                <Collapse in={filtersOpen}>
+                  <Divider sx={{ my: 1 }} />
+                  <Box sx={{ mb: 1 }}>
+                    <Typography variant="caption" color="text.secondary">
+                      Быстрые фильтры:
+                    </Typography>
+                    <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mt: 1 }}>
+                      {[
+                        ApplicationStatus.NEW,
+                        ApplicationStatus.SCREENING,
+                        ApplicationStatus.INTERVIEW_SCHEDULED,
+                        ApplicationStatus.APPROVED,
+                        ApplicationStatus.REJECTED,
+                      ].map((status) => (
+                        <Chip
+                          key={status}
+                          label={STATUS_LABELS[status]}
+                          onClick={() => handleStatusToggle(status)}
+                          color={selectedStatuses.includes(status) ? 'primary' : 'default'}
+                          variant={selectedStatuses.includes(status) ? 'filled' : 'outlined'}
+                          sx={{
+                            borderColor: selectedStatuses.includes(status) ? undefined : STATUS_COLORS[status],
+                            color: selectedStatuses.includes(status) ? undefined : STATUS_COLORS[status],
+                            transition: 'all 0.18s ease',
+                          }}
+                        />
+                      ))}
+                    </Stack>
+                  </Box>
+                  <TextField
+                    placeholder="Поиск по ФИО, email или телефону..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SearchIcon />
+                        </InputAdornment>
+                      ),
+                      endAdornment: search && (
+                        <InputAdornment position="end">
+                          <IconButton size="small" onClick={() => setSearch('')}>
+                            <ClearIcon />
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                  {(selectedStatuses.length > 0 || search) && (
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                      <Button size="small" startIcon={<ClearIcon />} onClick={handleClearFilters}>
+                        Сбросить фильтры
+                      </Button>
+                    </Box>
+                  )}
+                </Collapse>
+              </Paper>
+            </Grid>
+          </Grid>
 
-            {(selectedStatuses.length > 0 || search) && (
-              <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
-                <Button
-                  size="small"
-                  startIcon={<ClearIcon />}
-                  onClick={handleClearFilters}
-                >
-                  Сбросить фильтры
-                </Button>
+          <Paper sx={{ p: 3 }}>
+            <Stack direction={{ xs: 'column', md: 'row' }} alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+              <Box>
+                <Typography variant="h6">Заявки кандидатов</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Отсортировано по дате подачи, кликайте строку, чтобы открыть карточку.
+                </Typography>
               </Box>
-            )}
-          </Paper>
-
-          <Paper>
+              <Chip icon={<FilterIcon />} label={`${data?.totalElements ?? 0} в обработке`} color="primary" />
+            </Stack>
             {isLoading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-                <CircularProgress />
-              </Box>
+              <TableContainer>
+                <Table sx={{ minWidth: 960 }}>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Кандидат</TableCell>
+                      <TableCell>Email</TableCell>
+                      <TableCell>Телефон</TableCell>
+                      <TableCell>Вакансия</TableCell>
+                      <TableCell>Статус</TableCell>
+                      <TableCell>Дата подачи</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>{tableSkeleton}</TableBody>
+                </Table>
+              </TableContainer>
+            ) : data?.content.length === 0 ? (
+              <EmptyState
+                title="Заявки не найдены"
+                description="Попробуйте изменить фильтры или сбросить поиск, чтобы увидеть больше кандидатов."
+                actionLabel="Сбросить фильтры"
+                onAction={handleClearFilters}
+              />
             ) : (
               <>
                 <TableContainer>
-                  <Table>
+                  <Table sx={{ minWidth: 960 }}>
                     <TableHead>
                       <TableRow>
                         <TableCell>Кандидат</TableCell>
@@ -279,46 +343,34 @@ export default function HRDashboard() {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {data?.content.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={6} align="center">
-                            <Typography variant="body2" color="text.secondary">
-                              Заявки не найдены
-                            </Typography>
+                      {data?.content.map((application) => (
+                        <TableRow
+                          key={application.id}
+                          hover
+                          sx={{ cursor: 'pointer' }}
+                          onClick={() => router.push(`/hr/applications/${application.id}`)}
+                        >
+                          <TableCell>
+                            {application.candidate?.fullName || application.candidateName || 'N/A'}
                           </TableCell>
+                          <TableCell>
+                            {application.candidate?.email || application.candidateEmail || 'N/A'}
+                          </TableCell>
+                          <TableCell>{application.candidate?.phone || 'N/A'}</TableCell>
+                          <TableCell>{application.vacancyTitle}</TableCell>
+                          <TableCell>
+                            <Chip
+                              label={STATUS_LABELS[application.status]}
+                              size="small"
+                              sx={{
+                                backgroundColor: STATUS_COLORS[application.status],
+                                color: 'white',
+                              }}
+                            />
+                          </TableCell>
+                          <TableCell>{formatDate(application.createdAt)}</TableCell>
                         </TableRow>
-                      ) : (
-                        data?.content.map((application) => (
-                          <TableRow
-                            key={application.id}
-                            hover
-                            sx={{ cursor: 'pointer' }}
-                            onClick={() => router.push(`/hr/applications/${application.id}`)}
-                          >
-                            <TableCell>
-                              {application.candidate?.fullName || application.candidateName || 'N/A'}
-                            </TableCell>
-                            <TableCell>
-                              {application.candidate?.email || application.candidateEmail || 'N/A'}
-                            </TableCell>
-                            <TableCell>
-                              {application.candidate?.phone || 'N/A'}
-                            </TableCell>
-                            <TableCell>{application.vacancyTitle}</TableCell>
-                            <TableCell>
-                              <Chip
-                                label={STATUS_LABELS[application.status]}
-                                size="small"
-                                sx={{
-                                  backgroundColor: STATUS_COLORS[application.status],
-                                  color: 'white',
-                                }}
-                              />
-                            </TableCell>
-                            <TableCell>{formatDate(application.createdAt)}</TableCell>
-                          </TableRow>
-                        ))
-                      )}
+                      ))}
                     </TableBody>
                   </Table>
                 </TableContainer>
@@ -331,9 +383,7 @@ export default function HRDashboard() {
                   onRowsPerPageChange={handleChangeRowsPerPage}
                   rowsPerPageOptions={[10, 20, 50, 100]}
                   labelRowsPerPage="Строк на странице:"
-                  labelDisplayedRows={({ from, to, count }) =>
-                    `${from}–${to} из ${count !== -1 ? count : `более ${to}`}`
-                  }
+                  labelDisplayedRows={({ from, to, count }) => `${from}–${to} из ${count !== -1 ? count : `более ${to}`}`}
                 />
               </>
             )}

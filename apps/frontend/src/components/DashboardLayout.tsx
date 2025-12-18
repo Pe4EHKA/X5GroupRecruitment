@@ -37,6 +37,7 @@ import {
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/providers/AuthProvider';
 import { UserRole } from '@/types';
+import { palette } from '@/theme/tokens';
 
 const DRAWER_WIDTH = 260;
 
@@ -103,10 +104,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Toolbar sx={{ px: 3, py: 2 }}>
         <Stack spacing={0.5}>
-          <Typography variant="subtitle2" color="text.secondary">
+          <Typography variant="subtitle2" sx={{ color: palette.text.onMuted }}>
             X5 Recruitment
           </Typography>
-          <Typography variant="h6" sx={{ color: '#fff' }}>
+          <Typography variant="h6" sx={{ color: palette.text.onDark }}>
             Control Center
           </Typography>
         </Stack>
@@ -123,11 +124,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 py: 1.25,
                 borderRadius: 2,
                 mx: 1,
-                color: '#e2e8f0',
+                color: palette.text.onMuted,
                 transition: 'all 180ms ease',
                 '&.Mui-selected': {
-                  background: 'linear-gradient(135deg, rgba(79,70,229,0.35), rgba(14,165,233,0.32))',
-                  color: '#fff',
+                  background: 'linear-gradient(135deg, rgba(31,191,117,0.35), rgba(15,158,94,0.32))',
+                  color: palette.text.onDark,
                   boxShadow: '0 10px 30px rgba(0,0,0,0.24)',
                 },
                 '&:hover': {
@@ -146,9 +147,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           label={user?.roles.join(', ')}
           size="small"
           sx={{
-            color: '#e2e8f0',
+            color: palette.text.onMuted,
             borderColor: 'rgba(255,255,255,0.15)',
-            backgroundColor: 'rgba(255,255,255,0.05)',
+            backgroundColor: 'rgba(255,255,255,0.08)',
           }}
           variant="outlined"
         />
@@ -161,7 +162,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       sx={{
         display: 'flex',
         minHeight: '100vh',
-        background: 'linear-gradient(180deg, #f7f9ff 0%, #eef2f7 100%)',
+        background: `linear-gradient(180deg, ${palette.backgrounds.base} 0%, ${palette.backgrounds.muted} 100%)`,
       }}
     >
       <AppBar
@@ -189,13 +190,17 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             {filteredMenuItems.find((item) => item.path === pathname)?.text || 'Dashboard'}
           </Typography>
           <Stack direction="row" spacing={1.5} alignItems="center">
-            <Typography variant="body2" color="text.secondary">
-              {user?.fullName}
-            </Typography>
-            <IconButton onClick={handleProfileMenuOpen} color="inherit" sx={{ border: '1px solid', borderColor: 'divider' }}>
-              <Avatar sx={{ width: 36, height: 36 }}>
-                <AccountCircle />
-              </Avatar>
+          <Typography variant="body2" color="text.secondary">
+            {user?.fullName}
+          </Typography>
+          <IconButton
+            onClick={handleProfileMenuOpen}
+            color="inherit"
+            sx={{ border: '1px solid', borderColor: palette.borders.subtle }}
+          >
+            <Avatar sx={{ width: 36, height: 36 }}>
+              <AccountCircle />
+            </Avatar>
             </IconButton>
           </Stack>
           <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleProfileMenuClose}>

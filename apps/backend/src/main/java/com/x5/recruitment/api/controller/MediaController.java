@@ -53,7 +53,7 @@ public class MediaController {
         description = "Get metadata for a media file including transcription status"
     )
     @GetMapping("/{mediaId}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("permitAll()")
     public ResponseEntity<MediaResponse> getMedia(@PathVariable Long mediaId) {
         MediaResponse media = mediaService.getMedia(mediaId);
         return ResponseEntity.ok(media);
@@ -61,10 +61,10 @@ public class MediaController {
 
     @Operation(
         summary = "Stream media file",
-        description = "Stream a media file (video/audio). Requires authentication."
+        description = "Stream a media file (video/audio)."
     )
     @GetMapping("/{mediaId}/stream")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("permitAll()")
     public ResponseEntity<Resource> streamMedia(@PathVariable Long mediaId) {
         Resource resource = mediaService.streamMedia(mediaId);
         String mimeType = mediaService.getMediaMimeType(mediaId);

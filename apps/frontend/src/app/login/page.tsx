@@ -24,6 +24,7 @@ import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import { useAuth } from '@/providers/AuthProvider';
+import { palette } from '@/theme/tokens';
 
 const float = keyframes`
   0% { transform: translateY(0px); }
@@ -86,7 +87,7 @@ export default function LoginPage() {
           position: 'absolute',
           inset: 0,
           background:
-            'radial-gradient(120% 120% at 10% 10%, rgba(107, 91, 255, 0.25), transparent 40%), radial-gradient(80% 80% at 90% 20%, rgba(34, 193, 195, 0.25), transparent 40%), linear-gradient(135deg, #0f1424 0%, #0b1020 100%)',
+            `radial-gradient(120% 120% at 10% 10%, rgba(31, 191, 117, 0.24), transparent 40%), radial-gradient(80% 80% at 90% 20%, rgba(15, 158, 94, 0.2), transparent 40%), linear-gradient(135deg, #0b1a13 0%, #0f2418 100%)`,
           zIndex: 0,
         }}
       />
@@ -104,7 +105,7 @@ export default function LoginPage() {
             position: 'absolute',
             width: { xs: 180, md: 260 },
             height: { xs: 180, md: 260 },
-            background: 'linear-gradient(145deg, rgba(107,91,255,0.25), rgba(34,193,195,0.2))',
+            background: 'linear-gradient(145deg, rgba(31,191,117,0.28), rgba(15,158,94,0.16))',
             borderRadius: '50%',
             filter: 'blur(70px)',
             top: '-40px',
@@ -117,7 +118,7 @@ export default function LoginPage() {
             position: 'absolute',
             width: { xs: 140, md: 220 },
             height: { xs: 140, md: 220 },
-            background: 'linear-gradient(135deg, rgba(34,193,195,0.25), rgba(6,214,160,0.15))',
+            background: 'linear-gradient(135deg, rgba(31,191,117,0.22), rgba(15,158,94,0.14))',
             borderRadius: '50%',
             filter: 'blur(60px)',
             bottom: '-60px',
@@ -170,7 +171,7 @@ export default function LoginPage() {
                 }}
               >
                 <Stack direction="row" spacing={1.5} alignItems="center">
-                  <RocketLaunchIcon sx={{ color: '#8de1ff' }} />
+                  <RocketLaunchIcon sx={{ color: palette.primary.light }} />
                   <Box>
                     <Typography variant="h4" sx={{ color: 'white', lineHeight: 1 }}>
                       240+
@@ -193,7 +194,7 @@ export default function LoginPage() {
                 }}
               >
                 <Stack direction="row" spacing={1.5} alignItems="center">
-                  <TimelineIcon sx={{ color: '#c7b6ff' }} />
+                  <TimelineIcon sx={{ color: palette.secondary.light }} />
                   <Box>
                     <Typography variant="h4" sx={{ color: 'white', lineHeight: 1 }}>
                       12 дней
@@ -224,7 +225,7 @@ export default function LoginPage() {
                   width: 32,
                   height: 32,
                   borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #22c1c3, #6b5bff)',
+                  background: palette.accents.gradient,
                   display: 'grid',
                   placeItems: 'center',
                   color: 'white',
@@ -247,7 +248,7 @@ export default function LoginPage() {
               maxWidth: 520,
               ml: { md: 'auto' },
               overflow: 'hidden',
-              border: '1px solid rgba(255,255,255,0.1)',
+              border: '1px solid rgba(255,255,255,0.14)',
             }}
           >
             <CardContent sx={{ p: { xs: 3.5, md: 4 } }}>
@@ -362,14 +363,14 @@ export default function LoginPage() {
                 Admin
               </Button>
 
-              <Box sx={{ mt: 3, p: 2.5, borderRadius: 2, bgcolor: 'rgba(12,12,12,0.03)' }}>
+              <Box sx={{ mt: 3, p: 2.5, borderRadius: 2, bgcolor: palette.backgrounds.muted }}>
                 <Stack direction="row" spacing={1.5} alignItems="center">
                   <Box
                     sx={{
                       width: 40,
                       height: 40,
                       borderRadius: '12px',
-                      background: 'linear-gradient(135deg, #22c1c3, #6b5bff)',
+                      background: palette.accents.gradient,
                       display: 'grid',
                       placeItems: 'center',
                       color: 'white',

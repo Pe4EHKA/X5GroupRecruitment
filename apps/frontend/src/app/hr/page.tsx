@@ -40,19 +40,20 @@ import { useSnackbar } from 'notistack';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { keyframes } from '@mui/system';
+import { palette } from '@/theme/tokens';
 
 const STATUS_COLORS: Record<ApplicationStatus, string> = {
-  [ApplicationStatus.NEW]: '#4f46e5',
-  [ApplicationStatus.SCREENING]: '#7c3aed',
-  [ApplicationStatus.INTERVIEW_SCHEDULED]: '#0ea5e9',
-  [ApplicationStatus.INTERVIEW_COMPLETED]: '#0ea5e9',
-  [ApplicationStatus.APPROVED]: '#10b981',
-  [ApplicationStatus.REJECTED]: '#ef4444',
-  [ApplicationStatus.OFFER_SENT]: '#8b5cf6',
-  [ApplicationStatus.OFFER_ACCEPTED]: '#22c55e',
-  [ApplicationStatus.OFFER_DECLINED]: '#f97316',
-  [ApplicationStatus.WITHDRAWN]: '#64748b',
-  [ApplicationStatus.ON_HOLD]: '#f59e0b',
+  [ApplicationStatus.NEW]: palette.primary.main,
+  [ApplicationStatus.SCREENING]: palette.secondary.main,
+  [ApplicationStatus.INTERVIEW_SCHEDULED]: palette.semantic.info,
+  [ApplicationStatus.INTERVIEW_COMPLETED]: palette.semantic.info,
+  [ApplicationStatus.APPROVED]: palette.semantic.success,
+  [ApplicationStatus.REJECTED]: palette.semantic.error,
+  [ApplicationStatus.OFFER_SENT]: palette.secondary.light,
+  [ApplicationStatus.OFFER_ACCEPTED]: palette.primary.dark,
+  [ApplicationStatus.OFFER_DECLINED]: palette.semantic.error,
+  [ApplicationStatus.WITHDRAWN]: palette.neutral[600],
+  [ApplicationStatus.ON_HOLD]: palette.semantic.warning,
 };
 
 const STATUS_LABELS: Record<ApplicationStatus, string> = {

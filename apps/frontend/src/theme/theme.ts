@@ -11,8 +11,8 @@ export const theme = createTheme({
       paper: palette.backgrounds.surface,
     },
     text: {
-      primary: palette.neutral[900],
-      secondary: palette.neutral[600],
+      primary: palette.text.primary,
+      secondary: palette.text.secondary,
     },
     success: { main: palette.semantic.success },
     warning: { main: palette.semantic.warning },
@@ -26,7 +26,7 @@ export const theme = createTheme({
   typography: {
     ...typography,
     allVariants: {
-      color: palette.neutral[900],
+      color: palette.text.primary,
     },
   },
   components: {
@@ -35,8 +35,8 @@ export const theme = createTheme({
         body: {
           margin: 0,
           background:
-            `${palette.backgrounds.base} radial-gradient(circle at 18% 20%, rgba(99,102,241,0.08), transparent 35%), radial-gradient(circle at 80% 6%, rgba(14,165,233,0.07), transparent 32%)`,
-          color: palette.neutral[900],
+            `${palette.backgrounds.base} radial-gradient(circle at 18% 20%, rgba(31,191,117,0.1), transparent 35%), radial-gradient(circle at 80% 6%, rgba(15,158,94,0.08), transparent 32%)`,
+          color: palette.text.primary,
           fontFamily: typography.fontFamily,
           minHeight: '100vh',
         },
@@ -46,7 +46,7 @@ export const theme = createTheme({
         },
         '*::selection': {
           background: palette.primary.light,
-          color: '#fff',
+          color: palette.primary.contrastText,
         },
         a: {
           color: 'inherit',
@@ -73,7 +73,7 @@ export const theme = createTheme({
           borderRadius: radii.lg,
           backgroundColor: palette.backgrounds.surface,
           boxShadow: shadows.soft,
-          border: `1px solid ${palette.neutral[200]}`,
+          border: `1px solid ${palette.borders.subtle}`,
           transition: transitions.base,
           backgroundImage: palette.accents.gradientSoft,
           '&[data-variant="elevated"]': {
@@ -89,7 +89,7 @@ export const theme = createTheme({
         root: {
           borderRadius: radii.lg,
           boxShadow: shadows.medium,
-          border: `1px solid ${palette.neutral[200]}`,
+          border: `1px solid ${palette.borders.subtle}`,
           backgroundImage: `${palette.accents.glow}, ${palette.backgrounds.surface}`,
         },
       },
@@ -107,17 +107,18 @@ export const theme = createTheme({
           boxShadow: 'none',
           letterSpacing: 0.2,
           '&:focus-visible': {
-            outline: `3px solid rgba(79, 70, 229, 0.25)`,
+            outline: `3px solid ${palette.focusRing}`,
             outlineOffset: 2,
           },
         },
         containedPrimary: {
           backgroundImage: palette.accents.gradient,
-          color: '#fff',
+          color: palette.primary.contrastText,
           boxShadow: shadows.medium,
           '&:hover': {
             boxShadow: shadows.strong,
             transform: 'translateY(-1px)',
+            backgroundImage: palette.accents.gradient,
           },
           '&:active': {
             transform: 'translateY(0)',
@@ -125,16 +126,16 @@ export const theme = createTheme({
           },
         },
         outlined: {
-          borderColor: palette.neutral[300],
+          borderColor: palette.borders.subtle,
           '&:hover': {
             borderColor: palette.primary.main,
-            backgroundColor: palette.neutral[100],
+            backgroundColor: palette.backgrounds.muted,
           },
         },
         text: {
-          color: palette.primary.main,
+          color: palette.primary.dark,
           '&:hover': {
-            backgroundColor: palette.neutral[100],
+            backgroundColor: palette.backgrounds.muted,
           },
         },
       },
@@ -155,30 +156,30 @@ export const theme = createTheme({
       },
       styleOverrides: {
         root: {
-          '& .MuiOutlinedInput-root': {
-            borderRadius: radii.sm,
-            backgroundColor: '#fff',
-            transition: transitions.base,
-            '& fieldset': {
-              borderColor: palette.neutral[200],
+            '& .MuiOutlinedInput-root': {
+              borderRadius: radii.sm,
+              backgroundColor: '#fff',
               transition: transitions.base,
-            },
-            '&:hover fieldset': {
-              borderColor: palette.primary.main,
-            },
-            '&.Mui-focused fieldset': {
-              borderColor: palette.primary.main,
-              boxShadow: `0 0 0 3px rgba(79, 70, 229, 0.12)`,
+              '& fieldset': {
+                borderColor: palette.borders.subtle,
+                transition: transitions.base,
+              },
+              '&:hover fieldset': {
+                borderColor: palette.primary.main,
+              },
+              '&.Mui-focused fieldset': {
+                borderColor: palette.primary.main,
+                boxShadow: `0 0 0 3px ${palette.focusRing}`,
+              },
             },
           },
         },
       },
-    },
     MuiInputLabel: {
       styleOverrides: {
         root: {
           fontWeight: 700,
-          color: palette.neutral[600],
+          color: palette.text.muted,
         },
       },
     },
@@ -196,7 +197,7 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: radii.md,
-          border: `1px solid ${palette.neutral[200]}`,
+          border: `1px solid ${palette.borders.subtle}`,
           backgroundColor: palette.backgrounds.surface,
           boxShadow: shadows.soft,
         },
@@ -205,10 +206,10 @@ export const theme = createTheme({
     MuiTableHead: {
       styleOverrides: {
         root: {
-          backgroundColor: palette.neutral[100],
-          borderBottom: `1px solid ${palette.neutral[200]}`,
+          backgroundColor: palette.backgrounds.muted,
+          borderBottom: `1px solid ${palette.borders.subtle}`,
           '& .MuiTableCell-root': {
-            color: palette.neutral[700],
+            color: palette.text.secondary,
             fontWeight: 700,
             fontSize: '0.95rem',
           },
@@ -220,7 +221,7 @@ export const theme = createTheme({
         root: {
           transition: transitions.base,
           '&:hover': {
-            backgroundColor: palette.neutral[100],
+            backgroundColor: palette.backgrounds.muted,
           },
         },
       },
@@ -259,8 +260,8 @@ export const theme = createTheme({
     MuiDrawer: {
       styleOverrides: {
         paper: {
-          backgroundColor: '#0f172a',
-          color: '#e2e8f0',
+          backgroundColor: palette.backgrounds.sidebar,
+          color: palette.text.onDark,
           borderRight: `1px solid rgba(255,255,255,0.08)`,
         },
       },
@@ -269,8 +270,8 @@ export const theme = createTheme({
       styleOverrides: {
         colorInherit: {
           backgroundColor: palette.backgrounds.surface,
-          color: palette.neutral[900],
-          borderBottom: `1px solid ${palette.neutral[200]}`,
+          color: palette.text.primary,
+          borderBottom: `1px solid ${palette.borders.subtle}`,
           boxShadow: shadows.soft,
         },
       },

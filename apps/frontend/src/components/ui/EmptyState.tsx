@@ -38,7 +38,7 @@ export function EmptyState({
           width: 64,
           height: 64,
           borderRadius: '50%',
-          background: 'linear-gradient(135deg, rgba(79,70,229,0.12), rgba(14,165,233,0.12))',
+          background: 'linear-gradient(135deg, rgba(31,191,117,0.12), rgba(15,158,94,0.12))',
           display: 'grid',
           placeItems: 'center',
           color: 'text.secondary',

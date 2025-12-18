@@ -89,12 +89,12 @@ export default function RecruiterDashboard() {
 
           <Grid container spacing={3}>
             {[
-              { title: 'Новые', value: metrics?.newCount, icon: <Assignment />, color: '#4338ca' },
-              { title: 'На скрининге', value: metrics?.screeningCount, icon: <HourglassEmpty />, color: '#7c3aed' },
-              { title: 'На интервью', value: metrics?.interviewCount, icon: <Schedule />, color: '#0ea5e9' },
-              { title: 'Одобрено', value: metrics?.approvedCount, icon: <CheckCircle />, color: '#22c55e' },
-              { title: 'Отклонено', value: metrics?.rejectedCount, icon: <Cancel />, color: '#ef4444' },
-              { title: 'Нарушение SLA', value: metrics?.slaBreachCount, icon: <Warning />, color: '#f59e0b' },
+              { title: 'Новые', value: metrics?.newCount, icon: <Assignment />, color: palette.primary.main },
+              { title: 'На скрининге', value: metrics?.screeningCount, icon: <HourglassEmpty />, color: palette.secondary.main },
+              { title: 'На интервью', value: metrics?.interviewCount, icon: <Schedule />, color: palette.semantic.info },
+              { title: 'Одобрено', value: metrics?.approvedCount, icon: <CheckCircle />, color: palette.semantic.success },
+              { title: 'Отклонено', value: metrics?.rejectedCount, icon: <Cancel />, color: palette.semantic.error },
+              { title: 'Нарушение SLA', value: metrics?.slaBreachCount, icon: <Warning />, color: palette.semantic.warning },
               { title: 'Всего заявок', value: metrics?.totalCount, icon: <Assignment />, color: palette.neutral[600] },
             ].map((item, idx) => (
               <Grid key={item.title} item xs={12} sm={6} md={4}>

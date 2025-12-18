@@ -22,7 +22,7 @@ export function PageHeader({ title, subtitle, chipLabel, actions }: PageHeaderPr
         position: 'relative',
         overflow: 'hidden',
         background: palette.accents.gradientSoft,
-        border: `1px solid ${palette.neutral[200]}`,
+        border: `1px solid ${palette.borders.subtle}`,
       }}
     >
       <Box

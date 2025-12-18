@@ -1,5 +1,5 @@
 import { createTheme } from '@mui/material/styles';
-import { palette, radii, shadows, spacing, transitions, typography } from './tokens';
+import { motion, palette, radii, shadows, spacing, transitions, typography } from './tokens';
 
 export const theme = createTheme({
   palette: {
@@ -34,13 +34,15 @@ export const theme = createTheme({
       styleOverrides: {
         body: {
           margin: 0,
-          background: `${palette.backgrounds.base} radial-gradient(circle at 20% 20%, rgba(99,102,241,0.08), transparent 35%)`,
+          background:
+            `${palette.backgrounds.base} radial-gradient(circle at 18% 20%, rgba(99,102,241,0.08), transparent 35%), radial-gradient(circle at 80% 6%, rgba(14,165,233,0.07), transparent 32%)`,
           color: palette.neutral[900],
           fontFamily: typography.fontFamily,
           minHeight: '100vh',
         },
         '*': {
           boxSizing: 'border-box',
+          minWidth: 0,
         },
         '*::selection': {
           background: palette.primary.light,
@@ -73,6 +75,12 @@ export const theme = createTheme({
           boxShadow: shadows.soft,
           border: `1px solid ${palette.neutral[200]}`,
           transition: transitions.base,
+          backgroundImage: palette.accents.gradientSoft,
+          '&[data-variant="elevated"]': {
+            backgroundColor: palette.backgrounds.elevated,
+            backgroundImage: 'none',
+            boxShadow: shadows.medium,
+          },
         },
       },
     },
@@ -97,6 +105,7 @@ export const theme = createTheme({
           fontWeight: 700,
           transition: transitions.base,
           boxShadow: 'none',
+          letterSpacing: 0.2,
           '&:focus-visible': {
             outline: `3px solid rgba(79, 70, 229, 0.25)`,
             outlineOffset: 2,
@@ -109,6 +118,10 @@ export const theme = createTheme({
           '&:hover': {
             boxShadow: shadows.strong,
             transform: 'translateY(-1px)',
+          },
+          '&:active': {
+            transform: 'translateY(0)',
+            boxShadow: shadows.medium,
           },
         },
         outlined: {
@@ -131,6 +144,7 @@ export const theme = createTheme({
         root: {
           borderRadius: radii.pill,
           fontWeight: 600,
+          backgroundColor: palette.backgrounds.muted,
         },
       },
     },
@@ -147,6 +161,7 @@ export const theme = createTheme({
             transition: transitions.base,
             '& fieldset': {
               borderColor: palette.neutral[200],
+              transition: transitions.base,
             },
             '&:hover fieldset': {
               borderColor: palette.primary.main,
@@ -171,6 +186,9 @@ export const theme = createTheme({
       styleOverrides: {
         select: {
           borderRadius: radii.sm,
+          '&:focus': {
+            backgroundColor: 'transparent',
+          },
         },
       },
     },
@@ -179,6 +197,8 @@ export const theme = createTheme({
         root: {
           borderRadius: radii.md,
           border: `1px solid ${palette.neutral[200]}`,
+          backgroundColor: palette.backgrounds.surface,
+          boxShadow: shadows.soft,
         },
       },
     },
@@ -186,9 +206,11 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           backgroundColor: palette.neutral[100],
+          borderBottom: `1px solid ${palette.neutral[200]}`,
           '& .MuiTableCell-root': {
             color: palette.neutral[700],
             fontWeight: 700,
+            fontSize: '0.95rem',
           },
         },
       },
@@ -208,6 +230,7 @@ export const theme = createTheme({
         indicator: {
           height: 4,
           borderRadius: radii.pill,
+          boxShadow: shadows.inner,
         },
       },
     },
@@ -224,6 +247,7 @@ export const theme = createTheme({
         root: {
           borderRadius: radii.md,
           alignItems: 'flex-start',
+          padding: '12px 16px',
         },
       },
     },

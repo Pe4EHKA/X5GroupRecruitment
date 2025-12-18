@@ -124,9 +124,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 borderRadius: 2,
                 mx: 1,
                 color: '#e2e8f0',
+                transition: 'all 180ms ease',
                 '&.Mui-selected': {
-                  background: 'linear-gradient(135deg, rgba(79,70,229,0.32), rgba(14,165,233,0.28))',
+                  background: 'linear-gradient(135deg, rgba(79,70,229,0.35), rgba(14,165,233,0.32))',
                   color: '#fff',
+                  boxShadow: '0 10px 30px rgba(0,0,0,0.24)',
                 },
                 '&:hover': {
                   backgroundColor: 'rgba(255,255,255,0.08)',
@@ -159,7 +161,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       sx={{
         display: 'flex',
         minHeight: '100vh',
-        background: 'linear-gradient(180deg, #f7f8fc 0%, #edf1f7 100%)',
+        background: 'linear-gradient(180deg, #f7f9ff 0%, #eef2f7 100%)',
       }}
     >
       <AppBar
@@ -169,6 +171,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           width: { sm: `calc(100% - ${DRAWER_WIDTH}px)` },
           ml: { sm: `${DRAWER_WIDTH}px` },
           backdropFilter: 'blur(10px)',
+          backgroundColor: 'rgba(255,255,255,0.92)',
+          borderBottom: '1px solid rgba(148, 163, 184, 0.35)',
         }}
       >
         <Toolbar sx={{ minHeight: 72, px: { xs: 2, md: 4 } }}>

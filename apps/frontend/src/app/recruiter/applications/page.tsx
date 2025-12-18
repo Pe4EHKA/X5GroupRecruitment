@@ -15,7 +15,6 @@ import {
   Typography,
   CircularProgress,
   IconButton,
-  Chip,
   TextField,
   FormControl,
   InputLabel,
@@ -30,6 +29,8 @@ import { useQuery } from '@tanstack/react-query';
 import DashboardLayout from '@/components/DashboardLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import StatusBadge from '@/components/StatusBadge';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { UserRole, ApplicationStatus, ApplicationFilters } from '@/types';
 import { useApplications } from '@/hooks/useRecruiter';
 import { getCandidateFullName, getCandidateEmail } from '@/lib/utils';
@@ -85,12 +86,14 @@ export default function ApplicationsPage() {
     <ProtectedRoute allowedRoles={[UserRole.RECRUITER]}>
       <DashboardLayout>
         <Box>
-          <Typography variant="h4" gutterBottom>
-            Заявки
-          </Typography>
+          <PageHeader
+            title="Заявки"
+            subtitle="Просматривайте и фильтруйте кандидатов по статусам, вакансиям и SLA. Доступно компактное представление для быстрого скролла."
+            chipLabel="Pipeline"
+          />
 
           {/* Filters */}
-          <Paper sx={{ p: 2, mb: 3 }}>
+          <Paper data-variant="elevated" sx={{ p: 3, mb: 3 }}>
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6} md={3}>
                 <TextField
@@ -204,54 +207,64 @@ export default function ApplicationsPage() {
           </Paper>
 
           {/* Table */}
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>ID</TableCell>
-                  <TableCell>Кандидат</TableCell>
-                  <TableCell>Email</TableCell>
-                  <TableCell>Вакансия</TableCell>
-                  <TableCell>Статус</TableCell>
-                  <TableCell>Рекрутер</TableCell>
-                  <TableCell>Дата создания</TableCell>
-                  <TableCell>Действия</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {data?.content?.map((application) => (
-                  <TableRow key={application.id} hover>
-                    <TableCell>{application.id}</TableCell>
-                    <TableCell>{getCandidateFullName(application.candidate)}</TableCell>
-                    <TableCell>{getCandidateEmail(application.candidate)}</TableCell>
-                    <TableCell>{application.vacancyTitle}</TableCell>
-                    <TableCell>
-                      <StatusBadge status={application.status} />
-                    </TableCell>
-                    <TableCell>{application.recruiterName || '-'}</TableCell>
-                    <TableCell>
-                      {format(new Date(application.createdAt), 'dd.MM.yyyy HH:mm')}
-                    </TableCell>
-                    <TableCell>
-                      <IconButton
-                        size="small"
-                        color="primary"
-                        onClick={() => handleViewApplication(application.id)}
-                      >
-                        <Visibility />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {(!data?.content || data.content.length === 0) && (
+          <Paper data-variant="elevated">
+            <TableContainer>
+              <Table>
+                <TableHead>
                   <TableRow>
-                    <TableCell colSpan={8} align="center">
-                      Нет заявок
-                    </TableCell>
+                    <TableCell>ID</TableCell>
+                    <TableCell>Кандидат</TableCell>
+                    <TableCell>Email</TableCell>
+                    <TableCell>Вакансия</TableCell>
+                    <TableCell>Статус</TableCell>
+                    <TableCell>Рекрутер</TableCell>
+                    <TableCell>Дата создания</TableCell>
+                    <TableCell>Действия</TableCell>
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                </TableHead>
+                <TableBody>
+                  {data?.content?.map((application) => (
+                    <TableRow key={application.id} hover>
+                      <TableCell>{application.id}</TableCell>
+                      <TableCell>{getCandidateFullName(application.candidate)}</TableCell>
+                      <TableCell>{getCandidateEmail(application.candidate)}</TableCell>
+                      <TableCell>{application.vacancyTitle}</TableCell>
+                      <TableCell>
+                        <StatusBadge status={application.status} />
+                      </TableCell>
+                      <TableCell>{application.recruiterName || '-'}</TableCell>
+                      <TableCell>
+                        {format(new Date(application.createdAt), 'dd.MM.yyyy HH:mm')}
+                      </TableCell>
+                      <TableCell>
+                        <IconButton
+                          size="small"
+                          color="primary"
+                          onClick={() => handleViewApplication(application.id)}
+                        >
+                          <Visibility />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {(!data?.content || data.content.length === 0) && (
+                    <TableRow>
+                      <TableCell colSpan={8} align="center">
+                        <EmptyState
+                          title="Нет заявок"
+                          description="Попробуйте изменить фильтры или загрузите Excel, чтобы быстро наполнить воронку."
+                          actionLabel="Сбросить фильтры"
+                          onAction={() => {
+                            setFilters({ page: 0, size: rowsPerPage });
+                            setPage(0);
+                          }}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
             <TablePagination
               component="div"
               count={data?.totalElements || 0}
@@ -261,7 +274,7 @@ export default function ApplicationsPage() {
               onRowsPerPageChange={handleChangeRowsPerPage}
               rowsPerPageOptions={[10, 25, 50, 100]}
             />
-          </TableContainer>
+          </Paper>
         </Box>
       </DashboardLayout>
     </ProtectedRoute>

@@ -13,12 +13,13 @@ import {
   TableHead,
   TableRow,
   Alert,
-  CircularProgress,
   LinearProgress,
 } from '@mui/material';
 import { CloudUpload } from '@mui/icons-material';
 import DashboardLayout from '@/components/DashboardLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { UserRole } from '@/types';
 import { useImportXlsx } from '@/hooks/useRecruiter';
 
@@ -44,15 +45,14 @@ export default function ImportPage() {
     <ProtectedRoute allowedRoles={[UserRole.RECRUITER]}>
       <DashboardLayout>
         <Box>
-          <Typography variant="h4" gutterBottom>
-            Импорт заявок
-          </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-            Загрузите Excel файл с заявками кандидатов
-          </Typography>
+          <PageHeader
+            title="Импорт заявок"
+            subtitle="Загрузите Excel со списком кандидатов, чтобы автоматически создать карточки и учётные записи."
+            chipLabel="Automation"
+          />
 
           {/* Upload section */}
-          <Paper sx={{ p: 3, mb: 3 }}>
+          <Paper data-variant="elevated" sx={{ p: 3, mb: 3 }}>
             <input
               accept=".xlsx,.xls"
               style={{ display: 'none' }}
@@ -82,7 +82,7 @@ export default function ImportPage() {
           </Paper>
 
           {/* Result section */}
-          {result && (
+          {result ? (
             <>
               <Alert severity={result.batch.failedRows > 0 ? 'warning' : 'success'} sx={{ mb: 3 }}>
                 <Typography variant="subtitle1">Результат импорта</Typography>
@@ -101,7 +101,7 @@ export default function ImportPage() {
 
               {/* Errors table */}
               {result.errors.length > 0 && (
-                <Paper sx={{ mb: 3 }}>
+                <Paper data-variant="elevated" sx={{ mb: 3 }}>
                   <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
                     <Typography variant="h6">Ошибки импорта</Typography>
                   </Box>
@@ -134,10 +134,15 @@ export default function ImportPage() {
                 </Paper>
               )}
             </>
+          ) : (
+            <EmptyState
+              title="Пока нет результатов"
+              description="Загрузите Excel, чтобы увидеть статистику импорта и возможные ошибки."
+            />
           )}
 
           {/* Instructions */}
-          <Paper sx={{ p: 3, bgcolor: 'grey.50' }}>
+          <Paper data-variant="elevated" sx={{ p: 3, bgcolor: 'grey.50' }}>
             <Typography variant="h6" gutterBottom>
               Инструкция
             </Typography>

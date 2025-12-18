@@ -1,6 +1,6 @@
 export const palette = {
   primary: {
-    main: '#4f46e5',
+    main: '#4338ca',
     light: '#6366f1',
     dark: '#312e81',
     contrastText: '#ffffff',
@@ -13,7 +13,7 @@ export const palette = {
   },
   neutral: {
     50: '#f8fafc',
-    100: '#eef2f6',
+    100: '#eff3f9',
     200: '#e2e8f0',
     300: '#cbd5e1',
     400: '#94a3b8',
@@ -30,14 +30,17 @@ export const palette = {
     info: '#0ea5e9',
   },
   backgrounds: {
-    base: '#f4f6fb',
+    base: '#f5f7fb',
     surface: '#ffffff',
     muted: '#eef2f6',
+    elevated: '#f9fbff',
     glass: 'rgba(255,255,255,0.72)',
   },
   accents: {
-    gradient: 'linear-gradient(135deg, #4f46e5 0%, #0ea5e9 100%)',
-    glow: 'radial-gradient(circle at 20% 20%, rgba(99,102,241,0.18), transparent 35%), radial-gradient(circle at 80% 10%, rgba(14,165,233,0.18), transparent 35%)',
+    gradient: 'linear-gradient(135deg, #4338ca 0%, #0ea5e9 100%)',
+    gradientSoft: 'linear-gradient(145deg, rgba(67,56,202,0.12), rgba(14,165,233,0.08))',
+    glow:
+      'radial-gradient(circle at 20% 20%, rgba(99,102,241,0.18), transparent 35%), radial-gradient(circle at 80% 10%, rgba(14,165,233,0.18), transparent 35%)',
   },
 };
 
@@ -69,11 +72,24 @@ export const spacing = [4, 8, 12, 16, 24, 32, 40, 48];
 
 export const shadows = {
   soft: '0 10px 30px rgba(15, 23, 42, 0.08)',
-  medium: '0 15px 40px rgba(15, 23, 42, 0.12)',
-  strong: '0 25px 70px rgba(15, 23, 42, 0.16)',
+  medium: '0 18px 44px rgba(15, 23, 42, 0.12)',
+  strong: '0 28px 72px rgba(15, 23, 42, 0.16)',
+  inner: 'inset 0 1px 0 rgba(255,255,255,0.6)',
 };
 
 export const transitions = {
   base: 'all 200ms ease',
-  quicker: 'all 140ms ease',
+  quicker: 'all 150ms ease',
+};
+
+export const motion = {
+  duration: {
+    shortest: 120,
+    short: 180,
+    base: 220,
+  },
+  easing: {
+    standard: 'cubic-bezier(0.4, 0, 0.2, 1)',
+    emphasized: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+  },
 };

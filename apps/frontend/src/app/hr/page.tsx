@@ -178,9 +178,37 @@ export default function HRDashboard() {
             }
           />
 
+          <Grid container spacing={2} sx={{ mb: 1.5 }}>
+            <Grid item xs={12} sm={6} md={4}>
+              <Paper data-variant="elevated" sx={{ p: 2.5 }}>
+                <Typography variant="body2" color="text.secondary">Всего заявок</Typography>
+                <Typography variant="h4">{data?.totalElements ?? '—'}</Typography>
+                <Typography variant="caption" color="text.secondary">
+                  В обработке с учётом фильтров
+                </Typography>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <Paper data-variant="elevated" sx={{ p: 2.5 }}>
+                <Typography variant="body2" color="text.secondary">Активные статусы</Typography>
+                <Typography variant="h4">{selectedStatuses.length || 'Все'}</Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {selectedStatuses.length ? 'Применено' : 'Без фильтрации'} по статусам
+                </Typography>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <Paper data-variant="elevated" sx={{ p: 2.5 }}>
+                <Typography variant="body2" color="text.secondary">Строк на странице</Typography>
+                <Typography variant="h4">{rowsPerPage}</Typography>
+                <Typography variant="caption" color="text.secondary">Настройте под вашу скорость обзора</Typography>
+              </Paper>
+            </Grid>
+          </Grid>
+
           <Grid container spacing={3}>
             <Grid item xs={12} md={5}>
-              <Paper sx={{ p: 3, display: 'grid', gap: 2 }}>
+              <Paper data-variant="elevated" sx={{ p: 3, display: 'grid', gap: 2 }}>
                 <Stack direction="row" spacing={1.5} alignItems="center">
                   <LockReset color="primary" />
                   <Box>
@@ -223,7 +251,7 @@ export default function HRDashboard() {
             </Grid>
 
             <Grid item xs={12} md={7}>
-              <Paper sx={{ p: 3, display: 'grid', gap: 2 }}>
+              <Paper data-variant="elevated" sx={{ p: 3, display: 'grid', gap: 2 }}>
                 <Stack direction="row" spacing={1.5} alignItems="center" justifyContent="space-between">
                   <Stack spacing={0.5}>
                     <Typography variant="h6">Фильтры по заявкам</Typography>
@@ -295,7 +323,7 @@ export default function HRDashboard() {
             </Grid>
           </Grid>
 
-          <Paper sx={{ p: 3 }}>
+          <Paper data-variant="elevated" sx={{ p: 3 }}>
             <Stack direction={{ xs: 'column', md: 'row' }} alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
               <Box>
                 <Typography variant="h6">Заявки кандидатов</Typography>

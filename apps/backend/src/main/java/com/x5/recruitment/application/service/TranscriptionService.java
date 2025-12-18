@@ -120,10 +120,23 @@ public class TranscriptionService {
     }
 
     /**
-     * Perform actual transcription using local Vosk model
+     * Perform actual transcription using local Vosk model.
+     *
+     * If the bundled model is not available (for example, when the image
+     * was built without mounting an external model directory), we return a
+     * deterministic placeholder so the pipeline completes without any
+     * additional downloads.
      */
     private String performTranscription(Transcription transcription) {
-        validateConfiguration();
+        Path modelPath = resolveModelPath();
+
+        if (modelPath == null || !Files.exists(modelPath)) {
+            log.warn("Transcription model is not available, returning placeholder for {}", transcription.getId());
+            transcription.setLanguage(transcriptionLanguage);
+            return buildPlaceholderTranscription();
+        }
+
+        transcriptionModelPath = modelPath.toString();
 
         Path mediaPath = resolveMediaPath(transcription);
         Path wavPath = extractAudio(mediaPath);
@@ -175,18 +188,9 @@ public class TranscriptionService {
         }
     }
 
-    private void validateConfiguration() {
-        Path modelPath = resolveModelPath();
-
-        if (modelPath == null) {
-            throw new IllegalStateException("Local transcription model path is not configured");
-        }
-
-        if (!Files.exists(modelPath)) {
-            throw new IllegalStateException("Local transcription model not found: " + modelPath);
-        }
-
-        transcriptionModelPath = modelPath.toString();
+    private String buildPlaceholderTranscription() {
+        return "Автоматическая транскрибация недоступна в этой сборке. "
+            + "Добавьте офлайн-модель, чтобы включить распознавание речи.";
     }
 
     private Path extractAudio(Path mediaPath) {

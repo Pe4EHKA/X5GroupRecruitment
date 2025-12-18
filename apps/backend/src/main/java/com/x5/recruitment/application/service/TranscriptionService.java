@@ -139,16 +139,16 @@ public class TranscriptionService {
                 throw new IllegalStateException("Transcription API returned status " + response.getStatusCode());
             }
 
-            String body = response.getBody();
-            if (body == null || body.isBlank()) {
+            String responseBody = response.getBody();
+            if (responseBody == null || responseBody.isBlank()) {
                 throw new IllegalStateException("Empty transcription response received");
             }
 
             log.info("Received transcription for media {} ({} bytes)",
-                transcription.getMedia().getId(), body.length());
+                transcription.getMedia().getId(), responseBody.length());
 
             transcription.setLanguage(transcriptionLanguage);
-            return body.strip();
+            return responseBody.strip();
         } catch (RestClientException e) {
             log.error("Failed to transcribe media {}", transcription.getMedia().getId(), e);
             throw new IllegalStateException("Transcription API request failed: " + e.getMessage(), e);

@@ -76,7 +76,7 @@ public class CandidateService {
             .orElseThrow(() -> new IllegalArgumentException("Application not found"));
 
         // Security check: ensure the application belongs to this candidate
-        if (!application.getCandidate().getEmail().equals(email)) {
+        if (!isApplicationOwnedByEmail(application, email)) {
             throw new SecurityException("You do not have permission to view this application");
         }
 
@@ -93,7 +93,7 @@ public class CandidateService {
             .orElseThrow(() -> new IllegalArgumentException("Application not found"));
 
         // Security check: ensure the application belongs to this candidate
-        if (!application.getCandidate().getEmail().equals(email)) {
+        if (!isApplicationOwnedByEmail(application, email)) {
             throw new SecurityException("You do not have permission to view this application");
         }
 
@@ -118,7 +118,7 @@ public class CandidateService {
         Application application = applicationRepository.findById(applicationId)
             .orElseThrow(() -> new IllegalArgumentException("Application not found"));
 
-        if (!application.getCandidate().getEmail().equals(email)) {
+        if (!isApplicationOwnedByEmail(application, email)) {
             throw new SecurityException("You do not have permission to modify this application");
         }
 
@@ -131,6 +131,19 @@ public class CandidateService {
         applicationRepository.save(application);
 
         return mediaService.toResponse(media);
+    }
+
+    private boolean isApplicationOwnedByEmail(Application application, String email) {
+        if (application.getCandidate() == null) {
+            return false;
+        }
+
+        String candidateEmail = application.getCandidate().getEmail();
+        if (candidateEmail == null || email == null) {
+            return false;
+        }
+
+        return candidateEmail.trim().equalsIgnoreCase(email.trim());
     }
 
     private CandidateStatusDto mapToStatusDto(Application application) {

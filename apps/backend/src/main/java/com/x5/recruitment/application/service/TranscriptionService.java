@@ -129,7 +129,11 @@ public class TranscriptionService {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         headers.setAccept(List.of(MediaType.TEXT_PLAIN, MediaType.ALL));
-        headers.setBearerAuth(transcriptionApiKey);
+        if (transcriptionApiKey != null && !transcriptionApiKey.isBlank()) {
+            headers.setBearerAuth(transcriptionApiKey);
+        } else {
+            log.warn("Transcription API key is not configured; proceeding without Authorization header (expected for local transcription service)");
+        }
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
@@ -156,10 +160,6 @@ public class TranscriptionService {
     }
 
     private void validateConfiguration() {
-        if (transcriptionApiKey == null || transcriptionApiKey.isBlank()) {
-            throw new IllegalStateException("Transcription API key is not configured");
-        }
-
         if (transcriptionApiUrl == null || transcriptionApiUrl.isBlank()) {
             throw new IllegalStateException("Transcription API URL is not configured");
         }

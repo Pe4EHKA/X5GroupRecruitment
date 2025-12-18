@@ -5,6 +5,7 @@ import {
   AppBar,
   Avatar,
   Box,
+  Badge,
   Divider,
   Drawer,
   IconButton,
@@ -19,6 +20,7 @@ import {
   MenuItem,
   Stack,
   Chip,
+  Tooltip,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -33,13 +35,14 @@ import {
   Notifications,
   AccountCircle,
   Logout,
+  HelpOutline,
 } from '@mui/icons-material';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/providers/AuthProvider';
 import { UserRole } from '@/types';
 import { palette } from '@/theme/tokens';
 
-const DRAWER_WIDTH = 260;
+const DRAWER_WIDTH = 272;
 
 interface MenuItemLink {
   text: string;
@@ -101,14 +104,24 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   };
 
   const drawer = (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Box
+      sx={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        background: 'linear-gradient(180deg, #0b1a13 0%, #0f2418 45%, #0b1814 100%)',
+      }}
+    >
       <Toolbar sx={{ px: 3, py: 2 }}>
         <Stack spacing={0.5}>
           <Typography variant="subtitle2" sx={{ color: palette.text.onMuted }}>
             X5 Recruitment
           </Typography>
           <Typography variant="h6" sx={{ color: palette.text.onDark }}>
-            Control Center
+            Experience Hub
+          </Typography>
+          <Typography variant="caption" sx={{ color: 'rgba(232,245,237,0.72)' }}>
+            Единая точка управления наймом
           </Typography>
         </Stack>
       </Toolbar>
@@ -121,15 +134,18 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               onClick={() => handleMenuClick(item.path)}
               sx={{
                 px: 3,
-                py: 1.25,
+                py: 1.15,
                 borderRadius: 2,
                 mx: 1,
                 color: palette.text.onMuted,
                 transition: 'all 180ms ease',
                 '&.Mui-selected': {
-                  background: 'linear-gradient(135deg, rgba(31,191,117,0.35), rgba(15,158,94,0.32))',
+                  background: 'linear-gradient(135deg, rgba(31,191,117,0.32), rgba(15,158,94,0.28))',
                   color: palette.text.onDark,
-                  boxShadow: '0 10px 30px rgba(0,0,0,0.24)',
+                  boxShadow: '0 12px 36px rgba(0,0,0,0.28)',
+                  '& .MuiListItemIcon-root': {
+                    color: palette.text.onDark,
+                  },
                 },
                 '&:hover': {
                   backgroundColor: 'rgba(255,255,255,0.08)',
@@ -142,7 +158,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </ListItem>
         ))}
       </List>
-      <Box sx={{ px: 3, pb: 2 }}>
+      <Box sx={{ px: 3, pb: 3, display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
         <Chip
           label={user?.roles.join(', ')}
           size="small"
@@ -150,6 +166,17 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             color: palette.text.onMuted,
             borderColor: 'rgba(255,255,255,0.15)',
             backgroundColor: 'rgba(255,255,255,0.08)',
+          }}
+          variant="outlined"
+        />
+        <Chip
+          label="Нужна помощь?"
+          size="small"
+          icon={<HelpOutline sx={{ color: palette.text.onMuted }} />}
+          sx={{
+            color: palette.text.onMuted,
+            borderColor: 'rgba(255,255,255,0.1)',
+            backgroundColor: 'rgba(255,255,255,0.06)',
           }}
           variant="outlined"
         />
@@ -171,9 +198,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         sx={{
           width: { sm: `calc(100% - ${DRAWER_WIDTH}px)` },
           ml: { sm: `${DRAWER_WIDTH}px` },
-          backdropFilter: 'blur(10px)',
-          backgroundColor: 'rgba(255,255,255,0.92)',
-          borderBottom: '1px solid rgba(148, 163, 184, 0.35)',
+          backdropFilter: 'blur(12px)',
+          backgroundColor: 'rgba(255,255,255,0.9)',
+          borderBottom: '1px solid rgba(148, 163, 184, 0.28)',
         }}
       >
         <Toolbar sx={{ minHeight: 72, px: { xs: 2, md: 4 } }}>
@@ -186,21 +213,39 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            {filteredMenuItems.find((item) => item.path === pathname)?.text || 'Dashboard'}
-          </Typography>
+          <Stack spacing={0.5} sx={{ flexGrow: 1 }}>
+            <Typography variant="overline" color="text.secondary">
+              Управление воронкой
+            </Typography>
+            <Typography variant="h6" component="div" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              {filteredMenuItems.find((item) => item.path === pathname)?.text || 'Dashboard'}
+              <Chip label="Live" color="success" size="small" sx={{ height: 22 }} />
+            </Typography>
+          </Stack>
           <Stack direction="row" spacing={1.5} alignItems="center">
-          <Typography variant="body2" color="text.secondary">
-            {user?.fullName}
-          </Typography>
-          <IconButton
-            onClick={handleProfileMenuOpen}
-            color="inherit"
-            sx={{ border: '1px solid', borderColor: palette.borders.subtle }}
-          >
-            <Avatar sx={{ width: 36, height: 36 }}>
-              <AccountCircle />
-            </Avatar>
+            <Tooltip title="Уведомления">
+              <IconButton color="inherit">
+                <Badge variant="dot" color="success" overlap="circular">
+                  <Notifications />
+                </Badge>
+              </IconButton>
+            </Tooltip>
+            <Box sx={{ textAlign: 'right', display: { xs: 'none', sm: 'block' } }}>
+              <Typography variant="body2" color="text.primary" sx={{ fontWeight: 700 }}>
+                {user?.fullName}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                {user?.roles.join(', ')}
+              </Typography>
+            </Box>
+            <IconButton
+              onClick={handleProfileMenuOpen}
+              color="inherit"
+              sx={{ border: '1px solid', borderColor: palette.borders.subtle, backgroundColor: '#fff' }}
+            >
+              <Avatar sx={{ width: 36, height: 36 }}>
+                <AccountCircle />
+              </Avatar>
             </IconButton>
           </Stack>
           <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleProfileMenuClose}>

@@ -1,34 +1,37 @@
 package com.x5.recruitment.application.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.x5.recruitment.domain.model.Transcription;
 import com.x5.recruitment.domain.model.TranscriptionStatus;
 import com.x5.recruitment.domain.repository.TranscriptionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 
+import org.vosk.Model;
+import org.vosk.Recognizer;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.StringJoiner;
+import java.util.concurrent.TimeUnit;
 
 /**
- * Service for handling video transcription using a real external provider (OpenAI Whisper-compatible).
+ * Service for handling video transcription locally using a bundled speech-to-text model.
  */
 @Service
 @RequiredArgsConstructor
@@ -37,22 +40,19 @@ import java.util.Objects;
 public class TranscriptionService {
 
     private final TranscriptionRepository transcriptionRepository;
-    private final RestTemplateBuilder restTemplateBuilder;
+    private final ObjectMapper objectMapper;
 
     @Value("${app.media.storage-path:./media-storage}")
     private String storagePath;
 
-    @Value("${app.transcription.api-url:https://api.openai.com/v1/audio/transcriptions}")
-    private String transcriptionApiUrl;
-
-    @Value("${app.transcription.api-key:}")
-    private String transcriptionApiKey;
-
-    @Value("${app.transcription.model:whisper-1}")
-    private String transcriptionModel;
+    @Value("${app.transcription.local.model-path:}")
+    private String transcriptionModelPath;
 
     @Value("${app.transcription.language:ru}")
     private String transcriptionLanguage;
+
+    @Value("${app.transcription.local.sample-rate:16000}")
+    private int sampleRate;
 
     @Value("${app.transcription.timeout-ms:60000}")
     private long transcriptionTimeoutMs;
@@ -112,56 +112,157 @@ public class TranscriptionService {
     }
 
     /**
-     * Perform actual transcription using OpenAI Whisper API
+     * Perform actual transcription using local Vosk model
      */
     private String performTranscription(Transcription transcription) {
         validateConfiguration();
 
         Path mediaPath = resolveMediaPath(transcription);
-        RestTemplate restTemplate = buildRestTemplate();
+        Path wavPath = extractAudio(mediaPath);
 
-        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        body.add("file", new FileSystemResource(mediaPath));
-        body.add("model", transcriptionModel);
-        body.add("response_format", "text");
-        body.add("language", transcriptionLanguage);
+        try (Model model = new Model(transcriptionModelPath);
+             Recognizer recognizer = new Recognizer(model, sampleRate);
+             InputStream audioStream = new BufferedInputStream(Files.newInputStream(wavPath))) {
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        headers.setAccept(List.of(MediaType.TEXT_PLAIN, MediaType.ALL));
-        if (transcriptionApiKey != null && !transcriptionApiKey.isBlank()) {
-            headers.setBearerAuth(transcriptionApiKey);
-        } else {
-            log.warn("Transcription API key is not configured; proceeding without Authorization header (expected for local transcription service)");
-        }
+            byte[] buffer = new byte[4096];
+            StringJoiner transcriptJoiner = new StringJoiner(" ");
+            int read;
 
-        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-
-        try {
-            ResponseEntity<String> response = restTemplate.postForEntity(transcriptionApiUrl, requestEntity, String.class);
-            if (!response.getStatusCode().is2xxSuccessful()) {
-                throw new IllegalStateException("Transcription API returned status " + response.getStatusCode());
+            while ((read = audioStream.read(buffer)) != -1) {
+                if (recognizer.acceptWaveForm(buffer, read)) {
+                    transcriptJoiner.add(extractText(recognizer.getResult()));
+                }
             }
 
-            String responseBody = response.getBody();
-            if (responseBody == null || responseBody.isBlank()) {
-                throw new IllegalStateException("Empty transcription response received");
+            String finalText = extractText(recognizer.getFinalResult());
+            if (!finalText.isBlank()) {
+                transcriptJoiner.add(finalText);
             }
 
-            log.info("Received transcription for media {} ({} bytes)",
-                transcription.getMedia().getId(), responseBody.length());
+            String transcriptionText = transcriptJoiner.toString().replaceAll("\\s+", " ").trim();
+            log.info("Received transcription for media {} ({} chars)",
+                transcription.getMedia().getId(), transcriptionText.length());
 
             transcription.setLanguage(transcriptionLanguage);
-            return responseBody.strip();
-        } catch (RestClientException e) {
-            log.error("Failed to transcribe media {}", transcription.getMedia().getId(), e);
-            throw new IllegalStateException("Transcription API request failed: " + e.getMessage(), e);
+            return transcriptionText;
+        } catch (IOException e) {
+            log.error("Failed to read audio for transcription {}", transcription.getId(), e);
+            throw new IllegalStateException("Unable to read audio stream: " + e.getMessage(), e);
+        } finally {
+            deleteTempFile(wavPath);
+        }
+    }
+
+    private String extractText(String recognizerJson) {
+        if (recognizerJson == null || recognizerJson.isBlank()) {
+            return "";
+        }
+
+        try {
+            JsonNode jsonNode = objectMapper.readTree(recognizerJson);
+            return jsonNode.path("text").asText("").strip();
+        } catch (JsonProcessingException e) {
+            log.warn("Unable to parse recognizer result: {}", recognizerJson, e);
+            return recognizerJson;
         }
     }
 
     private void validateConfiguration() {
-        if (transcriptionApiUrl == null || transcriptionApiUrl.isBlank()) {
-            throw new IllegalStateException("Transcription API URL is not configured");
+        if (transcriptionModelPath == null || transcriptionModelPath.isBlank()) {
+            throw new IllegalStateException("Local transcription model path is not configured");
+        }
+
+        Path modelPath = Paths.get(transcriptionModelPath).toAbsolutePath();
+        if (!Files.exists(modelPath)) {
+            throw new IllegalStateException("Local transcription model not found: " + modelPath);
+        }
+    }
+
+    private Path extractAudio(Path mediaPath) {
+        Path wavPath;
+        try {
+            wavPath = Files.createTempFile("transcription-", ".wav");
+        } catch (IOException e) {
+            throw new IllegalStateException("Unable to create temporary audio file", e);
+        }
+
+        List<String> command = new ArrayList<>();
+        command.add("ffmpeg");
+        command.add("-y");
+        command.add("-i");
+        command.add(mediaPath.toString());
+        command.add("-ar");
+        command.add(String.valueOf(sampleRate));
+        command.add("-ac");
+        command.add("1");
+        command.add("-f");
+        command.add("wav");
+        command.add(wavPath.toString());
+
+        ProcessBuilder processBuilder = new ProcessBuilder(command);
+        processBuilder.redirectErrorStream(true);
+
+        try {
+            Process process = processBuilder.start();
+            List<String> outputLines = new ArrayList<>();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    outputLines.add(line);
+                }
+            }
+
+            boolean finished = process.waitFor(transcriptionTimeoutMs, TimeUnit.MILLISECONDS);
+            if (!finished) {
+                process.destroyForcibly();
+                throw new IllegalStateException("Audio extraction timed out after " + transcriptionTimeoutMs + " ms");
+            }
+
+            if (process.exitValue() != 0) {
+                throw new IllegalStateException("ffmpeg failed with code " + process.exitValue() + ": " + summarizeOutput(outputLines));
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Audio extraction interrupted", e);
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to execute ffmpeg for transcription: " + e.getMessage(), e);
+        }
+
+        if (!Files.exists(wavPath) || !Files.isReadable(wavPath)) {
+            throw new IllegalStateException("Extracted audio file is not available: " + wavPath);
+        }
+
+        try {
+            if (Files.size(wavPath) <= 0) {
+                throw new IllegalStateException("Extracted audio file is empty: " + wavPath);
+            }
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to validate extracted audio: " + wavPath, e);
+        }
+
+        return wavPath;
+    }
+
+    private String summarizeOutput(List<String> outputLines) {
+        if (outputLines.isEmpty()) {
+            return "";
+        }
+
+        List<String> preview = outputLines.size() > 8
+            ? outputLines.subList(0, 8)
+            : outputLines;
+        return String.join(" | ", preview);
+    }
+
+    private void deleteTempFile(Path file) {
+        if (file == null) {
+            return;
+        }
+
+        try {
+            Files.deleteIfExists(file);
+        } catch (IOException e) {
+            log.warn("Failed to delete temporary file {}", file, e);
         }
     }
 
@@ -194,13 +295,6 @@ public class TranscriptionService {
         }
 
         return mediaPath;
-    }
-
-    private RestTemplate buildRestTemplate() {
-        return restTemplateBuilder
-            .setConnectTimeout(Duration.ofMillis(transcriptionTimeoutMs))
-            .setReadTimeout(Duration.ofMillis(transcriptionTimeoutMs))
-            .build();
     }
 
     /**

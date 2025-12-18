@@ -31,15 +31,15 @@ export const theme = createTheme({
   },
   components: {
     MuiCssBaseline: {
-      styleOverrides: {
-        body: {
-          margin: 0,
-          background:
-            `${palette.backgrounds.base} radial-gradient(circle at 18% 20%, rgba(31,191,117,0.1), transparent 35%), radial-gradient(circle at 80% 6%, rgba(15,158,94,0.08), transparent 32%)`,
-          color: palette.text.primary,
-          fontFamily: typography.fontFamily,
-          minHeight: '100vh',
-        },
+        styleOverrides: {
+          body: {
+            margin: 0,
+            background:
+            `${palette.backgrounds.base} radial-gradient(circle at 18% 20%, rgba(31,191,117,0.08), transparent 32%), radial-gradient(circle at 80% 6%, rgba(15,158,94,0.06), transparent 30%), linear-gradient(180deg, #f7fbf8 0%, #eef3f0 60%, #e7eeea 100%)`,
+            color: palette.text.primary,
+            fontFamily: typography.fontFamily,
+            minHeight: '100vh',
+          },
         '*': {
           boxSizing: 'border-box',
           minWidth: 0,
@@ -200,6 +200,22 @@ export const theme = createTheme({
           border: `1px solid ${palette.borders.subtle}`,
           backgroundColor: palette.backgrounds.surface,
           boxShadow: shadows.soft,
+        },
+      },
+    },
+    MuiTableCell: {
+      styleOverrides: {
+        root: {
+          maxWidth: 260,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+          verticalAlign: 'middle',
+        },
+        head: {
+          fontWeight: 700,
+          color: palette.text.secondary,
+          backgroundColor: palette.backgrounds.elevated,
         },
       },
     },

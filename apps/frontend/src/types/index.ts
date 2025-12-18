@@ -187,6 +187,7 @@ export interface ApplicationDto {
   statusChangedAt: string;
   currentComment?: string;
   videoPresentation?: MediaResponse;
+  slaBreached?: boolean;
 }
 
 // Application type (legacy interface)
@@ -207,6 +208,7 @@ export interface Application {
   statusChangedAt: string;
   currentComment?: string;
   videoPresentation?: MediaResponse;
+  slaBreached?: boolean;
 }
 
 // ApplicationDetailDto from backend API (detail view)

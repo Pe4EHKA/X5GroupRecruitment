@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Box,
+  Stack,
   Paper,
   Table,
   TableBody,
@@ -20,9 +21,11 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Grid,
   Button,
   InputAdornment,
+  Grid,
+  Chip,
+  Typography,
 } from '@mui/material';
 import { Visibility, Search as SearchIcon } from '@mui/icons-material';
 import { useQuery } from '@tanstack/react-query';
@@ -85,15 +88,58 @@ export default function ApplicationsPage() {
   return (
     <ProtectedRoute allowedRoles={[UserRole.RECRUITER]}>
       <DashboardLayout>
-        <Box>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
           <PageHeader
             title="Заявки"
             subtitle="Просматривайте и фильтруйте кандидатов по статусам, вакансиям и SLA. Доступно компактное представление для быстрого скролла."
             chipLabel="Pipeline"
           />
 
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6} md={4}>
+              <Paper data-variant="elevated" sx={{ p: 2.5, display: 'grid', gap: 0.5 }}>
+                <Typography variant="body2" color="text.secondary">
+                  Всего заявок
+                </Typography>
+                <Typography variant="h4">{data?.totalElements ?? '—'}</Typography>
+                <Typography variant="caption" color="text.secondary">
+                  учитывая активные фильтры
+                </Typography>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <Paper data-variant="elevated" sx={{ p: 2.5, display: 'grid', gap: 0.5 }}>
+                <Typography variant="body2" color="text.secondary">
+                  На странице
+                </Typography>
+                <Typography variant="h4">{data?.content?.length ?? 0}</Typography>
+                <Typography variant="caption" color="text.secondary">
+                  текущий срез выборки
+                </Typography>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <Paper data-variant="elevated" sx={{ p: 2.5, display: 'grid', gap: 0.5 }}>
+                <Typography variant="body2" color="text.secondary">
+                  Применённые фильтры
+                </Typography>
+                <Stack direction="row" spacing={1} flexWrap="wrap">
+                  {(filters.status || filters.vacancyId || filters.search) ? (
+                    <>
+                      {filters.status && <Chip size="small" label={filters.status} color="primary" />}
+                      {filters.vacancyId && <Chip size="small" label={`Вакансия #${filters.vacancyId}`} />}
+                      {filters.search && <Chip size="small" label={`Поиск: ${filters.search}`} />}
+                    </>
+                  ) : (
+                    <Chip size="small" label="Не выбрано" variant="outlined" />
+                  )}
+                </Stack>
+              </Paper>
+            </Grid>
+          </Grid>
+
           {/* Filters */}
-          <Paper data-variant="elevated" sx={{ p: 3, mb: 3 }}>
+          <Paper data-variant="elevated" sx={{ p: { xs: 2.5, md: 3 }, mb: 1.5, borderRadius: 3 }}>
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6} md={3}>
                 <TextField
@@ -207,9 +253,9 @@ export default function ApplicationsPage() {
           </Paper>
 
           {/* Table */}
-          <Paper data-variant="elevated">
-            <TableContainer>
-              <Table>
+          <Paper data-variant="elevated" sx={{ borderRadius: 3, overflow: 'hidden' }}>
+            <TableContainer sx={{ maxHeight: { xs: 480, md: 'none' }, minWidth: 960 }}>
+              <Table stickyHeader>
                 <TableHead>
                   <TableRow>
                     <TableCell>ID</TableCell>
@@ -225,15 +271,24 @@ export default function ApplicationsPage() {
                 <TableBody>
                   {data?.content?.map((application) => (
                     <TableRow key={application.id} hover>
-                      <TableCell>{application.id}</TableCell>
-                      <TableCell>{getCandidateFullName(application.candidate)}</TableCell>
-                      <TableCell>{getCandidateEmail(application.candidate)}</TableCell>
-                      <TableCell>{application.vacancyTitle}</TableCell>
+                      <TableCell sx={{ maxWidth: 80 }}>{application.id}</TableCell>
+                      <TableCell sx={{ maxWidth: 220 }}>
+                        {getCandidateFullName(application.candidate)}
+                      </TableCell>
+                      <TableCell sx={{ maxWidth: 220 }}>{getCandidateEmail(application.candidate)}</TableCell>
+                      <TableCell sx={{ maxWidth: 220 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          {application.vacancyTitle}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                          {application.slaBreached ? 'SLA: нарушен' : 'SLA: в норме'}
+                        </Typography>
+                      </TableCell>
                       <TableCell>
                         <StatusBadge status={application.status} />
                       </TableCell>
-                      <TableCell>{application.recruiterName || '-'}</TableCell>
-                      <TableCell>
+                      <TableCell sx={{ maxWidth: 200 }}>{application.recruiterName || '-'}</TableCell>
+                      <TableCell sx={{ maxWidth: 200 }}>
                         {format(new Date(application.createdAt), 'dd.MM.yyyy HH:mm')}
                       </TableCell>
                       <TableCell>

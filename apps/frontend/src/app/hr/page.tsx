@@ -162,7 +162,7 @@ export default function HRDashboard() {
   return (
     <ProtectedRoute allowedRoles={[UserRole.RECRUITER, UserRole.ADMIN]}>
       <DashboardLayout>
-        <Box sx={{ animation: `${fadeIn} 220ms ease` }}>
+        <Box sx={{ animation: `${fadeIn} 220ms ease`, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
           <PageHeader
             title="HR кабинет"
             subtitle="Следите за статусами кандидатов, управляйте доступом и быстро реагируйте на воронку подбора."
@@ -335,8 +335,8 @@ export default function HRDashboard() {
               <Chip icon={<FilterIcon />} label={`${data?.totalElements ?? 0} в обработке`} color="primary" />
             </Stack>
             {isLoading ? (
-              <TableContainer>
-                <Table sx={{ minWidth: 960 }}>
+              <TableContainer sx={{ maxHeight: { xs: 420, md: 'none' }, minWidth: 960 }}>
+                <Table stickyHeader sx={{ minWidth: 960 }}>
                   <TableHead>
                     <TableRow>
                       <TableCell>Кандидат</TableCell>
@@ -359,8 +359,8 @@ export default function HRDashboard() {
               />
             ) : (
               <>
-                <TableContainer>
-                  <Table sx={{ minWidth: 960 }}>
+                <TableContainer sx={{ maxHeight: { xs: 420, md: 'none' }, minWidth: 960 }}>
+                  <Table stickyHeader sx={{ minWidth: 960 }}>
                     <TableHead>
                       <TableRow>
                         <TableCell>Кандидат</TableCell>
@@ -379,14 +379,14 @@ export default function HRDashboard() {
                           sx={{ cursor: 'pointer' }}
                           onClick={() => router.push(`/hr/applications/${application.id}`)}
                         >
-                          <TableCell>
+                          <TableCell sx={{ maxWidth: 220 }}>
                             {application.candidate?.fullName || application.candidateName || 'N/A'}
                           </TableCell>
-                          <TableCell>
+                          <TableCell sx={{ maxWidth: 220 }}>
                             {application.candidate?.email || application.candidateEmail || 'N/A'}
                           </TableCell>
-                          <TableCell>{application.candidate?.phone || 'N/A'}</TableCell>
-                          <TableCell>{application.vacancyTitle}</TableCell>
+                          <TableCell sx={{ maxWidth: 180 }}>{application.candidate?.phone || 'N/A'}</TableCell>
+                          <TableCell sx={{ maxWidth: 220 }}>{application.vacancyTitle}</TableCell>
                           <TableCell>
                             <Chip
                               label={STATUS_LABELS[application.status]}

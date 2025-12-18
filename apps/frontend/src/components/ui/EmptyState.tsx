@@ -26,11 +26,12 @@ export function EmptyState({
       alignItems="center"
       sx={{
         py: 6,
-        px: 2,
+        px: { xs: 2, sm: 4 },
         borderRadius: 3,
         border: `1px dashed ${palette.neutral[300]}`,
-        background: palette.backgrounds.surface,
+        background: `linear-gradient(145deg, rgba(31,191,117,0.06), rgba(15,158,94,0.04))`,
         boxShadow: shadows.soft,
+        textAlign: 'center',
       }}
     >
       <Box

@@ -45,6 +45,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/media/**").permitAll()
                 
                 // HR endpoints (RECRUITER role in MVP)
                 .requestMatchers("/api/hr/**").hasAnyRole("RECRUITER", "ADMIN")

@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Grid, Paper, Typography, CircularProgress } from '@mui/material';
+import { Box, Grid, Paper, Typography, Stack, Skeleton } from '@mui/material';
 import {
   Assignment,
   CheckCircle,
@@ -9,10 +9,12 @@ import {
   Warning,
   HourglassEmpty,
 } from '@mui/icons-material';
+import { PageHeader } from '@/components/ui/PageHeader';
 import DashboardLayout from '@/components/DashboardLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { UserRole } from '@/types';
 import { useDashboardMetrics } from '@/hooks/useRecruiter';
+import { palette } from '@/theme/tokens';
 
 interface MetricCardProps {
   title: string;
@@ -23,31 +25,51 @@ interface MetricCardProps {
 
 function MetricCard({ title, value, icon, color }: MetricCardProps) {
   return (
-    <Paper sx={{ p: 3 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Box>
-          <Typography variant="body2" color="text.secondary" gutterBottom>
-            {title}
-          </Typography>
-          <Typography variant="h4" component="div">
-            {value}
-          </Typography>
-        </Box>
+    <Paper data-variant="elevated" sx={{ p: 3 }}>
+      <Stack spacing={2}>
+        <Stack direction="row" spacing={1.5} alignItems="center" justifyContent="space-between">
+          <Stack spacing={0.5}>
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              {title}
+            </Typography>
+            <Typography variant="h4" component="div">
+              {value}
+            </Typography>
+          </Stack>
+          <Box
+            sx={{
+              width: 56,
+              height: 56,
+              borderRadius: '50%',
+              background: color,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#fff',
+              boxShadow: '0 14px 30px rgba(0,0,0,0.12)',
+            }}
+          >
+            {icon}
+          </Box>
+        </Stack>
         <Box
           sx={{
-            width: 56,
-            height: 56,
-            borderRadius: '50%',
-            backgroundColor: color,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'white',
+            height: 6,
+            borderRadius: 999,
+            backgroundColor: `${color}20`,
+            overflow: 'hidden',
           }}
         >
-          {icon}
+          <Box
+            sx={{
+              width: `${Math.min(100, value * 8)}%`,
+              backgroundColor: color,
+              height: '100%',
+              transition: 'width 240ms ease',
+            }}
+          />
         </Box>
-      </Box>
+      </Stack>
     </Paper>
   );
 }
@@ -55,86 +77,40 @@ function MetricCard({ title, value, icon, color }: MetricCardProps) {
 export default function RecruiterDashboard() {
   const { data: metrics, isLoading } = useDashboardMetrics();
 
-  if (isLoading) {
-    return (
-      <ProtectedRoute allowedRoles={[UserRole.RECRUITER]}>
-        <DashboardLayout>
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-            <CircularProgress />
-          </Box>
-        </DashboardLayout>
-      </ProtectedRoute>
-    );
-  }
-
   return (
     <ProtectedRoute allowedRoles={[UserRole.RECRUITER]}>
       <DashboardLayout>
         <Box>
-          <Typography variant="h4" gutterBottom>
-            Dashboard
-          </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-            Обзор заявок и метрик
-          </Typography>
+          <PageHeader
+            title="Дашборд рекрутера"
+            subtitle="Быстрый обзор воронки подбора и зон риска по SLA. Все метрики обновляются в реальном времени."
+            chipLabel="Recruitment Ops"
+          />
 
           <Grid container spacing={3}>
-            <Grid item xs={12} sm={6} md={4}>
-              <MetricCard
-                title="Новые"
-                value={metrics?.newCount || 0}
-                icon={<Assignment />}
-                color="#1976d2"
-              />
-            </Grid>
-            <Grid item xs={12} sm={6} md={4}>
-              <MetricCard
-                title="На скрининге"
-                value={metrics?.screeningCount || 0}
-                icon={<HourglassEmpty />}
-                color="#9c27b0"
-              />
-            </Grid>
-            <Grid item xs={12} sm={6} md={4}>
-              <MetricCard
-                title="На интервью"
-                value={metrics?.interviewCount || 0}
-                icon={<Schedule />}
-                color="#2196f3"
-              />
-            </Grid>
-            <Grid item xs={12} sm={6} md={4}>
-              <MetricCard
-                title="Одобрено"
-                value={metrics?.approvedCount || 0}
-                icon={<CheckCircle />}
-                color="#4caf50"
-              />
-            </Grid>
-            <Grid item xs={12} sm={6} md={4}>
-              <MetricCard
-                title="Отклонено"
-                value={metrics?.rejectedCount || 0}
-                icon={<Cancel />}
-                color="#f44336"
-              />
-            </Grid>
-            <Grid item xs={12} sm={6} md={4}>
-              <MetricCard
-                title="Нарушение SLA"
-                value={metrics?.slaBreachCount || 0}
-                icon={<Warning />}
-                color="#ff5722"
-              />
-            </Grid>
-            <Grid item xs={12} sm={6} md={4}>
-              <MetricCard
-                title="Всего заявок"
-                value={metrics?.totalCount || 0}
-                icon={<Assignment />}
-                color="#607d8b"
-              />
-            </Grid>
+            {[
+              { title: 'Новые', value: metrics?.newCount, icon: <Assignment />, color: '#4338ca' },
+              { title: 'На скрининге', value: metrics?.screeningCount, icon: <HourglassEmpty />, color: '#7c3aed' },
+              { title: 'На интервью', value: metrics?.interviewCount, icon: <Schedule />, color: '#0ea5e9' },
+              { title: 'Одобрено', value: metrics?.approvedCount, icon: <CheckCircle />, color: '#22c55e' },
+              { title: 'Отклонено', value: metrics?.rejectedCount, icon: <Cancel />, color: '#ef4444' },
+              { title: 'Нарушение SLA', value: metrics?.slaBreachCount, icon: <Warning />, color: '#f59e0b' },
+              { title: 'Всего заявок', value: metrics?.totalCount, icon: <Assignment />, color: palette.neutral[600] },
+            ].map((item, idx) => (
+              <Grid key={item.title} item xs={12} sm={6} md={4}>
+                {isLoading ? (
+                  <Paper data-variant="elevated" sx={{ p: 3 }}>
+                    <Stack spacing={2}>
+                      <Skeleton width="60%" height={20} />
+                      <Skeleton width="40%" height={36} />
+                      <Skeleton variant="rectangular" height={8} sx={{ borderRadius: 999 }} />
+                    </Stack>
+                  </Paper>
+                ) : (
+                  <MetricCard {...item} value={item.value || 0} />
+                )}
+              </Grid>
+            ))}
           </Grid>
         </Box>
       </DashboardLayout>

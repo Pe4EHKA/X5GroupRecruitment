@@ -54,6 +54,14 @@ public class TranscriptionService {
     @Value("${app.transcription.local.sample-rate:16000}")
     private int sampleRate;
 
+    /**
+     * Optional environment override for the model path. Allows configuring the
+     * Vosk model location via container environment without changing
+     * application properties (e.g. VOSK_MODEL_PATH=/opt/models/vosk).
+     */
+    @Value("${VOSK_MODEL_PATH:}")
+    private String voskModelPathOverride;
+
     @Value("${app.transcription.timeout-ms:60000}")
     private long transcriptionTimeoutMs;
 
@@ -168,14 +176,17 @@ public class TranscriptionService {
     }
 
     private void validateConfiguration() {
-        if (transcriptionModelPath == null || transcriptionModelPath.isBlank()) {
+        Path modelPath = resolveModelPath();
+
+        if (modelPath == null) {
             throw new IllegalStateException("Local transcription model path is not configured");
         }
 
-        Path modelPath = Paths.get(transcriptionModelPath).toAbsolutePath();
         if (!Files.exists(modelPath)) {
             throw new IllegalStateException("Local transcription model not found: " + modelPath);
         }
+
+        transcriptionModelPath = modelPath.toString();
     }
 
     private Path extractAudio(Path mediaPath) {
@@ -295,6 +306,42 @@ public class TranscriptionService {
         }
 
         return mediaPath;
+    }
+
+    private Path resolveModelPath() {
+        // Priority 1: explicit property
+        if (transcriptionModelPath != null && !transcriptionModelPath.isBlank()) {
+            Path explicit = Paths.get(transcriptionModelPath).toAbsolutePath().normalize();
+            if (Files.exists(explicit)) {
+                return explicit;
+            }
+        }
+
+        // Priority 2: environment override used in container deployments
+        if (voskModelPathOverride != null && !voskModelPathOverride.isBlank()) {
+            Path envPath = Paths.get(voskModelPathOverride).toAbsolutePath().normalize();
+            if (Files.exists(envPath)) {
+                return envPath;
+            }
+        }
+
+        // Priority 3: default next to media storage (mounted volume)
+        Path bundled = Paths.get(storagePath)
+            .toAbsolutePath()
+            .normalize()
+            .resolve("transcription-model")
+            .normalize();
+
+        if (Files.exists(bundled)) {
+            return bundled;
+        }
+
+        // Fallback: if explicit value was set but missing, return normalized path
+        if (transcriptionModelPath != null && !transcriptionModelPath.isBlank()) {
+            return Paths.get(transcriptionModelPath).toAbsolutePath().normalize();
+        }
+
+        return null;
     }
 
     /**

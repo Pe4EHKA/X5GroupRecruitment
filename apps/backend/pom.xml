@@ -61,9 +61,9 @@
 
         <!-- Speech-to-text (offline) -->
         <dependency>
-            <groupId>org.vosk</groupId>
+            <groupId>com.alphacephei</groupId>
             <artifactId>vosk</artifactId>
-            <version>0.3.47</version>
+            <version>0.3.45</version>
         </dependency>
 
         <!-- Database -->

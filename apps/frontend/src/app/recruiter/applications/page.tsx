@@ -13,7 +13,6 @@ import {
   TableHead,
   TableRow,
   TablePagination,
-  Typography,
   CircularProgress,
   IconButton,
   TextField,
@@ -25,8 +24,8 @@ import {
   InputAdornment,
   Grid,
   Chip,
-  Typography,
 } from '@mui/material';
+import Typography from '@mui/material/Typography';
 import { Visibility, Search as SearchIcon } from '@mui/icons-material';
 import { useQuery } from '@tanstack/react-query';
 import DashboardLayout from '@/components/DashboardLayout';

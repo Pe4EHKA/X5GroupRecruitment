@@ -63,7 +63,7 @@
         <dependency>
             <groupId>org.vosk</groupId>
             <artifactId>vosk</artifactId>
-            <version>0.3.45</version>
+            <version>0.3.47</version>
         </dependency>
 
         <!-- Database -->
@@ -138,6 +138,7 @@
             <url>https://alphacephei.com/maven/</url>
             <releases>
                 <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
             </releases>
             <snapshots>
                 <enabled>false</enabled>

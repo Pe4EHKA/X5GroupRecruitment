@@ -38,9 +38,18 @@ RUN --mount=type=cache,target=/root/.m2 \
 # Runtime stage with JRE 21 for smaller image
 FROM mirror.gcr.io/library/eclipse-temurin:21-jre-jammy
 
-# Install curl for healthcheck and ffmpeg for audio extraction
-RUN apt-get update && apt-get install -y --no-install-recommends curl ffmpeg && \
+# Install curl for healthcheck, ffmpeg for audio extraction and unzip for Vosk native library
+RUN apt-get update && apt-get install -y --no-install-recommends curl ffmpeg unzip && \
     rm -rf /var/lib/apt/lists/*
+
+# Add Vosk native library for linux-aarch64 to satisfy JNA lookup at runtime
+ARG VOSK_VERSION=0.3.45
+ARG VOSK_ARCH=linux-aarch64
+RUN VOSK_PACKAGE="vosk-${VOSK_ARCH}-${VOSK_VERSION}.zip" && \
+    curl -L -o "/tmp/${VOSK_PACKAGE}" "https://github.com/alphacep/vosk-api/releases/download/v${VOSK_VERSION}/${VOSK_PACKAGE}" && \
+    unzip -j "/tmp/${VOSK_PACKAGE}" "libvosk.so" -d /usr/local/lib && \
+    ldconfig && \
+    rm "/tmp/${VOSK_PACKAGE}"
 
 WORKDIR /app
 

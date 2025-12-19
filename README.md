@@ -165,8 +165,8 @@ docker compose logs -f backend     # только backend
 
 Сервис транскрибации работает **только с локальной офлайн-моделью Vosk**. В Docker-контейнере нет встроенной модели и внешние API не используются, поэтому нужно смонтировать каталог с подготовленной моделью:
 
-1. Скачайте подходящую Vosk-модель (например, `vosk-model-small-ru-0.22`) и распакуйте её в `apps/backend/transcription-model`. Если внутри каталога останется единственная папка версии (например, `vosk-model-small-ru-0.22`), сервис автоматически найдёт корень модели (`conf/model.conf`, `am`, `graph`).
-2. При запуске `docker compose up --build` каталог автоматически монтируется в контейнер по пути `/app/transcription-model`, а backend получает путь через переменные `APP_TRANSCRIPTION_LOCAL_MODEL_PATH` и `VOSK_MODEL_PATH`. Хост-путь можно переопределить через переменную окружения `TRANSCRIPTION_MODEL_HOST_PATH` (по умолчанию `./apps/backend/transcription-model`).
+1. Скачайте подходящую Vosk-модель (например, `vosk-model-small-ru-0.22`) и распакуйте её в `apps/backend/transcription-model`. В переменных `APP_TRANSCRIPTION_LOCAL_MODEL_PATH` и `VOSK_MODEL_PATH` указывайте путь **прямо на каталог модели** (`.../vosk-model-small-ru-0.22`), т.к. внутри него лежат `conf`, `am`, `graph`.
+2. При запуске `docker compose up --build` каталог автоматически монтируется в контейнер по пути `/app/transcription-model/vosk-model-small-ru-0.22`, а backend получает этот же путь через переменные окружения. Хост-путь можно переопределить через переменную окружения `TRANSCRIPTION_MODEL_HOST_PATH` (по умолчанию `./apps/backend/transcription-model`).
 3. Убедитесь, что на хосте достаточно дискового пространства (модель занимает сотни мегабайт).
 4. Для корректного извлечения аудио внутри контейнера установлен `ffmpeg` (добавлено в `apps/backend/Dockerfile`). Никакие дополнительные CLI ставить не нужно.
 

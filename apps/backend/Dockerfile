@@ -45,11 +45,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl ffmpeg unz
 # Add Vosk native library for linux-aarch64 to satisfy JNA lookup at runtime
 ARG VOSK_VERSION=0.3.45
 ARG VOSK_ARCH=linux-aarch64
-RUN VOSK_PACKAGE="vosk-${VOSK_ARCH}-${VOSK_VERSION}.zip" && \
-    curl -L -o "/tmp/${VOSK_PACKAGE}" "https://github.com/alphacep/vosk-api/releases/download/v${VOSK_VERSION}/${VOSK_PACKAGE}" && \
-    unzip -j "/tmp/${VOSK_PACKAGE}" "libvosk.so" -d /usr/local/lib && \
-    ldconfig && \
-    rm "/tmp/${VOSK_PACKAGE}"
+RUN set -eux; \
+    VOSK_PACKAGE="vosk-${VOSK_ARCH}-${VOSK_VERSION}.zip"; \
+    curl -L -o "/tmp/${VOSK_PACKAGE}" "https://github.com/alphacep/vosk-api/releases/download/v${VOSK_VERSION}/${VOSK_PACKAGE}"; \
+    mkdir -p /tmp/vosk && unzip -q "/tmp/${VOSK_PACKAGE}" -d /tmp/vosk; \
+    LIB_PATH="$(find /tmp/vosk -name libvosk.so -type f | head -n 1)"; \
+    test -n "$LIB_PATH"; \
+    cp "$LIB_PATH" /usr/local/lib/libvosk.so; \
+    ldconfig; \
+    rm -rf /tmp/vosk "/tmp/${VOSK_PACKAGE}"
 
 WORKDIR /app
 

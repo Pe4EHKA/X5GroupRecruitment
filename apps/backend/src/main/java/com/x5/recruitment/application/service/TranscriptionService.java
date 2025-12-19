@@ -345,8 +345,26 @@ public class TranscriptionService {
             return null;
         }
 
-        if (isModelRoot(normalized)) {
+        if (isValidModelRoot(normalized)) {
             return normalized;
+        }
+
+        if (!Files.isDirectory(normalized)) {
+            return null;
+        }
+
+        try (Stream<Path> children = Files.list(normalized)) {
+            Optional<Path> firstModelDir = children
+                .filter(Files::isDirectory)
+                .sorted()
+                .filter(this::isValidModelRoot)
+                .findFirst();
+
+            if (firstModelDir.isPresent()) {
+                return firstModelDir.get().toAbsolutePath().normalize();
+            }
+        } catch (IOException e) {
+            log.warn("Unable to inspect model directory {}", normalized, e);
         }
 
         if (!Files.isDirectory(normalized)) {
@@ -441,6 +459,21 @@ public class TranscriptionService {
     }
 
     private boolean isModelRoot(Path candidate) {
+        if (candidate == null || !Files.isDirectory(candidate)) {
+            return false;
+        }
+
+        Path confDir = candidate.resolve("conf");
+        Path acousticDir = candidate.resolve("am");
+        Path graphDir = candidate.resolve("graph");
+
+        return Files.isDirectory(confDir)
+            && Files.exists(confDir.resolve("model.conf"))
+            && Files.isDirectory(acousticDir)
+            && Files.isDirectory(graphDir);
+    }
+
+    private boolean isValidModelRoot(Path candidate) {
         if (candidate == null || !Files.isDirectory(candidate)) {
             return false;
         }

@@ -365,7 +365,8 @@ public class TranscriptionService {
             log.warn("Unable to inspect model directory {}", normalized, e);
         }
 
-        return null;
+        throw new IllegalStateException("Local transcription model not found: " + errorPath
+            + ". Provide app.transcription.local.model-path or mount a model directory.");
     }
 
     private boolean isModelRoot(Path candidate) {

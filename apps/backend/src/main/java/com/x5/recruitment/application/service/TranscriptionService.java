@@ -25,10 +25,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.StringJoiner;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Service for handling video transcription locally using a bundled speech-to-text model.
@@ -119,11 +123,8 @@ public class TranscriptionService {
         }
     }
 
-    /**
-     * Perform actual transcription using local Vosk model
-     */
     private String performTranscription(Transcription transcription) {
-        validateConfiguration();
+        transcriptionModelPath = resolveModelPath().toString();
 
         Path mediaPath = resolveMediaPath(transcription);
         Path wavPath = extractAudio(mediaPath);
@@ -173,20 +174,6 @@ public class TranscriptionService {
             log.warn("Unable to parse recognizer result: {}", recognizerJson, e);
             return recognizerJson;
         }
-    }
-
-    private void validateConfiguration() {
-        Path modelPath = resolveModelPath();
-
-        if (modelPath == null) {
-            throw new IllegalStateException("Local transcription model path is not configured");
-        }
-
-        if (!Files.exists(modelPath)) {
-            throw new IllegalStateException("Local transcription model not found: " + modelPath);
-        }
-
-        transcriptionModelPath = modelPath.toString();
     }
 
     private Path extractAudio(Path mediaPath) {
@@ -309,39 +296,91 @@ public class TranscriptionService {
     }
 
     private Path resolveModelPath() {
+        List<Path> candidateRoots = new ArrayList<>();
+
         // Priority 1: explicit property
         if (transcriptionModelPath != null && !transcriptionModelPath.isBlank()) {
-            Path explicit = Paths.get(transcriptionModelPath).toAbsolutePath().normalize();
-            if (Files.exists(explicit)) {
-                return explicit;
-            }
+            candidateRoots.add(Paths.get(transcriptionModelPath));
         }
 
         // Priority 2: environment override used in container deployments
         if (voskModelPathOverride != null && !voskModelPathOverride.isBlank()) {
-            Path envPath = Paths.get(voskModelPathOverride).toAbsolutePath().normalize();
-            if (Files.exists(envPath)) {
-                return envPath;
+            candidateRoots.add(Paths.get(voskModelPathOverride));
+        }
+
+        // Priority 3: common repo locations (root-level and module-local)
+        candidateRoots.add(Paths.get("./transcription-model"));
+        candidateRoots.add(Paths.get("apps", "backend", "transcription-model"));
+
+        // Priority 4: default next to media storage (mounted volume inside container)
+        candidateRoots.add(Paths.get(storagePath).resolve("transcription-model"));
+
+        Set<String> inspected = new HashSet<>();
+
+        for (Path candidateRoot : candidateRoots) {
+            Path modelRoot = detectModelRoot(candidateRoot);
+            if (modelRoot != null) {
+                return modelRoot;
             }
+
+            inspected.add(candidateRoot.toAbsolutePath().normalize().toString());
         }
 
-        // Priority 3: default next to media storage (mounted volume)
-        Path bundled = Paths.get(storagePath)
-            .toAbsolutePath()
-            .normalize()
-            .resolve("transcription-model")
-            .normalize();
+        String searchedLocations = inspected.stream()
+            .sorted()
+            .collect(Collectors.joining(", "));
 
-        if (Files.exists(bundled)) {
-            return bundled;
+        throw new IllegalStateException("Local transcription model not found. Searched: " + searchedLocations
+            + ". Provide app.transcription.local.model-path or mount a model directory.");
+    }
+
+    private Path detectModelRoot(Path candidateRoot) {
+        if (candidateRoot == null) {
+            return null;
         }
 
-        // Fallback: if explicit value was set but missing, return normalized path
-        if (transcriptionModelPath != null && !transcriptionModelPath.isBlank()) {
-            return Paths.get(transcriptionModelPath).toAbsolutePath().normalize();
+        Path normalized = candidateRoot.toAbsolutePath().normalize();
+        if (!Files.exists(normalized)) {
+            return null;
+        }
+
+        if (isModelRoot(normalized)) {
+            return normalized;
+        }
+
+        if (!Files.isDirectory(normalized)) {
+            return null;
+        }
+
+        try (Stream<Path> children = Files.list(normalized)) {
+            List<Path> subdirectories = children
+                .filter(Files::isDirectory)
+                .limit(2)
+                .toList();
+
+            if (subdirectories.size() == 1 && isModelRoot(subdirectories.get(0))) {
+                return subdirectories.get(0).toAbsolutePath().normalize();
+            }
+        } catch (IOException e) {
+            log.warn("Unable to inspect model directory {}", normalized, e);
         }
 
         return null;
+    }
+
+    private boolean isModelRoot(Path candidate) {
+        if (candidate == null || !Files.isDirectory(candidate)) {
+            return false;
+        }
+
+        Path confDir = candidate.resolve("conf");
+        Path acousticDir = candidate.resolve("am");
+        Path graphDir = candidate.resolve("graph");
+
+        return Files.isDirectory(confDir)
+            && Files.exists(confDir.resolve("model.conf"))
+            && Files.isDirectory(acousticDir)
+            && Files.isDirectory(graphDir);
     }
 
     /**

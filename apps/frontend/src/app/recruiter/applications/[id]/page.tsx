@@ -107,7 +107,7 @@ export default function ApplicationDetailPage() {
     return (
       <ProtectedRoute allowedRoles={[UserRole.RECRUITER]}>
         <DashboardLayout>
-          <Typography>Заявка не найдена</Typography>
+          <Typography variant="h6">Заявка не найдена</Typography>
         </DashboardLayout>
       </ProtectedRoute>
     );
@@ -116,21 +116,41 @@ export default function ApplicationDetailPage() {
   return (
     <ProtectedRoute allowedRoles={[UserRole.RECRUITER]}>
       <DashboardLayout>
-        <Box>
-          <Button startIcon={<ArrowBack />} onClick={() => router.back()} sx={{ mb: 2 }}>
-            Назад
-          </Button>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" gap={1.5}>
+            <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+              <Button startIcon={<ArrowBack />} onClick={() => router.back()} variant="outlined" size="small">
+                Назад
+              </Button>
+              <Chip label={`ID ${application.id}`} color="secondary" sx={{ fontWeight: 700 }} />
+            </Stack>
+            <Stack direction="row" spacing={1} flexWrap="wrap">
+              <Button variant="outlined" onClick={() => setStatusDialogOpen(true)}>
+                Изменить статус
+              </Button>
+            </Stack>
+          </Stack>
 
-          <Typography variant="h4" gutterBottom>
-            Заявка #{application.id}
-          </Typography>
-
-          {/* Actions */}
-          <Box sx={{ mb: 3, display: 'flex', gap: 2 }}>
-            <Button variant="contained" onClick={() => setStatusDialogOpen(true)}>
-              Изменить статус
-            </Button>
-          </Box>
+          <Paper data-variant="elevated" sx={{ p: { xs: 2.5, md: 3 }, borderRadius: 3 }}>
+            <Stack direction={{ xs: 'column', md: 'row' }} spacing={2.5} alignItems={{ md: 'center' }}>
+              <Stack spacing={0.5} flex={1} minWidth={0}>
+                <Typography variant="overline" color="text.secondary">
+                  Заявка
+                </Typography>
+                <Typography variant="h4" sx={{ lineHeight: 1.2, wordBreak: 'break-word' }}>
+                  {getCandidateFullName(application.candidate)}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ wordBreak: 'break-word' }}>
+                  {application.vacancyTitle}
+                </Typography>
+              </Stack>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} flexWrap="wrap">
+                <Chip label={application.status} color="primary" variant="outlined" />
+                <Chip label={application.recruiterName || 'Рекрутер не назначен'} variant="outlined" />
+                <Chip label={application.hmName || 'HM не назначен'} variant="outlined" />
+              </Stack>
+            </Stack>
+          </Paper>
 
           <Grid container spacing={3}>
             {/* Candidate Info */}
@@ -146,31 +166,41 @@ export default function ApplicationDetailPage() {
                       <Typography variant="body2" color="text.secondary">
                         ФИО
                       </Typography>
-                      <Typography variant="body1">{getCandidateFullName(application.candidate)}</Typography>
+                      <Typography variant="body1" sx={{ wordBreak: 'break-word' }}>
+                        {getCandidateFullName(application.candidate)}
+                      </Typography>
                     </Grid>
                     <Grid item xs={6}>
                       <Typography variant="body2" color="text.secondary">
                         Email
                       </Typography>
-                      <Typography variant="body1">{getCandidateEmail(application.candidate)}</Typography>
+                      <Typography variant="body1" sx={{ wordBreak: 'break-word' }}>
+                        {getCandidateEmail(application.candidate)}
+                      </Typography>
                     </Grid>
                     <Grid item xs={6}>
                       <Typography variant="body2" color="text.secondary">
                         Телефон
                       </Typography>
-                      <Typography variant="body1">{getCandidatePhone(application.candidate)}</Typography>
+                      <Typography variant="body1" sx={{ wordBreak: 'break-word' }}>
+                        {getCandidatePhone(application.candidate)}
+                      </Typography>
                     </Grid>
                     <Grid item xs={6}>
                       <Typography variant="body2" color="text.secondary">
                         Университет
                       </Typography>
-                      <Typography variant="body1">{getCandidateUniversity(application.candidate)}</Typography>
+                      <Typography variant="body1" sx={{ wordBreak: 'break-word' }}>
+                        {getCandidateUniversity(application.candidate)}
+                      </Typography>
                     </Grid>
                     <Grid item xs={6}>
                       <Typography variant="body2" color="text.secondary">
                         Курс
                       </Typography>
-                      <Typography variant="body1">{getCandidateCourse(application.candidate)}</Typography>
+                      <Typography variant="body1" sx={{ wordBreak: 'break-word' }}>
+                        {getCandidateCourse(application.candidate)}
+                      </Typography>
                     </Grid>
                   </Grid>
                 </CardContent>
@@ -190,7 +220,9 @@ export default function ApplicationDetailPage() {
                       <Typography variant="body2" color="text.secondary">
                         Вакансия
                       </Typography>
-                      <Typography variant="body1">{application.vacancyTitle}</Typography>
+                      <Typography variant="body1" sx={{ wordBreak: 'break-word' }}>
+                        {application.vacancyTitle}
+                      </Typography>
                     </Grid>
                     <Grid item xs={6}>
                       <Typography variant="body2" color="text.secondary">
@@ -299,9 +331,11 @@ export default function ApplicationDetailPage() {
                       <ListItem key={history.id}>
                         <ListItemText
                           primary={
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
                               <StatusBadge status={history.status} />
-                              <Typography variant="body2">{history.comment}</Typography>
+                              <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
+                                {history.comment}
+                              </Typography>
                             </Box>
                           }
                           secondary={`${history.changedBy} • ${format(

@@ -32,7 +32,7 @@
     <repositories>
         <repository>
             <id>alphacephei</id>
-            <url>https://alphacephei.com/maven/repo</url>
+            <url>https://alphacephei.com/maven</url>
             <releases>
                 <enabled>true</enabled>
             </releases>

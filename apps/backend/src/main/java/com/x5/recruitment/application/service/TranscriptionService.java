@@ -119,11 +119,8 @@ public class TranscriptionService {
         }
     }
 
-    /**
-     * Perform actual transcription using local Vosk model
-     */
     private String performTranscription(Transcription transcription) {
-        validateConfiguration();
+        transcriptionModelPath = resolveModelPath().toString();
 
         Path mediaPath = resolveMediaPath(transcription);
         Path wavPath = extractAudio(mediaPath);
@@ -173,20 +170,6 @@ public class TranscriptionService {
             log.warn("Unable to parse recognizer result: {}", recognizerJson, e);
             return recognizerJson;
         }
-    }
-
-    private void validateConfiguration() {
-        Path modelPath = resolveModelPath();
-
-        if (modelPath == null) {
-            throw new IllegalStateException("Local transcription model path is not configured");
-        }
-
-        if (!Files.exists(modelPath)) {
-            throw new IllegalStateException("Local transcription model not found: " + modelPath);
-        }
-
-        transcriptionModelPath = modelPath.toString();
     }
 
     private Path extractAudio(Path mediaPath) {
@@ -336,12 +319,13 @@ public class TranscriptionService {
             return bundled;
         }
 
-        // Fallback: if explicit value was set but missing, return normalized path
-        if (transcriptionModelPath != null && !transcriptionModelPath.isBlank()) {
-            return Paths.get(transcriptionModelPath).toAbsolutePath().normalize();
+        String errorPath = transcriptionModelPath;
+        if (errorPath == null || errorPath.isBlank()) {
+            errorPath = bundled.toString();
         }
 
-        return null;
+        throw new IllegalStateException("Local transcription model not found: " + errorPath
+            + ". Provide app.transcription.local.model-path or mount a model directory.");
     }
 
     /**

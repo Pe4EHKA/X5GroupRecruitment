@@ -119,24 +119,8 @@ public class TranscriptionService {
         }
     }
 
-    /**
-     * Perform actual transcription using local Vosk model.
-     *
-     * If the bundled model is not available (for example, when the image
-     * was built without mounting an external model directory), we return a
-     * deterministic placeholder so the pipeline completes without any
-     * additional downloads.
-     */
     private String performTranscription(Transcription transcription) {
-        Path modelPath = resolveModelPath();
-
-        if (modelPath == null || !Files.exists(modelPath)) {
-            log.warn("Transcription model is not available, returning placeholder for {}", transcription.getId());
-            transcription.setLanguage(transcriptionLanguage);
-            return buildPlaceholderTranscription();
-        }
-
-        transcriptionModelPath = modelPath.toString();
+        transcriptionModelPath = resolveModelPath().toString();
 
         Path mediaPath = resolveMediaPath(transcription);
         Path wavPath = extractAudio(mediaPath);
@@ -186,11 +170,6 @@ public class TranscriptionService {
             log.warn("Unable to parse recognizer result: {}", recognizerJson, e);
             return recognizerJson;
         }
-    }
-
-    private String buildPlaceholderTranscription() {
-        return "Автоматическая транскрибация недоступна в этой сборке. "
-            + "Добавьте офлайн-модель, чтобы включить распознавание речи.";
     }
 
     private Path extractAudio(Path mediaPath) {
@@ -340,12 +319,13 @@ public class TranscriptionService {
             return bundled;
         }
 
-        // Fallback: if explicit value was set but missing, return normalized path
-        if (transcriptionModelPath != null && !transcriptionModelPath.isBlank()) {
-            return Paths.get(transcriptionModelPath).toAbsolutePath().normalize();
+        String errorPath = transcriptionModelPath;
+        if (errorPath == null || errorPath.isBlank()) {
+            errorPath = bundled.toString();
         }
 
-        return null;
+        throw new IllegalStateException("Local transcription model not found: " + errorPath
+            + ". Provide app.transcription.local.model-path or mount a model directory.");
     }
 
     /**

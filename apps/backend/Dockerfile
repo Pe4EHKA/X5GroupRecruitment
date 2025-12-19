@@ -29,8 +29,8 @@ RUN --mount=type=cache,target=/root/.m2 \
 # Runtime stage with JRE 21 for smaller image
 FROM mirror.gcr.io/library/eclipse-temurin:21-jre-jammy
 
-# Install curl for healthcheck
-RUN apt-get update && apt-get install -y --no-install-recommends curl && \
+# Install curl for healthcheck and ffmpeg for audio extraction
+RUN apt-get update && apt-get install -y --no-install-recommends curl ffmpeg && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

@@ -2,6 +2,15 @@
 # Use gcr.io mirror to avoid intermittent Docker Hub auth errors
 FROM mirror.gcr.io/library/maven:3.9.9-eclipse-temurin-21 AS builder
 
+# Ensure external downloads bypass any inherited proxy settings that can block
+# access to public Maven repositories during image builds.
+ENV HTTP_PROXY="" \
+    HTTPS_PROXY="" \
+    http_proxy="" \
+    https_proxy="" \
+    NO_PROXY="" \
+    no_proxy=""
+
 WORKDIR /app
 
 # Pre-download dependencies to speed up subsequent builds

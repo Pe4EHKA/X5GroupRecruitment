@@ -17,7 +17,7 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>X5 Internship Recruitment System</name>
     <description>Automated recruitment and feedback system for internship programs</description>
-    
+
     <properties>
         <java.version>21</java.version>
         <maven.compiler.source>21</maven.compiler.source>
@@ -28,6 +28,19 @@
         <lombok.version>1.18.32</lombok.version>
         <vosk.version>0.3.47</vosk.version>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>alphacephei</id>
+            <url>https://alphacephei.com/maven/repo</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
     
     <dependencies>
         <!-- Spring Boot Starters -->

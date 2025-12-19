@@ -26,9 +26,7 @@
         <openapi.version>2.7.0</openapi.version>
         <poi.version>5.3.0</poi.version>
         <lombok.version>1.18.32</lombok.version>
-        <vosk.version>0.3.45</vosk.version>
-        <!-- Default native classifier for the Vosk runtime (override via -Dvosk.native.classifier=linux-arm64, etc.) -->
-        <vosk.native.classifier>linux-x86_64</vosk.native.classifier>
+        <vosk.version>0.3.47</vosk.version>
     </properties>
     
     <dependencies>
@@ -68,15 +66,6 @@
             <groupId>com.alphacephei</groupId>
             <artifactId>vosk</artifactId>
             <version>${vosk.version}</version>
-        </dependency>
-
-        <!-- Bring native Vosk binaries for linux/aarch64 into the classpath -->
-        <dependency>
-            <groupId>com.alphacephei</groupId>
-            <artifactId>vosk</artifactId>
-            <version>${vosk.version}</version>
-            <classifier>${vosk.native.classifier}</classifier>
-            <scope>runtime</scope>
         </dependency>
 
         <!-- Database -->
@@ -145,21 +134,6 @@
         </dependency>
     </dependencies>
 
-    <repositories>
-        <repository>
-            <id>alphacephei-vosk</id>
-            <name>Alphacephei Maven Repository (Vosk)</name>
-            <url>https://alphacephei.com/maven/</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
-    
     <build>
         <plugins>
             <plugin>

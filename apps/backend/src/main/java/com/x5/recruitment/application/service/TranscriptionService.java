@@ -367,7 +367,40 @@ public class TranscriptionService {
             log.warn("Unable to inspect model directory {}", normalized, e);
         }
 
-        return null;
+        if (!Files.isDirectory(normalized)) {
+            return null;
+        }
+
+        try (Stream<Path> children = Files.list(normalized)) {
+            List<Path> subdirectories = children
+                .filter(Files::isDirectory)
+                .limit(2)
+                .toList();
+
+            if (subdirectories.size() == 1 && isModelRoot(subdirectories.get(0))) {
+                return subdirectories.get(0).toAbsolutePath().normalize();
+            }
+        } catch (IOException e) {
+            log.warn("Unable to inspect model directory {}", normalized, e);
+        }
+
+        throw new IllegalStateException("Local transcription model not found: " + errorPath
+            + ". Provide app.transcription.local.model-path or mount a model directory.");
+    }
+
+    private boolean isModelRoot(Path candidate) {
+        if (candidate == null || !Files.isDirectory(candidate)) {
+            return false;
+        }
+
+        Path confDir = candidate.resolve("conf");
+        Path acousticDir = candidate.resolve("am");
+        Path graphDir = candidate.resolve("graph");
+
+        return Files.isDirectory(confDir)
+            && Files.exists(confDir.resolve("model.conf"))
+            && Files.isDirectory(acousticDir)
+            && Files.isDirectory(graphDir);
     }
 
     private boolean isModelRoot(Path candidate) {

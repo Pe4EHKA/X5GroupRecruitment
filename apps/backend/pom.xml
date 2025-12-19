@@ -29,6 +29,46 @@
         <vosk.version>0.3.45</vosk.version>
     </properties>
 
+    <profiles>
+        <!-- Map various ARM identifiers to the classifier that exists in alphacephei repo -->
+        <profile>
+            <id>force-linux-aarch64</id>
+            <activation>
+                <os>
+                    <family>linux</family>
+                    <arch>aarch64</arch>
+                </os>
+            </activation>
+            <properties>
+                <os.detected.classifier>linux-aarch64</os.detected.classifier>
+            </properties>
+        </profile>
+        <profile>
+            <id>force-linux-arm64</id>
+            <activation>
+                <os>
+                    <family>linux</family>
+                    <arch>arm64</arch>
+                </os>
+            </activation>
+            <properties>
+                <os.detected.classifier>linux-aarch64</os.detected.classifier>
+            </properties>
+        </profile>
+        <profile>
+            <id>force-linux-aarch_64</id>
+            <activation>
+                <os>
+                    <family>linux</family>
+                    <arch>aarch_64</arch>
+                </os>
+            </activation>
+            <properties>
+                <os.detected.classifier>linux-aarch64</os.detected.classifier>
+            </properties>
+        </profile>
+    </profiles>
+
     <repositories>
         <repository>
             <id>alphacephei</id>
@@ -79,6 +119,14 @@
             <groupId>com.alphacephei</groupId>
             <artifactId>vosk</artifactId>
             <version>${vosk.version}</version>
+        </dependency>
+
+        <!-- Native Vosk binaries for the current platform (required for JNA to find libvosk.so/libvosk.dll) -->
+        <dependency>
+            <groupId>com.alphacephei</groupId>
+            <artifactId>vosk-platform</artifactId>
+            <version>${vosk.version}</version>
+            <classifier>${os.detected.classifier}</classifier>
         </dependency>
 
         <dependency>
@@ -167,6 +215,12 @@
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>kr.motd.maven</groupId>
+                <artifactId>os-maven-plugin</artifactId>
+                <version>1.7.1</version>
+                <extensions>true</extensions>
             </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

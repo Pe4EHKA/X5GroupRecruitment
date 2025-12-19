@@ -30,10 +30,13 @@ services:
       SPRING_DATASOURCE_USERNAME: recruitment
       SPRING_DATASOURCE_PASSWORD: recruitment123
       JAVA_HOME: /opt/java/openjdk
+      APP_TRANSCRIPTION_LOCAL_MODEL_PATH: /app/transcription-model/vosk-model-small-ru-0.22
+      VOSK_MODEL_PATH: /app/transcription-model/vosk-model-small-ru-0.22
     ports:
       - "8080:8080"
     volumes:
       - ./logs:/app/logs
+      - ${TRANSCRIPTION_MODEL_HOST_PATH:-./apps/backend/transcription-model}:/app/transcription-model:ro
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 15s
